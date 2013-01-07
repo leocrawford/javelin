@@ -23,13 +23,13 @@ Features
 * JSON parsing and generation
 * JSON Path navigation
 * Pluggable database strategies which include:
-** Simple unversioned storage and recall
-** Versioned with Timestamp
-** Purging of old timestamped versions by either date or number of versions (TBC)
-** Vector clock / eventual consistency (TBC)
-** Purging of discarded vector clocks (TBC)
-** Random resolver on read of vector clocks (TBC) 
-** User resolver on read of vector clocks (TBC)
+    * Simple unversioned storage and recall
+    * Versioned with Timestamp
+    * Purging of old timestamped versions by either date or number of versions (TBC)
+    * Vector clock / eventual consistency (TBC)
+    * Purging of discarded vector clocks (TBC)
+    * Random resolver on read of vector clocks (TBC) 
+    * User resolver on read of vector clocks (TBC)
 
 
 Coming Soon

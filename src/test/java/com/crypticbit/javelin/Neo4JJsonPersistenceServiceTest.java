@@ -1,4 +1,4 @@
-package com.crypticbit.f2f.db;
+package com.crypticbit.javelin;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -9,8 +9,10 @@ import java.nio.file.Files;
 
 import org.junit.Test;
 
-import com.crypticbit.f2f.db.neo4j.Neo4JGraphNode;
-import com.crypticbit.f2f.db.neo4j.Neo4JJsonPersistenceService;
+import com.crypticbit.javelin.IllegalJsonException;
+import com.crypticbit.javelin.JsonPersistenceException;
+import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
+import com.crypticbit.javelin.neo4j.Neo4JJsonPersistenceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Neo4JJsonPersistenceServiceTest {

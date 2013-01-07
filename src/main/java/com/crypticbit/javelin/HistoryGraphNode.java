@@ -1,4 +1,4 @@
-package com.crypticbit.f2f.db;
+package com.crypticbit.javelin;
 
 import java.util.List;
 

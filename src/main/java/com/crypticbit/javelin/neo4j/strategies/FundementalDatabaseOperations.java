@@ -1,9 +1,9 @@
-package com.crypticbit.f2f.db.neo4j.strategies;
+package com.crypticbit.javelin.neo4j.strategies;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
-import com.crypticbit.f2f.db.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
 
 /**
  * The CRUD Operations a database needs to implement - and which can be

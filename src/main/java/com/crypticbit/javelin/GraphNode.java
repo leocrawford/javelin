@@ -1,9 +1,9 @@
-package com.crypticbit.f2f.db;
+package com.crypticbit.javelin;
 
 import java.util.List;
 
-import com.crypticbit.f2f.db.neo4j.Neo4JGraphNode;
-import com.crypticbit.f2f.db.neo4j.nodes.EmptyGraphNode;
+import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.EmptyGraphNode;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public interface GraphNode  {

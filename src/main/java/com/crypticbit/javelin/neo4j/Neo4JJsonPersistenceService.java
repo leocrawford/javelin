@@ -1,4 +1,4 @@
-package com.crypticbit.f2f.db.neo4j;
+package com.crypticbit.javelin.neo4j;
 
 import java.io.File;
 
@@ -11,16 +11,16 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.kernel.AbstractGraphDatabase;
 import org.neo4j.server.WrappingNeoServerBootstrapper;
 
-import com.crypticbit.f2f.db.JsonPersistenceService;
-import com.crypticbit.f2f.db.neo4j.nodes.EmptyGraphNode;
-import com.crypticbit.f2f.db.neo4j.nodes.EmptyGraphNode.PotentialRelationship;
-import com.crypticbit.f2f.db.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.f2f.db.neo4j.strategies.FundementalDatabaseOperations.NullUpdateOperation;
-import com.crypticbit.f2f.db.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
-import com.crypticbit.f2f.db.neo4j.strategies.SimpleFdoAdapter;
-import com.crypticbit.f2f.db.neo4j.strategies.TimeStampedHistoryAdapter;
-import com.crypticbit.f2f.db.neo4j.types.NodeTypes;
-import com.crypticbit.f2f.db.neo4j.types.RelationshipTypes;
+import com.crypticbit.javelin.JsonPersistenceService;
+import com.crypticbit.javelin.neo4j.nodes.EmptyGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.EmptyGraphNode.PotentialRelationship;
+import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
+import com.crypticbit.javelin.neo4j.strategies.SimpleFdoAdapter;
+import com.crypticbit.javelin.neo4j.strategies.TimeStampedHistoryAdapter;
+import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.NullUpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.types.NodeTypes;
+import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 
 /**
  * Provides persistence for Json objects (depicted using Jackson JsonNode) with

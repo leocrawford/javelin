@@ -1,11 +1,11 @@
-package com.crypticbit.f2f.db.neo4j.strategies;
+package com.crypticbit.javelin.neo4j.strategies;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
-import com.crypticbit.f2f.db.neo4j.types.RelationshipTypes;
+import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 
 public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 

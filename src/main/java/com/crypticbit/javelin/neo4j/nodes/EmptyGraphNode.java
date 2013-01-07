@@ -1,4 +1,4 @@
-package com.crypticbit.f2f.db.neo4j.nodes;
+package com.crypticbit.javelin.neo4j.nodes;
 
 import java.io.IOException;
 import java.util.List;
@@ -8,16 +8,16 @@ import org.neo4j.graphdb.Relationship;
 
 import scala.actors.threadpool.Arrays;
 
-import com.crypticbit.f2f.db.GraphNode;
-import com.crypticbit.f2f.db.History;
-import com.crypticbit.f2f.db.IllegalJsonException;
-import com.crypticbit.f2f.db.JsonPersistenceException;
-import com.crypticbit.f2f.db.neo4j.Neo4JGraphNode;
-import com.crypticbit.f2f.db.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.f2f.db.neo4j.strategies.FundementalDatabaseOperations.NullUpdateOperation;
-import com.crypticbit.f2f.db.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
-import com.crypticbit.f2f.db.neo4j.types.NodeTypes;
-import com.crypticbit.f2f.db.neo4j.types.RelationshipParameters;
+import com.crypticbit.javelin.GraphNode;
+import com.crypticbit.javelin.History;
+import com.crypticbit.javelin.IllegalJsonException;
+import com.crypticbit.javelin.JsonPersistenceException;
+import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
+import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
+import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.NullUpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.types.NodeTypes;
+import com.crypticbit.javelin.neo4j.types.RelationshipParameters;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,4 +1,4 @@
-package com.crypticbit.f2f.db.neo4j.nodes;
+package com.crypticbit.javelin.neo4j.nodes;
 
 import java.io.IOException;
 import java.util.List;
@@ -6,12 +6,12 @@ import java.util.List;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
-import com.crypticbit.f2f.db.History;
-import com.crypticbit.f2f.db.IllegalJsonException;
-import com.crypticbit.f2f.db.JsonPersistenceException;
-import com.crypticbit.f2f.db.neo4j.Neo4JGraphNode;
-import com.crypticbit.f2f.db.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.f2f.db.neo4j.types.RelationshipParameters;
+import com.crypticbit.javelin.History;
+import com.crypticbit.javelin.IllegalJsonException;
+import com.crypticbit.javelin.JsonPersistenceException;
+import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
+import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
+import com.crypticbit.javelin.neo4j.types.RelationshipParameters;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;

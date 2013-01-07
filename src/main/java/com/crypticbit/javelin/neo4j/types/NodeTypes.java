@@ -1,14 +1,14 @@
-package com.crypticbit.f2f.db.neo4j.types;
+package com.crypticbit.javelin.neo4j.types;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
-import com.crypticbit.f2f.db.neo4j.Neo4JGraphNode;
-import com.crypticbit.f2f.db.neo4j.nodes.ArrayGraphNode;
-import com.crypticbit.f2f.db.neo4j.nodes.EmptyGraphNode;
-import com.crypticbit.f2f.db.neo4j.nodes.MapGraphNode;
-import com.crypticbit.f2f.db.neo4j.nodes.ValueGraphNode;
-import com.crypticbit.f2f.db.neo4j.strategies.FundementalDatabaseOperations;
+import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.ArrayGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.EmptyGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.MapGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.ValueGraphNode;
+import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 
 public enum NodeTypes {
     ARRAY() {

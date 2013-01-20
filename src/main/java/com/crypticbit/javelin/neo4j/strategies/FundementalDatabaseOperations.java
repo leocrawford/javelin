@@ -71,9 +71,8 @@ public interface FundementalDatabaseOperations {
 
 		@Override
 		public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, FundementalDatabaseOperations dal) {
-		    UpdateOperation.this.updateElement(relationshipToGraphNodeToUpdate, dal);
-		    newOperation.updateElement(relationshipToGraphNodeToUpdate, dal);
-		    return relationshipToGraphNodeToUpdate;
+		    Relationship r = UpdateOperation.this.updateElement(relationshipToGraphNodeToUpdate, dal);
+		    return newOperation.updateElement(r, dal);
 		}
 
 	    };

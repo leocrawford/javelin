@@ -117,7 +117,7 @@ public class Neo4JJsonPersistenceServiceTest extends Neo4JTestSupport {
 	
 	System.out.println(foundNode);
 	foundNode.write("\"even newer stuff\"");
-	ps.startWebServiceAndWait();
+//	ps.startWebServiceAndWait();
 	
 	
 	

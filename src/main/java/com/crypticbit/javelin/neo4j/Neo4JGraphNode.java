@@ -1,6 +1,7 @@
 package com.crypticbit.javelin.neo4j;
 
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 
 import com.crypticbit.javelin.HistoryGraphNode;
 import com.crypticbit.javelin.IllegalJsonException;
@@ -13,6 +14,7 @@ public interface Neo4JGraphNode extends HistoryGraphNode {
     public Node getDatabaseNode();
     public FundementalDatabaseOperations getStrategy();
     public Neo4JGraphNode navigate(PathToken token) throws IllegalJsonException;
+    public Relationship getIncomingRelationship();
     
 
 

@@ -38,6 +38,14 @@ Coming Soon
 * Various strategies (as shown above)
 * JSONPath wildcards
 
+It isn't
+--------
+
+* A JDBC database
+* Designed to be particularly performant
+* Scalable (on it's own - but the eventual consistency means you can distribute it very easily)
+* Remoteable - though the simple JSON interface means it can be made remotable with great ease
+
 Design
 ------
 

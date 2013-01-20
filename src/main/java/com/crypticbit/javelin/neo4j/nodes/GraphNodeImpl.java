@@ -3,7 +3,6 @@ package com.crypticbit.javelin.neo4j.nodes;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,9 +16,8 @@ import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.operations.JsonWriteUpdateOperation;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
-import com.crypticbit.javelin.neo4j.types.RelationshipParameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -52,7 +50,7 @@ public class GraphNodeImpl implements Neo4JGraphNode {
     public void write(final String json) throws IllegalJsonException, JsonPersistenceException {
 	try {
 	    final JsonNode values = new ObjectMapper().readTree(json);
-	    getStrategy().update(incomingRelationship, true, getJsonUpdateOperation(values));
+	    getStrategy().update(incomingRelationship, true, new JsonWriteUpdateOperation(values));
 	} catch (JsonProcessingException jpe) {
 	    throw new IllegalJsonException("The JSON string was badly formed: " + json, jpe);
 	} catch (IOException e) {
@@ -107,7 +105,8 @@ public class GraphNodeImpl implements Neo4JGraphNode {
 	    for (Relationship r : graphNode.getDatabaseNode().getRelationships(RelationshipTypes.PREVIOUS_VERSION,
 		    Direction.OUTGOING)) {
 
-		final Neo4JGraphNode endNode = NodeTypes.wrapAsGraphNode(r.getEndNode(), r, getStrategy());
+		Relationship readRelationship = getStrategy().read(r);
+		final Neo4JGraphNode endNode = NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(), readRelationship, getStrategy());
 		history.addAll(endNode.getHistory());
 	    }
 	}
@@ -130,37 +129,6 @@ public class GraphNodeImpl implements Neo4JGraphNode {
     public EmptyGraphNode add() throws IllegalJsonException, JsonPersistenceException {
 	throw new UnsupportedOperationException("add is to be provided locally");
 
-    }
-
-    public static UpdateOperation getJsonUpdateOperation(final JsonNode jsonNode) {
-	return new UpdateOperation() {
-
-	    @Override
-	    public void updateElement(Node graphNode, FundementalDatabaseOperations dal) {
-		if (jsonNode.isContainerNode()) {
-		    if (jsonNode.isArray()) {
-			graphNode.setProperty(RelationshipParameters.TYPE.name(), NodeTypes.ARRAY.toString());
-			for (int loop = 0; loop < jsonNode.size(); loop++) {
-			    ArrayGraphNode.addElementToArray(dal, graphNode, loop, dal.createNewNode(getJsonUpdateOperation( jsonNode.get(loop))));		    
-			}
-		    }
-		    if (jsonNode.isObject()) {
-			graphNode.setProperty(RelationshipParameters.TYPE.name(), NodeTypes.MAP.toString());
-			Iterator<String> fieldNamesIterator = jsonNode.fieldNames();
-			while (fieldNamesIterator.hasNext()) {
-			    String f = fieldNamesIterator.next();
-			    MapGraphNode.addElementToMap(dal, graphNode, f, dal.createNewNode(getJsonUpdateOperation(jsonNode.get(f))));
-			}
-		    }
-		} else {
-		    graphNode.setProperty(RelationshipParameters.TYPE.name(), NodeTypes.VALUE.toString());
-		    graphNode.setProperty(RelationshipParameters.VALUE.name(), jsonNode.toString());
-		}
-		
-	    }
-	    
-	};
-	
     }
 
     @Override

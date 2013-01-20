@@ -4,9 +4,10 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
-import com.crypticbit.javelin.neo4j.types.RelationshipParameters;
+import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 
 public class SimpleFdoAdapter implements FundementalDatabaseOperations {
@@ -19,36 +20,40 @@ public class SimpleFdoAdapter implements FundementalDatabaseOperations {
     }
 
     @Override
-    public Node createNewNode(UpdateOperation createOperation) {
+    public Relationship createNewNode(Node parentNode, RelationshipType type, UpdateOperation createOperation) {
+	Relationship result;
 	Transaction tx = graphDb.beginTx();
 	try {
 	    Node node = graphDb.createNode();
-	    createOperation.updateElement(node, fdo);
+	    Relationship newRelationship = parentNode.createRelationshipTo(node, type);
+	System.out.println("Created new relationship: "+newRelationship);
+	    result = createOperation.updateElement(newRelationship, fdo);
 	    tx.success();
-	    return node;
 	} finally {
 	    tx.finish();
 	}
-
+	return result;
     }
 
     @Override
-    public void update(Relationship relationshipToParent, boolean removeEverything, UpdateOperation o) {
+    public Relationship update(Relationship relationshipToParent, boolean removeEverything, UpdateOperation o) {
 	Transaction tx = graphDb.beginTx();
+	Relationship result;
 	try {
 	    if (removeEverything) {
 		removeRelationships(relationshipToParent.getEndNode(), RelationshipTypes.ARRAY, RelationshipTypes.MAP);
-		removeProperties(relationshipToParent.getEndNode(), RelationshipParameters.values());
+		removeProperties(relationshipToParent.getEndNode(), Parameters.DISCARDED);
 	    }
-	    o.updateElement(relationshipToParent.getEndNode(), fdo);
+	    result = o.updateElement(relationshipToParent, fdo);
 	    tx.success();
 	} finally {
 	    tx.finish();
 	}
+	return result;
     }
 
-    private void removeProperties(Node node, RelationshipParameters[] values) {
-	for (RelationshipParameters key : values) {
+    private void removeProperties(Node node, Parameters.Node[] values) {
+	for (Parameters.Node key : values) {
 	    node.removeProperty(key.name());
 	}
 
@@ -63,8 +68,8 @@ public class SimpleFdoAdapter implements FundementalDatabaseOperations {
     }
 
     @Override
-    public Node read(Relationship r) {
-	return r.getEndNode();
+    public Relationship read(Relationship r) {
+	return r;
     }
 
     @Override

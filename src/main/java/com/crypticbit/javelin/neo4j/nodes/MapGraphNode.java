@@ -16,12 +16,11 @@ import com.crypticbit.javelin.History;
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
-import com.crypticbit.javelin.neo4j.nodes.EmptyGraphNode.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.NullUpdateOperation;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
-import com.crypticbit.javelin.neo4j.types.RelationshipParameters;
+import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -68,16 +67,10 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
 	    children = new HashSet<Map.Entry<String, Neo4JGraphNode>>();
 
 	    for (Relationship r : node.getRelationships(RelationshipTypes.MAP, Direction.OUTGOING)) {
-
-		Node endNode = r.getEndNode();
-		Node chosenNode = endNode;
-		if (endNode.hasRelationship(Direction.OUTGOING, RelationshipTypes.INCOMING_VERSION)) {
-		    chosenNode = endNode.getRelationships(Direction.OUTGOING, RelationshipTypes.INCOMING_VERSION)
-			    .iterator().next().getEndNode();
-		}
+		Relationship readRelationship = getStrategy().read(r);
 		children.add(new AbstractMap.SimpleImmutableEntry<String, Neo4JGraphNode>((String) r
-			.getProperty(RelationshipParameters.KEY.name()), NodeTypes.wrapAsGraphNode(chosenNode, r,
-			getStrategy())));
+			.getProperty(Parameters.Relationship.KEY.name()), NodeTypes.wrapAsGraphNode(
+			readRelationship.getEndNode(), readRelationship, getStrategy())));
 	    }
 	}
     }
@@ -158,26 +151,33 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
 	    return this.get(key);
 	else {
 	    return new EmptyGraphNode(new PotentialRelationship() {
-		private Relationship r;
 
 		@Override
 		public Relationship create(final UpdateOperation createOperation) {
 		    // this is a create, and an update (on the parent)
-		    getStrategy().update(virtualSuperclass.getIncomingRelationship(), false, new UpdateOperation() {
-			@Override
-			public void updateElement(Node node, FundementalDatabaseOperations dal) {
-			    r = addElementToMap(dal, node, key, getStrategy().createNewNode(createOperation));
-			}
-		    });
-		    return r;
+		    return getStrategy().update(virtualSuperclass.getIncomingRelationship(), false,
+			    new UpdateOperation() {
+				@Override
+				public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
+					FundementalDatabaseOperations dal) {
+				    
+				    Relationship newR = getStrategy().createNewNode(
+					    relationshipToGraphNodeToUpdate.getEndNode(), RelationshipTypes.MAP,
+					    createOperation);
+				    newR.setProperty(Parameters.Relationship.KEY.name(), key);
+				    System.out.println("*** Creating r-->"+newR.getStartNode()+","+newR.getEndNode()+" - "+key+","+newR);
+				    return newR;
+				}
+			    });
 		}
 	    }, getStrategy());
 	}
     }
 
-    static Relationship addElementToMap(FundementalDatabaseOperations dal, Node node, final String key, Node newNode) {
+    public static Relationship addElementToMap(FundementalDatabaseOperations dal, Node node, final String key,
+	    Node newNode) {
 	Relationship r = node.createRelationshipTo(newNode, RelationshipTypes.MAP);
-	r.setProperty(RelationshipParameters.KEY.name(), key);
+	r.setProperty(Parameters.Relationship.KEY.name(), key);
 	return r;
     }
 
@@ -185,11 +185,13 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
 	// this is a delete (on node) and update (on parent)
 	getStrategy().update(relationshipToParent, false, new UpdateOperation() {
 	    @Override
-	    public void updateElement(Node node, FundementalDatabaseOperations dal) {
-		for (Relationship relationshipToNodeToDelete : node.getRelationships(Direction.OUTGOING,
-			RelationshipTypes.MAP))
-		    if (relationshipToNodeToDelete.getProperty(RelationshipParameters.KEY.name()).equals(key))
+	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
+		    FundementalDatabaseOperations dal) {
+		for (Relationship relationshipToNodeToDelete : relationshipToGraphNodeToUpdate.getEndNode()
+			.getRelationships(Direction.OUTGOING, RelationshipTypes.MAP))
+		    if (relationshipToNodeToDelete.getProperty(Parameters.Relationship.KEY.name()).equals(key))
 			dal.delete(relationshipToNodeToDelete);
+		return null;
 	    }
 	});
     }
@@ -208,9 +210,11 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
     public Neo4JGraphNode navigate(PathToken token) throws IllegalJsonException {
 	if (token.isArrayIndexToken())
 	    throw new IllegalJsonException("Expecting a map element in json path expression: " + token.getFragment());
-	if (this.containsKey(token.getFragment()))
-	    return get(token.getFragment());
-	else
-	    return put(token.getFragment());
+	return put(token.getFragment());
+    }
+
+    @Override
+    public Relationship getIncomingRelationship() {
+	return virtualSuperclass.getIncomingRelationship();
     }
 }

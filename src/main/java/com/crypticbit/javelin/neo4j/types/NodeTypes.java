@@ -31,8 +31,8 @@ public enum NodeTypes {
 	}
     };
     public static Neo4JGraphNode wrapAsGraphNode(Node graphNode, Relationship incomingRelationship, FundementalDatabaseOperations fdo) {
-	if (graphNode.hasProperty(RelationshipParameters.TYPE.name()))
-	    return valueOf((String) graphNode.getProperty(RelationshipParameters.TYPE.name()))._wrapAsGraphNode(graphNode,incomingRelationship, fdo);
+	if (graphNode.hasProperty(Parameters.Node.TYPE.name()))
+	    return valueOf((String) graphNode.getProperty(Parameters.Node.TYPE.name()))._wrapAsGraphNode(graphNode,incomingRelationship, fdo);
 	else
 	  throw new Error("Found node with no type: "+graphNode.getId());
 	// FIXME throw exceptiom

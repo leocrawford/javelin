@@ -3,9 +3,7 @@ package com.crypticbit.javelin.neo4j.strategies;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-
-import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import org.neo4j.graphdb.RelationshipType;
 
 public abstract class CompoundFdoAdapter implements FundementalDatabaseOperations {
 
@@ -23,18 +21,18 @@ public abstract class CompoundFdoAdapter implements FundementalDatabaseOperation
     }
 
     @Override
-    public Node createNewNode(UpdateOperation createOperation) {
-	return nextAdapter.createNewNode(createOperation);
+    public Relationship createNewNode(Node parentNode, RelationshipType type, UpdateOperation createOperation) {
+	return nextAdapter.createNewNode(parentNode, type, createOperation);
     }
 
     @Override
-    public void update(Relationship relationshipToParent, boolean removeEverything, UpdateOperation operation) {
-	nextAdapter.update(relationshipToParent, removeEverything, operation);
+    public Relationship update(Relationship relationshipToParent, boolean removeEverything, UpdateOperation operation) {
+	return nextAdapter.update(relationshipToParent, removeEverything, operation);
 
     }
 
     @Override
-    public Node read(Relationship relationshipToNode) {
+    public Relationship read(Relationship relationshipToNode) {
 	return nextAdapter.read(relationshipToNode);
     }
 
@@ -48,5 +46,10 @@ public abstract class CompoundFdoAdapter implements FundementalDatabaseOperation
 	this.fdo = fdo;
 	this.nextAdapter.setTopFdo(fdo);
     }
+
+    public FundementalDatabaseOperations getFdo() {
+	return fdo;
+    }
+
 
 }

@@ -11,7 +11,7 @@ import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.javelin.neo4j.types.RelationshipParameters;
+import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
@@ -33,8 +33,8 @@ public class ValueGraphNode extends ValueNode implements Neo4JGraphNode {
 	this.node = graphNode;
 	virtualSuperclass = new GraphNodeImpl(this, incomingRelationship, fdo);
 	try {
-	    if (graphNode.hasProperty(RelationshipParameters.VALUE.name())) {
-		this.delegate = OBJECT_MAPPER.readTree((String) graphNode.getProperty(RelationshipParameters.VALUE
+	    if (graphNode.hasProperty(Parameters.Node.VALUE.name())) {
+		this.delegate = OBJECT_MAPPER.readTree((String) graphNode.getProperty(Parameters.Node.VALUE
 			.name()));
 	    } else {
 		this.delegate = OBJECT_MAPPER.readTree("null");
@@ -130,5 +130,10 @@ public class ValueGraphNode extends ValueNode implements Neo4JGraphNode {
     public Neo4JGraphNode navigate(PathToken token) throws IllegalJsonException {
    	    throw new IllegalJsonException("It's not possible to navigate within a child node: " + token.getFragment());
        }
+    
+    @Override
+    public Relationship getIncomingRelationship() {
+	return virtualSuperclass.getIncomingRelationship();
+    }
 
 }

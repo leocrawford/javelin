@@ -6,19 +6,19 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.kernel.AbstractGraphDatabase;
 import org.neo4j.server.WrappingNeoServerBootstrapper;
 
 import com.crypticbit.javelin.JsonPersistenceService;
 import com.crypticbit.javelin.neo4j.nodes.EmptyGraphNode;
-import com.crypticbit.javelin.neo4j.nodes.EmptyGraphNode.PotentialRelationship;
+import com.crypticbit.javelin.neo4j.strategies.CompoundFdoAdapter;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
+import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.strategies.SimpleFdoAdapter;
 import com.crypticbit.javelin.neo4j.strategies.TimeStampedHistoryAdapter;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.NullUpdateOperation;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 
@@ -53,10 +53,20 @@ public class Neo4JJsonPersistenceService implements JsonPersistenceService {
     private File file;
     private transient GraphDatabaseService graphDb;
     private transient Node referenceNode;
+    private String identity;
 
-    /** Use (or create if not present) the neo4j database at this location */
-    public Neo4JJsonPersistenceService(File file) {
+    /**
+     * Use (or create if not present) the neo4j database at this location
+     * 
+     * @param file
+     *            the location of an existing db, or location to create one
+     * @param identity
+     *            the unique identity of the machine/user combo (which is used
+     *            for VectorClock)
+     * */
+    public Neo4JJsonPersistenceService(File file, String identity) {
 	this.file = file;
+	this.identity = identity;
 	setup();
     }
 
@@ -120,24 +130,19 @@ public class Neo4JJsonPersistenceService implements JsonPersistenceService {
 	} else {
 
 	    return new EmptyGraphNode(new PotentialRelationship() {
-		Relationship relationship;
 		@Override
 		public Relationship create(UpdateOperation createOperation) {
-
-		    fdo.createNewNode(createOperation.add(new UpdateOperation() {
-			@Override
-			public void updateElement(Node graphNode, FundementalDatabaseOperations dal) {
-			    relationship = getDatabaseNode().createRelationshipTo(graphNode, RelationshipTypes.MAP);
-			}
-		    }));
-		    return relationship;
+		    Relationship newR =  fdo.createNewNode(getDatabaseNode(), RelationshipTypes.MAP, createOperation);
+		    return newR;
 		}
 	    }, fdo);
 	}
     }
 
     private FundementalDatabaseOperations createDatabase() {
-	TimeStampedHistoryAdapter fdo = new TimeStampedHistoryAdapter(graphDb, new SimpleFdoAdapter(graphDb));
+	CompoundFdoAdapter fdo = // new VectorClockAdapter(graphDb, 
+		new TimeStampedHistoryAdapter(graphDb,
+		new SimpleFdoAdapter(graphDb));//, identity);
 	fdo.setTopFdo(fdo);
 	return fdo;
 

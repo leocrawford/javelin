@@ -13,12 +13,12 @@ import com.crypticbit.javelin.History;
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
-import com.crypticbit.javelin.neo4j.nodes.EmptyGraphNode.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
+import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.NullUpdateOperation;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
-import com.crypticbit.javelin.neo4j.types.RelationshipParameters;
+import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -42,7 +42,7 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
      * 
      * @param incomingRelationship
      */
-    public ArrayGraphNode(Node node, Relationship incomingRelationship,FundementalDatabaseOperations fdo) {
+    public ArrayGraphNode(Node node, Relationship incomingRelationship, FundementalDatabaseOperations fdo) {
 	this.node = node;
 	this.virtualSuperclass = new GraphNodeImpl(this, incomingRelationship, fdo);
     }
@@ -77,8 +77,9 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
 	if (children == null) {
 	    Map<Integer, Neo4JGraphNode> map = new TreeMap<Integer, Neo4JGraphNode>();
 	    for (Relationship r : node.getRelationships(RelationshipTypes.ARRAY, Direction.OUTGOING)) {
-		map.put((Integer) r.getProperty(RelationshipParameters.INDEX.name()),
-			NodeTypes.wrapAsGraphNode(r.getEndNode(), r, getStrategy()));
+		Relationship readRelationship = getStrategy().read(r);
+		map.put((Integer) r.getProperty(Parameters.Relationship.INDEX.name()),
+			NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(), readRelationship, getStrategy()));
 	    }
 	    children = map.values().toArray(new Neo4JGraphNode[map.size()]);
 	}
@@ -147,26 +148,30 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
     public EmptyGraphNode add() {
 
 	return new EmptyGraphNode(new PotentialRelationship() {
-	    private Relationship r;
 
 	    @Override
 	    public Relationship create(final UpdateOperation createOperation) {
-		getStrategy().update(virtualSuperclass.getIncomingRelationship(), false,
-			new UpdateOperation() {
-			    @Override
-			    public void updateElement(Node node, FundementalDatabaseOperations dal) {
-				r = addElementToArray(dal, node, findNextUnusedIndex(node), getStrategy().createNewNode(createOperation));
-			    }
-			});
-		return r;
+		return getStrategy().update(virtualSuperclass.getIncomingRelationship(), false, new UpdateOperation() {
+		    @Override
+		    public Relationship updateElement(Relationship relationship, FundementalDatabaseOperations dal) {
+			int nextUnusedIndex = findNextUnusedIndex(relationship.getEndNode());
+			Relationship newR = getStrategy().createNewNode(relationship.getEndNode(),
+				RelationshipTypes.ARRAY, createOperation);
+			newR.setProperty(Parameters.Relationship.INDEX.name(),
+				nextUnusedIndex);
+			return newR;
+		    }
+		});
 	    }
-	},getStrategy());
+	}, getStrategy());
 
     }
 
-    static Relationship addElementToArray(FundementalDatabaseOperations dal, Node node, int index, Node newNode) {
+    // FIXME - should be package protected
+    // FIXME - is this in a transaction?
+    public static Relationship addElementToArray(FundementalDatabaseOperations dal, Node node, int index, Node newNode) {
 	Relationship r = node.createRelationshipTo(newNode, RelationshipTypes.ARRAY);
-	r.setProperty(RelationshipParameters.INDEX.name(), index);
+	r.setProperty(Parameters.Relationship.INDEX.name(), index);
 	return r;
     }
 
@@ -174,11 +179,13 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
 	// this is a delete (on node) and update (on parent)
 	getStrategy().update(relationshipToParent, false, new UpdateOperation() {
 	    @Override
-	    public void updateElement(Node node, FundementalDatabaseOperations dal) {
-		for (Relationship relationshipToNodeToDelete : node.getRelationships(Direction.OUTGOING,
-			RelationshipTypes.ARRAY))
-		    if (relationshipToNodeToDelete.getProperty(RelationshipParameters.INDEX.name()).equals(index))
+	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
+		    FundementalDatabaseOperations dal) {
+		for (Relationship relationshipToNodeToDelete : relationshipToGraphNodeToUpdate.getEndNode()
+			.getRelationships(Direction.OUTGOING, RelationshipTypes.ARRAY))
+		    if (relationshipToNodeToDelete.getProperty(Parameters.Relationship.INDEX.name()).equals(index))
 			dal.delete(relationshipToNodeToDelete);
+		return null;
 	    }
 	});
     }
@@ -186,8 +193,8 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
     private int findNextUnusedIndex(Node parent) {
 	int max = 0;
 	for (Relationship a : parent.getRelationships(Direction.OUTGOING, RelationshipTypes.ARRAY)) {
-	    if ((int) a.getProperty(RelationshipParameters.INDEX.name()) > max)
-		max = (int) a.getProperty(RelationshipParameters.INDEX.name());
+	    if ((int) a.getProperty(Parameters.Relationship.INDEX.name()) > max)
+		max = (int) a.getProperty(Parameters.Relationship.INDEX.name());
 	}
 	return max + 1;
     }
@@ -202,6 +209,11 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
 	if (!token.isArrayIndexToken())
 	    throw new IllegalJsonException("Expecting an array element in json path expression: " + token.getFragment());
 	return get(token.getArrayIndex());
+    }
+
+    @Override
+    public Relationship getIncomingRelationship() {
+	return virtualSuperclass.getIncomingRelationship();
     }
 
 }

@@ -123,7 +123,6 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 		acc = VectorClock.max(acc, c);
 
 	}
-	System.out.println("Setting vc to " + acc);
 	if (selected.getValue() != relationshipToNode.getEndNode())
 	    super.update(relationshipToNode, true, new PopulateFromNodeUpdate(
 		    selected.getValue().getEndNode()).add(new WriteVectorClock(acc)));

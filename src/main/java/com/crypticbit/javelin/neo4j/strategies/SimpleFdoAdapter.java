@@ -26,7 +26,6 @@ public class SimpleFdoAdapter implements FundementalDatabaseOperations {
 	try {
 	    Node node = graphDb.createNode();
 	    Relationship newRelationship = parentNode.createRelationshipTo(node, type);
-	System.out.println("Created new relationship: "+newRelationship);
 	    result = createOperation.updateElement(newRelationship, fdo);
 	    tx.success();
 	} finally {

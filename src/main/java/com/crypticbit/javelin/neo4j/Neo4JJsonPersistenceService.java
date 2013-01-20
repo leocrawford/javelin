@@ -140,9 +140,9 @@ public class Neo4JJsonPersistenceService implements JsonPersistenceService {
     }
 
     private FundementalDatabaseOperations createDatabase() {
-	CompoundFdoAdapter fdo = // new VectorClockAdapter(graphDb, 
+	CompoundFdoAdapter fdo = new VectorClockAdapter(graphDb, 
 		new TimeStampedHistoryAdapter(graphDb,
-		new SimpleFdoAdapter(graphDb));//, identity);
+		new SimpleFdoAdapter(graphDb)), identity);
 	fdo.setTopFdo(fdo);
 	return fdo;
 

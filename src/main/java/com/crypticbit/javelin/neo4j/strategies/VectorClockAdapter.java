@@ -2,8 +2,10 @@ package com.crypticbit.javelin.neo4j.strategies;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -24,18 +26,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class VectorClockAdapter extends CompoundFdoAdapter {
 
-    private static final String VERSION_CLOCK = Parameters.Node.VERSION_CLOCK
-	    .name();
+    private static final String VERSION_CLOCK = Parameters.Node.VERSION_CLOCK.name();
 
     public class IncrementVectorClock extends UpdateOperation {
 
 	@Override
 	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
 		FundementalDatabaseOperations dal) {
+	    System.out.println("Updating vc " + relationshipToGraphNodeToUpdate.getEndNode());
 	    VectorClock vc = getVectorClock(relationshipToGraphNodeToUpdate.getEndNode());
 	    vc.incrementClock(identity);
 	    try {
-		relationshipToGraphNodeToUpdate.setProperty(VERSION_CLOCK, vc.serializeToString());
+		relationshipToGraphNodeToUpdate.getEndNode().setProperty(VERSION_CLOCK, vc.serializeToString());
 	    } catch (JsonProcessingException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
@@ -47,8 +49,7 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 
     private String identity;
 
-    public VectorClockAdapter(GraphDatabaseService graphDb,
-	    FundementalDatabaseOperations nextAdapter, String identity) {
+    public VectorClockAdapter(GraphDatabaseService graphDb, FundementalDatabaseOperations nextAdapter, String identity) {
 	super(graphDb, nextAdapter);
 	this.identity = identity;
 
@@ -56,15 +57,12 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 
     @Override
     public Relationship createNewNode(Node parentNode, RelationshipType type, UpdateOperation createOperation) {
-	return super.createNewNode(parentNode, type, createOperation
-			.add(new IncrementVectorClock()));
+	return super.createNewNode(parentNode, type, createOperation.add(new IncrementVectorClock()));
     }
 
     @Override
-    public Relationship update(Relationship relationshipToParent,
-	    boolean removeEverything, UpdateOperation operation) {
-	return super.update(relationshipToParent, removeEverything,
-		operation.add(new IncrementVectorClock()));
+    public Relationship update(Relationship relationshipToParent, boolean removeEverything, UpdateOperation operation) {
+	return super.update(relationshipToParent, removeEverything, operation.add(new IncrementVectorClock()));
     }
 
     @Override
@@ -72,16 +70,14 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 	Node node = relationshipToNode.getEndNode();
 
 	// if no incoming nodes, do nothing
-	if (!node.hasRelationship(Direction.OUTGOING,
-		RelationshipTypes.INCOMING_VERSION))
+	if (!node.hasRelationship(Direction.OUTGOING, RelationshipTypes.INCOMING_VERSION))
 	    return super.read(relationshipToNode);
 
 	VectorClock vectorClock = this.getVectorClock(node);
 	Map<VectorClock, Relationship> candidates = new HashMap<>();
 	// copy the candidate relationships into the map
 	candidates.put(getVectorClock(node), relationshipToNode);
-	for (Relationship r : node.getRelationships(Direction.OUTGOING,
-		RelationshipTypes.INCOMING_VERSION)) {
+	for (Relationship r : node.getRelationships(Direction.OUTGOING, RelationshipTypes.INCOMING_VERSION)) {
 	    Node endNode = r.getEndNode();
 	    VectorClock vc = this.getVectorClock(endNode);
 	    candidates.put(vc, r);
@@ -106,14 +102,16 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 
 	    }
 	}
+
 	Entry<VectorClock, Relationship> selected;
+
 	if (candidates.size() == 1)
 	    selected = candidates.entrySet().iterator().next();
-	else
-	    selected = candidates.entrySet().iterator().next();
+	else {
+	    Chooser chooser = new UserSelectedChooser();
+	    selected = chooser.select((List<Entry<VectorClock, Relationship>>) new ArrayList(candidates.entrySet()));
 
-	System.out.println("Unable to distinguish between " + candidates.size()
-		+ " candidates - " + candidates + ". Returning first: "+selected);
+	}
 
 	VectorClock acc = null;
 	for (VectorClock c : candidates.keySet()) {
@@ -124,29 +122,21 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 
 	}
 	if (selected.getValue() != relationshipToNode.getEndNode())
-	    super.update(relationshipToNode, true, new PopulateFromNodeUpdate(
-		    selected.getValue().getEndNode()).add(new WriteVectorClock(acc)));
+	    return super.update(relationshipToNode, true,
+		    new PopulateFromNodeUpdate(selected.getValue().getEndNode()).add(new WriteVectorClock(acc)));
 	else
-	    super.update(relationshipToNode, true, new WriteVectorClock(acc));
-	return selected.getValue();
+	    return super.update(relationshipToNode, true, new WriteVectorClock(acc));
+	// return selected.getValue();
 
     }
 
-    public void addIncoming(final Relationship relationshipToNode,
-	    UpdateOperation operation) {
+    public void addIncoming(final Relationship relationshipToNode, UpdateOperation operation) {
 	// FIXME - do we update the VectorClock twice?
-	super.createNewNode(null, null, operation.add(new UpdateOperation() {
-	    @Override
-	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		    FundementalDatabaseOperations dal) {
-		return relationshipToNode.getEndNode().createRelationshipTo(relationshipToGraphNodeToUpdate.getEndNode(),
-			RelationshipTypes.INCOMING_VERSION);
-	    }
-	}));
-
+	super.createNewNode(relationshipToNode.getEndNode(), RelationshipTypes.INCOMING_VERSION, operation);
     }
 
     public VectorClock getVectorClock(Node graphNode) {
+	System.out.println("Graph node " + graphNode + ": " + graphNode.hasProperty(VERSION_CLOCK));
 	if (graphNode.hasProperty(VERSION_CLOCK)) {
 	    String vcString = (String) graphNode.getProperty(VERSION_CLOCK);
 	    try {
@@ -174,11 +164,10 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
      * @author Frits de Nijs
      * @author Peter Dijkshoorn
      */
-    public static class VectorClock extends HashMap<String, Integer> implements
-	    Serializable {
+    public static class VectorClock extends HashMap<String, Integer> implements Serializable {
 
-	public static VectorClock deSerialize(String serialized)
-		throws JsonParseException, JsonMappingException, IOException {
+	public static VectorClock deSerialize(String serialized) throws JsonParseException, JsonMappingException,
+		IOException {
 	    ObjectMapper mapper = new ObjectMapper();
 	    VectorClock vc = mapper.readValue(serialized, VectorClock.class);
 	    return vc;
@@ -302,8 +291,7 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 	    for (String lEntry : pTwo.keySet()) {
 		// Insert the Clock Two value if it is not present in One, or if
 		// it is higher.
-		if (!lResult.containsKey(lEntry)
-			|| lResult.get(lEntry) < pTwo.get(lEntry)) {
+		if (!lResult.containsKey(lEntry) || lResult.get(lEntry) < pTwo.get(lEntry)) {
 		    lResult.put(lEntry, pTwo.get(lEntry));
 		}
 	    }
@@ -327,8 +315,7 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 	 * 
 	 * @return VectorComparison value indicating how One relates to Two.
 	 */
-	public static VectorComparison compare(VectorClock pOne,
-		VectorClock pTwo) {
+	public static VectorComparison compare(VectorClock pOne, VectorClock pTwo) {
 	    // Initially we assume it is all possible things.
 	    boolean lEqual = true;
 	    boolean lGreater = true;

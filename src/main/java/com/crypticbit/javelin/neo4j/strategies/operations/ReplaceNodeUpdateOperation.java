@@ -24,6 +24,7 @@ public final class ReplaceNodeUpdateOperation extends UpdateOperation {
     @Override
     public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
 	    FundementalDatabaseOperations dal) {
+		
 	Node newGraphNode = relationshipToGraphNodeToUpdate.getEndNode();
 	if (!removeEverything) {
 	    CloneUtils.copyOutgoingRelationships(oldGraphNode, newGraphNode);
@@ -33,7 +34,7 @@ public final class ReplaceNodeUpdateOperation extends UpdateOperation {
 	}
 	CloneUtils.copyProperties(relationshipToParent,relationshipToGraphNodeToUpdate);
 	// FIXME - should this be elsewhere?
-
+	System.out.println("Deleting: "+relationshipToParent);
 	relationshipToParent.delete();
 	newGraphNode.createRelationshipTo(oldGraphNode,
 		RelationshipTypes.PREVIOUS_VERSION);

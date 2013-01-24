@@ -68,7 +68,8 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
 
 	    for (Relationship r : node.getRelationships(RelationshipTypes.MAP, Direction.OUTGOING)) {
 		Relationship readRelationship = getStrategy().read(r);
-		children.add(new AbstractMap.SimpleImmutableEntry<String, Neo4JGraphNode>((String) r
+		System.out.println("Old: "+r+", new: "+readRelationship);
+		children.add(new AbstractMap.SimpleImmutableEntry<String, Neo4JGraphNode>((String) readRelationship
 			.getProperty(Parameters.Relationship.KEY.name()), NodeTypes.wrapAsGraphNode(
 			readRelationship.getEndNode(), readRelationship, getStrategy())));
 	    }

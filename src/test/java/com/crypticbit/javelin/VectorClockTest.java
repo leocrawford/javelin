@@ -42,6 +42,8 @@ public class VectorClockTest extends Neo4JTestSupport {
 		new JsonWriteUpdateOperation(MAPPER.readTree(s1))
 			.add(new WriteVectorClock(v1)));
 
+	// ps2.startWebServiceAndWait();
+	
 	GraphNode x = ps2.getRootNode().navigate("second");
 	System.out.println("We read: "+x+" with vc "+vca2.getVectorClock(gN2.getDatabaseNode()));
 	

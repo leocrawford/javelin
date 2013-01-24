@@ -13,6 +13,7 @@ import org.neo4j.graphdb.Relationship;
 import com.crypticbit.javelin.History;
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
+import com.crypticbit.javelin.MergeableBlock;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
@@ -225,8 +226,13 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
     }
 
     @Override
-    public void merge(String json, VectorClock vectorClock) throws JsonProcessingException, IOException {
-	virtualSuperclass.merge(json, vectorClock);
+    public void merge(MergeableBlock block) throws JsonProcessingException, IOException {
+	virtualSuperclass.merge(block);
+    }
+
+    @Override
+    public MergeableBlock getExtract() {
+	return virtualSuperclass.getExtract();
     }
 
 }

@@ -17,15 +17,18 @@ public class VectorClockTest extends Neo4JTestSupport {
 	ps1.getRootNode().navigate("second").write("[2,3,4]");
 	ps1.getRootNode().navigate("second").write("[2,3,4,5]");
 	GraphNode ps1Second = ps1.getRootNode().navigate("second");
-	String s1 = ps1Second.toJsonString();
-	System.out.println("Writing " + s1 + " with " + ps1Second.getVectorClock() + " to ps2");
+	System.out.println("Writing: "+ps1Second.getExtract());
 
 	ps2.getRootNode().write(JSON_TEXT);
 	ps2.getRootNode().navigate("second").write("[5,6]");
-	ps2.getRootNode().navigate("second").merge(s1, ps1Second.getVectorClock());
+	ps2.getRootNode().navigate("second").merge(ps1Second.getExtract());
 
 	GraphNode ps2Second = ps2.getRootNode().navigate("second");
-	System.out.println("We read: " + ps2Second + " with vc " + ps2Second.getVectorClock());
+	System.out.println("We read: " + ps2Second.getExtract());
+	
+	ps1.getRootNode().navigate("second").merge(ps2.getRootNode().navigate("second").getExtract());
+	System.out.println("We read: " + ps1.getRootNode().navigate("second").getExtract());
+	
 
     }
 

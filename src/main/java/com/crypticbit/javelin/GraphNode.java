@@ -30,8 +30,10 @@ public interface GraphNode {
     public VectorClock getVectorClock();
 
     // FIXME Factor out to a serialisable class
-    public void merge(String json, VectorClock vectorClock) throws JsonProcessingException, IOException;
+    public void merge(MergeableBlock block) throws JsonProcessingException, IOException;
 
+    public MergeableBlock getExtract();
+    
     public long getTimestamp();
 
 }

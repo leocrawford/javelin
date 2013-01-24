@@ -14,6 +14,7 @@ import com.crypticbit.javelin.GraphNode;
 import com.crypticbit.javelin.History;
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
+import com.crypticbit.javelin.MergeableBlock;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter;
@@ -152,13 +153,36 @@ public class GraphNodeImpl implements Neo4JGraphNode {
     }
 
     @Override
-    public void merge(String json, VectorClock vectorClock) throws JsonProcessingException, IOException {
+    public void merge(MergeableBlock block) throws JsonProcessingException, IOException {
 	// FIXME - what if VC is not at top of stack?
 	// FIXME Factor out Object Mapper
 	VectorClockAdapter vca2 = ((VectorClockAdapter) getStrategy());
 	vca2.addIncoming(getIncomingRelationship(),
-		new JsonWriteUpdateOperation(new ObjectMapper().readTree(json)).add(new WriteVectorClock(vectorClock)));
+		new JsonWriteUpdateOperation(new ObjectMapper().readTree(block.getJson())).add(new WriteVectorClock(
+			block.getVectorClock())));
 
+    }
+
+    @Override
+    public MergeableBlock getExtract() {
+	return new MergeableBlock() {
+	    private String json = graphNode.toJsonNode().toString();
+	    private VectorClock vc = graphNode.getVectorClock();
+
+	    @Override
+	    public VectorClock getVectorClock() {
+		return vc;
+	    }
+
+	    @Override
+	    public String getJson() {
+		return json;
+	    }
+
+	    public String toString() {
+		return json + " (" + vc + ")";
+	    }
+	};
     }
 
 }

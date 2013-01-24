@@ -12,10 +12,11 @@ import com.crypticbit.javelin.GraphNode;
 import com.crypticbit.javelin.History;
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
+import com.crypticbit.javelin.MergeableBlock;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter.VectorClock;
 import com.crypticbit.javelin.neo4j.strategies.operations.JsonWriteUpdateOperation;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
@@ -42,8 +43,7 @@ public class EmptyGraphNode implements Neo4JGraphNode {
      * 
      * @param incomingRelationship
      */
-    public EmptyGraphNode(PotentialRelationship potentialRelationship,
-	    FundementalDatabaseOperations fdo) {
+    public EmptyGraphNode(PotentialRelationship potentialRelationship, FundementalDatabaseOperations fdo) {
 	this.potentialRelationship = potentialRelationship;
 	this.fdo = fdo;
     }
@@ -61,8 +61,7 @@ public class EmptyGraphNode implements Neo4JGraphNode {
 
     private void checkHaveDelegateNode() {
 	if (node == null)
-	    throw new UnsupportedOperationException(
-		    "Not possible to invoke this method on an EmptyGraphNode");
+	    throw new UnsupportedOperationException("Not possible to invoke this method on an EmptyGraphNode");
     }
 
     @Override
@@ -72,21 +71,16 @@ public class EmptyGraphNode implements Neo4JGraphNode {
     }
 
     @Override
-    public void write(String json) throws IllegalJsonException,
-	    JsonPersistenceException {
+    public void write(String json) throws IllegalJsonException, JsonPersistenceException {
 	if (node == null) {
 	    try {
 		final JsonNode values = new ObjectMapper().readTree(json);
-		Relationship r = potentialRelationship
-			.create(new JsonWriteUpdateOperation(values));
-		node = NodeTypes.wrapAsGraphNode(r.getEndNode(), r,
-			getStrategy());
+		Relationship r = potentialRelationship.create(new JsonWriteUpdateOperation(values));
+		node = NodeTypes.wrapAsGraphNode(r.getEndNode(), r, getStrategy());
 	    } catch (JsonProcessingException jpe) {
-		throw new IllegalJsonException(
-			"The JSON string was badly formed: " + json, jpe);
+		throw new IllegalJsonException("The JSON string was badly formed: " + json, jpe);
 	    } catch (IOException e) {
-		throw new JsonPersistenceException(
-			"IOException whilst writing data to database", e);
+		throw new JsonPersistenceException("IOException whilst writing data to database", e);
 	    }
 	} else
 	    node.write(json);
@@ -95,17 +89,15 @@ public class EmptyGraphNode implements Neo4JGraphNode {
 
     private void makeRelationsipTangibleIfNotAlready(final NodeTypes nodeType) {
 	if (node == null) {
-	    Relationship r = potentialRelationship
-		    .create(new UpdateOperation() {
-			@Override
-			public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-				FundementalDatabaseOperations dal) {
-			    relationshipToGraphNodeToUpdate.getEndNode().setProperty(
-				    Parameters.Node.TYPE.name(),
-				    nodeType.name());
-			    return relationshipToGraphNodeToUpdate;
-			}
-		    });
+	    Relationship r = potentialRelationship.create(new UpdateOperation() {
+		@Override
+		public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
+			FundementalDatabaseOperations dal) {
+		    relationshipToGraphNodeToUpdate.getEndNode().setProperty(Parameters.Node.TYPE.name(),
+			    nodeType.name());
+		    return relationshipToGraphNodeToUpdate;
+		}
+	    });
 	    node = NodeTypes.wrapAsGraphNode(r.getEndNode(), r, getStrategy());
 
 	}
@@ -113,16 +105,14 @@ public class EmptyGraphNode implements Neo4JGraphNode {
     }
 
     @Override
-    public Neo4JGraphNode put(String key) throws IllegalJsonException,
-	    JsonPersistenceException {
+    public Neo4JGraphNode put(String key) throws IllegalJsonException, JsonPersistenceException {
 	makeRelationsipTangibleIfNotAlready(NodeTypes.MAP);
 	return node.put(key);
 
     }
 
     @Override
-    public EmptyGraphNode add() throws IllegalJsonException,
-	    JsonPersistenceException {
+    public EmptyGraphNode add() throws IllegalJsonException, JsonPersistenceException {
 	makeRelationsipTangibleIfNotAlready(NodeTypes.ARRAY);
 	return node.add();
 
@@ -154,8 +144,7 @@ public class EmptyGraphNode implements Neo4JGraphNode {
     @Override
     public Neo4JGraphNode navigate(PathToken token) throws IllegalJsonException {
 	// checkHaveDelegateNode();
-	makeRelationsipTangibleIfNotAlready(token.isArrayIndexToken() ? NodeTypes.ARRAY
-		: NodeTypes.MAP);
+	makeRelationsipTangibleIfNotAlready(token.isArrayIndexToken() ? NodeTypes.ARRAY : NodeTypes.MAP);
 	return node.navigate(token);
     }
 
@@ -164,7 +153,7 @@ public class EmptyGraphNode implements Neo4JGraphNode {
 	checkHaveDelegateNode();
 	return node.getIncomingRelationship();
     }
-    
+
     @Override
     public VectorClock getVectorClock() {
 	checkHaveDelegateNode();
@@ -172,8 +161,15 @@ public class EmptyGraphNode implements Neo4JGraphNode {
     }
 
     @Override
-    public void merge(String json, VectorClock vectorClock) throws JsonProcessingException, IOException {
+    public void merge(MergeableBlock block) throws JsonProcessingException, IOException {
 	checkHaveDelegateNode();
-	node.merge(json, vectorClock);
+	node.merge(block);
     }
+
+    @Override
+    public MergeableBlock getExtract() {
+	checkHaveDelegateNode();
+	return node.getExtract();
+    }
+
 }

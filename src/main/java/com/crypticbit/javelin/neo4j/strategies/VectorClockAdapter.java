@@ -69,7 +69,6 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 	if (!node.hasRelationship(Direction.OUTGOING, RelationshipTypes.INCOMING_VERSION))
 	    return super.read(relationshipToNode);
 
-	VectorClock vectorClock = this.getVectorClock(node);
 	Map<VectorClock, Relationship> candidates = new HashMap<>();
 	// copy the candidate relationships into the map
 	candidates.put(getVectorClock(node), relationshipToNode);

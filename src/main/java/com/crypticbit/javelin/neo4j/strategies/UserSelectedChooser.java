@@ -6,7 +6,6 @@ import java.util.Scanner;
 
 import org.neo4j.graphdb.Relationship;
 
-import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter.VectorClock;
 
 public class UserSelectedChooser implements Chooser {
 
@@ -15,7 +14,7 @@ public class UserSelectedChooser implements Chooser {
 	System.out.println("Concurrent updates. please choose one");
 	int loop = 1;
 	for (Entry<VectorClock, Relationship> c : candidates) {
-	    System.out.println((loop++) + ") " + c.getValue() + " - " + c.getKey());
+	    System.out.println((loop++) + ") " + c.getValue().getEndNode() + " - " + c.getKey());
 	}
 	Scanner scanIn = new Scanner(System.in);
 	int selection = scanIn.nextInt();

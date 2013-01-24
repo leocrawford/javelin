@@ -3,9 +3,9 @@ package com.crypticbit.javelin.neo4j.strategies.operations;
 import org.neo4j.graphdb.Relationship;
 
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
+import com.crypticbit.javelin.neo4j.strategies.VectorClock;
 import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
-import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter.VectorClock;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 public class WriteVectorClock extends UpdateOperation {

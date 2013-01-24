@@ -5,7 +5,6 @@ import java.util.Map.Entry;
 
 import org.neo4j.graphdb.Relationship;
 
-import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter.VectorClock;
 
 public interface Chooser {
 

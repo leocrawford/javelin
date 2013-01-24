@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
 import com.crypticbit.javelin.neo4j.nodes.EmptyGraphNode;
-import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter.VectorClock;
+import com.crypticbit.javelin.neo4j.strategies.VectorClock;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 

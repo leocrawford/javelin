@@ -1,5 +1,6 @@
 package com.crypticbit.javelin.neo4j.nodes;
 
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.HashSet;
@@ -18,10 +19,12 @@ import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter.VectorClock;
 import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonpath.internal.PathToken;
@@ -68,7 +71,6 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
 
 	    for (Relationship r : node.getRelationships(RelationshipTypes.MAP, Direction.OUTGOING)) {
 		Relationship readRelationship = getStrategy().read(r);
-		System.out.println("Old: "+r+", new: "+readRelationship);
 		children.add(new AbstractMap.SimpleImmutableEntry<String, Neo4JGraphNode>((String) readRelationship
 			.getProperty(Parameters.Relationship.KEY.name()), NodeTypes.wrapAsGraphNode(
 			readRelationship.getEndNode(), readRelationship, getStrategy())));
@@ -216,5 +218,15 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
     @Override
     public Relationship getIncomingRelationship() {
 	return virtualSuperclass.getIncomingRelationship();
+    }
+    
+    @Override
+    public VectorClock getVectorClock() {
+	return virtualSuperclass.getVectorClock();
+    }
+    
+    @Override
+    public void merge(String json, VectorClock vectorClock) throws JsonProcessingException, IOException {
+	virtualSuperclass.merge(json, vectorClock);
     }
 }

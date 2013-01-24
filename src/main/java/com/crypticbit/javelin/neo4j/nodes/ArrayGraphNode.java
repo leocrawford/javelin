@@ -1,5 +1,6 @@
 package com.crypticbit.javelin.neo4j.nodes;
 
+import java.io.IOException;
 import java.util.AbstractList;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +18,11 @@ import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.NullUpdateOperation;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter.VectorClock;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.internal.PathToken;
@@ -214,6 +217,16 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
     @Override
     public Relationship getIncomingRelationship() {
 	return virtualSuperclass.getIncomingRelationship();
+    }
+
+    @Override
+    public VectorClock getVectorClock() {
+	return virtualSuperclass.getVectorClock();
+    }
+
+    @Override
+    public void merge(String json, VectorClock vectorClock) throws JsonProcessingException, IOException {
+	virtualSuperclass.merge(json, vectorClock);
     }
 
 }

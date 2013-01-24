@@ -9,8 +9,6 @@ import java.nio.file.Files;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.IllegalJsonException;
-import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
 import com.crypticbit.javelin.neo4j.Neo4JJsonPersistenceService;
 
@@ -82,7 +80,7 @@ public class Neo4JJsonPersistenceServiceTest extends Neo4JTestSupport {
 
 	ps.getRootNode().write(JSON_TEXT);
 	ps.getRootNode().navigate("second[0]").write("\"new value 1\"");
-	
+
 	assertEquals(
 		MAPPER.readTree("{\"first\": 123, \"second\": [\"new value 1\", 4, 5, 6, {\"id\": 123}], \"third\": 789, \"xid\": null}"),
 		MAPPER.readTree(ps.getRootNode().toJsonString()));
@@ -114,12 +112,14 @@ public class Neo4JJsonPersistenceServiceTest extends Neo4JTestSupport {
 
 	GraphNode foundNode = ps.getRootNode().navigate("second[0].k1.a1.a2");
 	foundNode.write("\"even newer stuff\"");
-	
-	assertEquals(MAPPER.readTree("{\"id\":\"sd1 p\", \"newNode\":\"very new stuff\", \"a1\":{\"a2\":\"even newer stuff\"}}"),
+
+	assertEquals(
+		MAPPER.readTree("{\"id\":\"sd1 p\", \"newNode\":\"very new stuff\", \"a1\":{\"a2\":\"even newer stuff\"}}"),
 		MAPPER.readTree(ps.getRootNode().navigate("second[0].k1").toJsonString()));
 
 	ps.getRootNode().navigate("second[0].k1.a1.a3[0].b.c").write("\"at end of newly created chain\"");
-	assertEquals(MAPPER.readTree("{\"a3\":[{\"b\":{\"c\":\"at end of newly created chain\"}}], \"a2\":\"even newer stuff\"}"),
+	assertEquals(
+		MAPPER.readTree("{\"a3\":[{\"b\":{\"c\":\"at end of newly created chain\"}}], \"a2\":\"even newer stuff\"}"),
 		MAPPER.readTree(ps.getRootNode().navigate("second[0].k1.a1").toJsonString()));
 
     }
@@ -179,18 +179,31 @@ public class Neo4JJsonPersistenceServiceTest extends Neo4JTestSupport {
     @Test
     public void testPersistenceBetweenSessions() throws IOException, JsonPersistenceException, IllegalJsonException {
 	File file = Files.createTempDirectory("neo4j_test").toFile();
-	Neo4JJsonPersistenceService ps = new Neo4JJsonPersistenceService(file,"i1");
+	Neo4JJsonPersistenceService ps = new Neo4JJsonPersistenceService(file, "i1");
 
 	Neo4JGraphNode rootNode = ps.getRootNode();
 	rootNode.write(JSON_TEXT);
 	assertEquals(MAPPER.readTree(JSON_TEXT), MAPPER.readTree(ps.getRootNode().toJsonString()));
 	ps.close();
 
-	ps = new Neo4JJsonPersistenceService(file,"i1");
+	ps = new Neo4JJsonPersistenceService(file, "i1");
 
 	rootNode = ps.getRootNode();
 	assertEquals(MAPPER.readTree(JSON_TEXT), MAPPER.readTree(ps.getRootNode().toJsonString()));
 	ps.close();
+
+    }
+
+    @Test
+    public void testMultipleWriteToSameNode() throws IOException, JsonPersistenceException, IllegalJsonException {
+	Neo4JJsonPersistenceService ps = createNewService();
+
+	ps.getRootNode().write(JSON_TEXT);
+	GraphNode aNode = ps.getRootNode().navigate("second");
+	aNode.write("[2,3,4]");
+	String writeValue = "[2,3,4,5]";
+	aNode.write(writeValue);
+	assertEquals(MAPPER.readTree(writeValue), MAPPER.readTree(aNode.toJsonString()));
 
     }
 

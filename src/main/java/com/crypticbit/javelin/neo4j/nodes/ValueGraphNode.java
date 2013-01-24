@@ -11,6 +11,7 @@ import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
+import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter.VectorClock;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -136,4 +137,13 @@ public class ValueGraphNode extends ValueNode implements Neo4JGraphNode {
 	return virtualSuperclass.getIncomingRelationship();
     }
 
+    @Override
+    public VectorClock getVectorClock() {
+	return virtualSuperclass.getVectorClock();
+    }
+    
+    @Override
+    public void merge(String json, VectorClock vectorClock) throws JsonProcessingException, IOException {
+	virtualSuperclass.merge(json, vectorClock);
+    }
 }

@@ -16,6 +16,7 @@ import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter.VectorClock;
 import com.crypticbit.javelin.neo4j.strategies.operations.JsonWriteUpdateOperation;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.crypticbit.javelin.neo4j.types.Parameters;
@@ -163,5 +164,16 @@ public class EmptyGraphNode implements Neo4JGraphNode {
 	checkHaveDelegateNode();
 	return node.getIncomingRelationship();
     }
+    
+    @Override
+    public VectorClock getVectorClock() {
+	checkHaveDelegateNode();
+	return node.getVectorClock();
+    }
 
+    @Override
+    public void merge(String json, VectorClock vectorClock) throws JsonProcessingException, IOException {
+	checkHaveDelegateNode();
+	node.merge(json, vectorClock);
+    }
 }

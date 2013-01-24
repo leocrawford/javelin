@@ -16,7 +16,10 @@ import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
+import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter;
+import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter.VectorClock;
 import com.crypticbit.javelin.neo4j.strategies.operations.JsonWriteUpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.operations.WriteVectorClock;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -106,7 +109,8 @@ public class GraphNodeImpl implements Neo4JGraphNode {
 		    Direction.OUTGOING)) {
 
 		Relationship readRelationship = getStrategy().read(r);
-		final Neo4JGraphNode endNode = NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(), readRelationship, getStrategy());
+		final Neo4JGraphNode endNode = NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(),
+			readRelationship, getStrategy());
 		history.addAll(endNode.getHistory());
 	    }
 	}
@@ -139,6 +143,22 @@ public class GraphNodeImpl implements Neo4JGraphNode {
     @Override
     public FundementalDatabaseOperations getStrategy() {
 	return fdo;
+    }
+
+    @Override
+    public VectorClock getVectorClock() {
+	// FIXME - what if VC is not at top of stack?
+	return ((VectorClockAdapter) getStrategy()).getVectorClock(graphNode.getDatabaseNode());
+    }
+
+    @Override
+    public void merge(String json, VectorClock vectorClock) throws JsonProcessingException, IOException {
+	// FIXME - what if VC is not at top of stack?
+	// FIXME Factor out Object Mapper
+	VectorClockAdapter vca2 = ((VectorClockAdapter) getStrategy());
+	vca2.addIncoming(getIncomingRelationship(),
+		new JsonWriteUpdateOperation(new ObjectMapper().readTree(json)).add(new WriteVectorClock(vectorClock)));
+
     }
 
 }

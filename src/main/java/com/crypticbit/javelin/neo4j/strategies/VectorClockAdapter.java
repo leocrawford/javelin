@@ -33,7 +33,6 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 	@Override
 	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
 		FundementalDatabaseOperations dal) {
-	    System.out.println("Updating vc " + relationshipToGraphNodeToUpdate.getEndNode());
 	    VectorClock vc = getVectorClock(relationshipToGraphNodeToUpdate.getEndNode());
 	    vc.incrementClock(identity);
 	    try {
@@ -82,6 +81,7 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 	    VectorClock vc = this.getVectorClock(endNode);
 	    candidates.put(vc, r);
 	}
+
 	// get rid of any that are definitely predecessors of any other elements
 	for (Entry<VectorClock, Relationship> c1 : candidates.entrySet()) {
 	    for (Entry<VectorClock, Relationship> c2 : candidates.entrySet()) {
@@ -110,7 +110,6 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 	else {
 	    Chooser chooser = new UserSelectedChooser();
 	    selected = chooser.select((List<Entry<VectorClock, Relationship>>) new ArrayList(candidates.entrySet()));
-
 	}
 
 	VectorClock acc = null;
@@ -136,7 +135,6 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
     }
 
     public VectorClock getVectorClock(Node graphNode) {
-	System.out.println("Graph node " + graphNode + ": " + graphNode.hasProperty(VERSION_CLOCK));
 	if (graphNode.hasProperty(VERSION_CLOCK)) {
 	    String vcString = (String) graphNode.getProperty(VERSION_CLOCK);
 	    try {

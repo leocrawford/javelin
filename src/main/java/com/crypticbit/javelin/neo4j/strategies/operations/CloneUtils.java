@@ -51,7 +51,7 @@ class CloneUtils {
 
     static void copyOutgoingRelationships(Node fromNode, Node toNode) {
 	for (Relationship rel : fromNode.getRelationships(Direction.OUTGOING)) {
-	    if (!rel.isType(RelationshipTypes.PREVIOUS_VERSION))
+	    if (!rel.isType(RelationshipTypes.VERSION))
 		cloneRelationshipFromNewStartNode(toNode, rel);
 	}
 

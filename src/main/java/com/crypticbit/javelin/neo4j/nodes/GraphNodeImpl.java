@@ -106,12 +106,12 @@ public class GraphNodeImpl implements Neo4JGraphNode {
 		    return graphNode;
 		}
 	    });
-	    for (Relationship r : graphNode.getDatabaseNode().getRelationships(RelationshipTypes.PREVIOUS_VERSION,
+	    for (Relationship r : graphNode.getDatabaseNode().getRelationships(RelationshipTypes.VERSION,
 		    Direction.OUTGOING)) {
 
 		Relationship readRelationship = getStrategy().read(r);
 		final Neo4JGraphNode endNode = NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(),
-			readRelationship, getStrategy());
+			r, getStrategy());
 		history.addAll(endNode.getHistory());
 	    }
 	}

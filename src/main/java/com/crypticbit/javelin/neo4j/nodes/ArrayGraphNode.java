@@ -83,7 +83,7 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
 	    for (Relationship r : node.getRelationships(RelationshipTypes.ARRAY, Direction.OUTGOING)) {
 		Relationship readRelationship = getStrategy().read(r);
 		map.put((Integer) r.getProperty(Parameters.Relationship.INDEX.name()),
-			NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(), readRelationship, getStrategy()));
+			NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(), r, getStrategy()));
 	    }
 	    children = map.values().toArray(new Neo4JGraphNode[map.size()]);
 	}

@@ -1,8 +1,5 @@
 package com.crypticbit.javelin.neo4j.strategies;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -13,13 +10,11 @@ import org.neo4j.graphdb.Transaction;
 import com.crypticbit.javelin.neo4j.strategies.operations.ReplaceNodeUpdateOperation;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 
-
 public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 
     private Relationship currentVersion;
-    
-    public TimeStampedHistoryAdapter(GraphDatabaseService graphDb,
-	    FundementalDatabaseOperations nextAdapter) {
+
+    public TimeStampedHistoryAdapter(GraphDatabaseService graphDb, FundementalDatabaseOperations nextAdapter) {
 	super(graphDb, nextAdapter);
     }
 
@@ -29,15 +24,16 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 	try {
 	    Node node = getGraphDB().createNode();
 	    Relationship newRelationship = parentNode.createRelationshipTo(node, type);
-	    Relationship version0 = super.createNewNode(node,RelationshipTypes.PREVIOUS_VERSION , createOperation
-			.add(getTimestampOperation()));
-	    
+	    Relationship version0 = super.createNewNode(node, RelationshipTypes.VERSION,
+		    createOperation.add(getTimestampOperation()));
+
 	    tx.success();
 	    currentVersion = version0;
+	    return newRelationship;
 	} finally {
 	    tx.finish();
 	}
-	return currentVersion;
+
 
     }
 
@@ -53,11 +49,20 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
     }
 
     @Override
-    public Relationship update(final Relationship relationshipToParent,
-	    final boolean removeEverything, final UpdateOperation operation) {
-	final Node nodeToUpdate = relationshipToParent.getEndNode();
-	return createNewNode(relationshipToParent.getStartNode(), relationshipToParent.getType(), new ReplaceNodeUpdateOperation(nodeToUpdate,
-			removeEverything, relationshipToParent).add(operation));
+    public Relationship update(final Relationship relationshipToParent, final boolean removeEverything,
+	    final UpdateOperation operation) {
+	// final Node nodeToUpdate = relationshipToParent.getEndNode();
+	Transaction tx = getGraphDB().beginTx();
+	try {
+	    Relationship result = super.createNewNode(relationshipToParent.getEndNode(), RelationshipTypes.VERSION,
+		    new ReplaceNodeUpdateOperation(read(relationshipToParent).getEndNode(), removeEverything,
+			    relationshipToParent).add(operation));
+	    result.setProperty("timestamp", System.currentTimeMillis());
+	    tx.success();
+	    return result;
+	} finally {
+	    tx.finish();
+	}
 
     }
 
@@ -66,23 +71,22 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 	if (currentVersion != null)
 	    return currentVersion;
 	else {
-		Node node = relationshipToNode.getEndNode();
+	    Node node = relationshipToNode.getEndNode();
 
-		Relationship found = null;
-		Long timestamp = null;
-		
-		for (Relationship r : node.getRelationships(Direction.OUTGOING, RelationshipTypes.PREVIOUS_VERSION)) {
-		    if(timestamp == null || (Long) r.getProperty("timestamp") > timestamp)
-		    {
-			found = r;
-			timestamp = (Long) r.getProperty("timestamp");
-		    }
+	    Relationship found = null;
+	    Long timestamp = null;
+
+	    for (Relationship r : node.getRelationships(Direction.OUTGOING, RelationshipTypes.VERSION)) {
+		if (timestamp == null || (Long) r.getProperty("timestamp") > timestamp) {
+		    found = r;
+		    timestamp = (Long) r.getProperty("timestamp");
 		}
-		return found;
+	    }
+	    return found;
 
 	}
     }
-    
+
     @Override
     public void delete(Relationship relationshipToNodeToDelete) {
 	// FIXME - not implemented

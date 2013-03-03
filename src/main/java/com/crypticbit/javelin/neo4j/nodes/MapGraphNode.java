@@ -72,9 +72,9 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
 
 	    for (Relationship r : node.getRelationships(RelationshipTypes.MAP, Direction.OUTGOING)) {
 		Relationship readRelationship = getStrategy().read(r);
-		children.add(new AbstractMap.SimpleImmutableEntry<String, Neo4JGraphNode>((String) readRelationship
+		children.add(new AbstractMap.SimpleImmutableEntry<String, Neo4JGraphNode>((String) r
 			.getProperty(Parameters.Relationship.KEY.name()), NodeTypes.wrapAsGraphNode(
-			readRelationship.getEndNode(), readRelationship, getStrategy())));
+			readRelationship.getEndNode(), r, getStrategy())));
 	    }
 	}
     }
@@ -177,12 +177,12 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
 	}
     }
 
-    public static Relationship addElementToMap(FundementalDatabaseOperations dal, Node node, final String key,
-	    Node newNode) {
-	Relationship r = node.createRelationshipTo(newNode, RelationshipTypes.MAP);
-	r.setProperty(Parameters.Relationship.KEY.name(), key);
-	return r;
-    }
+//    public static Relationship addElementToMap(FundementalDatabaseOperations dal, Node node, final String key,
+//	    Node newNode) {
+//	Relationship r = node.createRelationshipTo(newNode, RelationshipTypes.MAP);
+//	r.setProperty(Parameters.Relationship.KEY.name(), key);
+//	return r;
+//    }
 
     public void removeElementFromMap(final Relationship relationshipToParent, final String key) {
 	// this is a delete (on node) and update (on parent)

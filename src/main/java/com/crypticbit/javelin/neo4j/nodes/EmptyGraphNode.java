@@ -77,7 +77,8 @@ public class EmptyGraphNode implements Neo4JGraphNode {
 	    try {
 		final JsonNode values = new ObjectMapper().readTree(json);
 		Relationship r = potentialRelationship.create(new JsonWriteUpdateOperation(values));
-		node = NodeTypes.wrapAsGraphNode(r.getEndNode(), r, getStrategy());
+		Relationship readRelationship = fdo.read(r);
+		node = NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(), r, getStrategy());
 	    } catch (JsonProcessingException jpe) {
 		throw new IllegalJsonException("The JSON string was badly formed: " + json, jpe);
 	    } catch (IOException e) {

@@ -124,9 +124,10 @@ public class Neo4JJsonPersistenceService implements JsonPersistenceService {
     public Neo4JGraphNode getRootNode() {
 	final FundementalDatabaseOperations fdo = createDatabase();
 	if (getDatabaseNode().hasRelationship(RelationshipTypes.MAP, Direction.OUTGOING)) {
-	    Relationship r = fdo.read(getDatabaseNode().getRelationships(RelationshipTypes.MAP, Direction.OUTGOING).iterator()
-		    .next());
-	    return NodeTypes.wrapAsGraphNode(r.getEndNode(), r, fdo);
+	    Relationship r = getDatabaseNode().getRelationships(RelationshipTypes.MAP, Direction.OUTGOING).iterator()
+		    .next();
+	    Relationship readRelationship = fdo.read(r);
+	    return NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(), r, fdo);
 	} else {
 
 	    return new EmptyGraphNode(new PotentialRelationship() {

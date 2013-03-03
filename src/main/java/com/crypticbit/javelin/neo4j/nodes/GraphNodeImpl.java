@@ -121,7 +121,7 @@ public class GraphNodeImpl implements Neo4JGraphNode {
 
     @Override
     public long getTimestamp() {
-	return (long) graphNode.getDatabaseNode().getProperty("timestamp");
+	return (long) incomingRelationship.getProperty("timestamp");
     }
 
     @Override
@@ -183,6 +183,11 @@ public class GraphNodeImpl implements Neo4JGraphNode {
 		return json + " (" + vc + ")";
 	    }
 	};
+    }
+    
+    @Override
+    public boolean exists() {
+	return true;
     }
 
 }

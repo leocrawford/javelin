@@ -15,6 +15,7 @@ public interface Neo4JGraphNode extends HistoryGraphNode {
     public FundementalDatabaseOperations getStrategy();
     public Neo4JGraphNode navigate(PathToken token) throws IllegalJsonException;
     public Relationship getIncomingRelationship();
+    public boolean exists();
     
 
 

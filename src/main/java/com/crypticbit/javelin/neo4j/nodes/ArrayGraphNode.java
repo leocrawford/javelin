@@ -235,4 +235,9 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
 	return virtualSuperclass.getExtract();
     }
 
+    @Override
+    public boolean exists() {
+	return true;
+    }
+
 }

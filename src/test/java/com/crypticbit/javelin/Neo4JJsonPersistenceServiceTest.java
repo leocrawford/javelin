@@ -130,7 +130,7 @@ public class Neo4JJsonPersistenceServiceTest extends Neo4JTestSupport {
 
 	ps.getRootNode().write(JSON_TEXT);
 	ps.getRootNode().write("\"new value 1\"");
-
+	
 	assertEquals(MAPPER.readTree("\"new value 1\""), MAPPER.readTree(ps.getRootNode().toJsonString()));
     }
 

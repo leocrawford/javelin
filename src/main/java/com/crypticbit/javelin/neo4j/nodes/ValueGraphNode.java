@@ -152,4 +152,9 @@ public class ValueGraphNode extends ValueNode implements Neo4JGraphNode {
     public MergeableBlock getExtract() {
 	return virtualSuperclass.getExtract();
     }
+    
+    @Override
+    public boolean exists() {
+	return true;
+    }
 }

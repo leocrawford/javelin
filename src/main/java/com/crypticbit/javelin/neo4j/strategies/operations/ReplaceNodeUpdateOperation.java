@@ -33,11 +33,6 @@ public final class ReplaceNodeUpdateOperation extends UpdateOperation {
 	    CloneUtils.copyProperties(oldGraphNode, newGraphNode, Parameters.PRESERVED);
 	}
 	CloneUtils.copyProperties(relationshipToParent,relationshipToGraphNodeToUpdate);
-	// FIXME - should this be elsewhere (the delete)s?
-	relationshipToParent.delete();
-	newGraphNode.createRelationshipTo(oldGraphNode,
-		RelationshipTypes.PREVIOUS_VERSION);
-
 	return relationshipToGraphNodeToUpdate;
     }
 

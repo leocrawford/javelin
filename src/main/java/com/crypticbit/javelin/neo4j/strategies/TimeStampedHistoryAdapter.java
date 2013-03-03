@@ -1,15 +1,23 @@
 package com.crypticbit.javelin.neo4j.strategies;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
 
 import com.crypticbit.javelin.neo4j.strategies.operations.ReplaceNodeUpdateOperation;
+import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 
 
 public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 
+    private Relationship currentVersion;
+    
     public TimeStampedHistoryAdapter(GraphDatabaseService graphDb,
 	    FundementalDatabaseOperations nextAdapter) {
 	super(graphDb, nextAdapter);
@@ -17,8 +25,20 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 
     @Override
     public Relationship createNewNode(Node parentNode, RelationshipType type, UpdateOperation createOperation) {
-	return super.createNewNode(parentNode, type, createOperation
+	Transaction tx = getGraphDB().beginTx();
+	try {
+	    Node node = getGraphDB().createNode();
+	    Relationship newRelationship = parentNode.createRelationshipTo(node, type);
+	    Relationship version0 = super.createNewNode(node,RelationshipTypes.PREVIOUS_VERSION , createOperation
 			.add(getTimestampOperation()));
+	    
+	    tx.success();
+	    currentVersion = version0;
+	} finally {
+	    tx.finish();
+	}
+	return currentVersion;
+
     }
 
     private UpdateOperation getTimestampOperation() {
@@ -26,7 +46,7 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 	    @Override
 	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
 		    FundementalDatabaseOperations dal) {
-		relationshipToGraphNodeToUpdate.getEndNode().setProperty("timestamp", System.currentTimeMillis());
+		relationshipToGraphNodeToUpdate.setProperty("timestamp", System.currentTimeMillis());
 		return relationshipToGraphNodeToUpdate;
 	    }
 	};
@@ -41,6 +61,28 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 
     }
 
+    @Override
+    public Relationship read(Relationship relationshipToNode) {
+	if (currentVersion != null)
+	    return currentVersion;
+	else {
+		Node node = relationshipToNode.getEndNode();
+
+		Relationship found = null;
+		Long timestamp = null;
+		
+		for (Relationship r : node.getRelationships(Direction.OUTGOING, RelationshipTypes.PREVIOUS_VERSION)) {
+		    if(timestamp == null || (Long) r.getProperty("timestamp") > timestamp)
+		    {
+			found = r;
+			timestamp = (Long) r.getProperty("timestamp");
+		    }
+		}
+		return found;
+
+	}
+    }
+    
     @Override
     public void delete(Relationship relationshipToNodeToDelete) {
 	// FIXME - not implemented

@@ -60,8 +60,9 @@ public class EmptyGraphNode implements Neo4JGraphNode {
     }
 
     private void checkHaveDelegateNode() {
-	if (node == null)
+	if (node == null) {
 	    throw new UnsupportedOperationException("Not possible to invoke this method on an EmptyGraphNode");
+	}
     }
 
     @Override
@@ -170,6 +171,17 @@ public class EmptyGraphNode implements Neo4JGraphNode {
     public MergeableBlock getExtract() {
 	checkHaveDelegateNode();
 	return node.getExtract();
+    }
+
+    @Override
+    public boolean exists() {
+	// FIXME - should try and make tangeable
+//	    try {
+//		checkHaveDelegateNode();
+//	    } catch (Exception e) {
+//		e.printStackTrace();
+//	    }
+	return node != null;
     }
 
 }

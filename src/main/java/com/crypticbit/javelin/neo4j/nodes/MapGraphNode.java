@@ -235,4 +235,9 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
     public MergeableBlock getExtract() {
 	return virtualSuperclass.getExtract();
     }
+
+    @Override
+    public boolean exists() {
+	return true;
+    }
 }

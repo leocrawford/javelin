@@ -42,6 +42,7 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 	    @Override
 	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
 		    FundementalDatabaseOperations dal) {
+		System.out.println("Setting timestamp property on "+relationshipToGraphNodeToUpdate+" from "+relationshipToGraphNodeToUpdate.getStartNode().getId()+" to "+relationshipToGraphNodeToUpdate.getEndNode().getId());
 		relationshipToGraphNodeToUpdate.setProperty("timestamp", System.currentTimeMillis());
 		return relationshipToGraphNodeToUpdate;
 	    }
@@ -56,10 +57,9 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 	try {
 	    Relationship result = super.createNewNode(relationshipToParent.getEndNode(), RelationshipTypes.VERSION,
 		    new ReplaceNodeUpdateOperation(read(relationshipToParent).getEndNode(), removeEverything,
-			    relationshipToParent).add(operation));
-	    result.setProperty("timestamp", System.currentTimeMillis());
+			    relationshipToParent).add(operation).add(getTimestampOperation()));
 	    tx.success();
-	    return result;
+	    return relationshipToParent;
 	} finally {
 	    tx.finish();
 	}

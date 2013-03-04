@@ -72,7 +72,8 @@ public interface FundementalDatabaseOperations {
 		@Override
 		public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, FundementalDatabaseOperations dal) {
 		    Relationship r = UpdateOperation.this.updateElement(relationshipToGraphNodeToUpdate, dal);
-		    return newOperation.updateElement(r, dal);
+		    // FIXME should second resule product of first?
+		    return newOperation.updateElement(relationshipToGraphNodeToUpdate, dal);
 		}
 
 	    };

@@ -100,7 +100,8 @@ public class EmptyGraphNode implements Neo4JGraphNode {
 		    return relationshipToGraphNodeToUpdate;
 		}
 	    });
-	    node = NodeTypes.wrapAsGraphNode(r.getEndNode(), r, getStrategy());
+	    Relationship readRelationship = getStrategy().read(r);
+	    node = NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(), r, getStrategy());
 
 	}
 	checkHaveDelegateNode();

@@ -113,9 +113,13 @@ public class Neo4JJsonPersistenceServiceTest extends Neo4JTestSupport {
 	assertEquals(MAPPER.readTree("{\"newNode\":\"very new stuff\",\"id\":\"sd1 p\"}"),
 		MAPPER.readTree(ps.getRootNode().navigate("second[0].k1").toJsonString()));
 
+
+	
 	GraphNode foundNode = ps.getRootNode().navigate("second[0].k1.a1.a2");
 	foundNode.write("\"even newer stuff\"");
 
+//	ps.startWebServiceAndWait();
+	
 	assertEquals(
 		MAPPER.readTree("{\"id\":\"sd1 p\", \"newNode\":\"very new stuff\", \"a1\":{\"a2\":\"even newer stuff\"}}"),
 		MAPPER.readTree(ps.getRootNode().navigate("second[0].k1").toJsonString()));
@@ -207,8 +211,18 @@ public class Neo4JJsonPersistenceServiceTest extends Neo4JTestSupport {
 	aNode.write("[2,3,4]");
 	String writeValue = "[2,3,4,5]";
 	aNode.write(writeValue);
-	assertEquals(MAPPER.readTree(writeValue), MAPPER.readTree(aNode.toJsonString()));
+	assertEquals(MAPPER.readTree(writeValue), MAPPER.readTree(ps.getRootNode().navigate("second").toJsonString()));
+    }
+    
+    @Test
+    public void testUpdateToSameNodeAfterWrite() throws IOException, JsonPersistenceException, IllegalJsonException {
+	Neo4JJsonPersistenceService ps = createNewService();
 
+	ps.getRootNode().write(JSON_TEXT);
+	GraphNode aNode = ps.getRootNode().navigate("second");
+	String writeValue = "[2,3,4,5]";
+	aNode.write(writeValue);
+	assertEquals(MAPPER.readTree(writeValue), MAPPER.readTree(aNode.toJsonString()));
     }
 
 }

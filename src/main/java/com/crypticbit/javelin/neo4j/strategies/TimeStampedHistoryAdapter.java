@@ -59,7 +59,7 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 		    new ReplaceNodeUpdateOperation(read(relationshipToParent).getEndNode(), removeEverything,
 			    relationshipToParent).add(operation).add(getTimestampOperation()));
 	    tx.success();
-	    return relationshipToParent;
+	    return result;
 	} finally {
 	    tx.finish();
 	}

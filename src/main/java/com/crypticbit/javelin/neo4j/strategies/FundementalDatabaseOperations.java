@@ -72,8 +72,11 @@ public interface FundementalDatabaseOperations {
 		@Override
 		public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, FundementalDatabaseOperations dal) {
 		    Relationship r = UpdateOperation.this.updateElement(relationshipToGraphNodeToUpdate, dal);
-		    // FIXME should second resule product of first?
-		    return newOperation.updateElement(relationshipToGraphNodeToUpdate, dal);
+		     if(r != relationshipToGraphNodeToUpdate)
+		    	System.err.println(UpdateOperation.this.getClass()+" has changed the relationship for compound operation");
+		    // FIXME should second resulted product of first? - in experiment
+		    newOperation.updateElement(r, dal);
+		    return relationshipToGraphNodeToUpdate;
 		}
 
 	    };

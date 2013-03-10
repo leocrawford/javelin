@@ -36,6 +36,28 @@ import com.jayway.jsonpath.internal.PathToken;
  */
 public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements Neo4JGraphNode {
 
+    public final class CreateNewMapElementUpdateOperation extends UpdateOperation {
+	private final String key;
+	private final UpdateOperation createOperation;
+	Relationship newR;
+	
+	public CreateNewMapElementUpdateOperation(String key, UpdateOperation createOperation) {
+	    this.key = key;
+	    this.createOperation = createOperation;
+	}
+
+	@Override
+	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
+		FundementalDatabaseOperations dal) {
+	    
+	    newR = getStrategy().createNewNode(
+		    relationshipToGraphNodeToUpdate.getEndNode(), RelationshipTypes.MAP,
+		    createOperation);
+	    newR.setProperty(Parameters.Relationship.KEY.name(), key);
+	    return newR;
+	}
+    }
+
     private Node node;
     private Set<Map.Entry<String, Neo4JGraphNode>> children;
     private GraphNodeImpl virtualSuperclass;
@@ -159,19 +181,10 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
 		@Override
 		public Relationship create(final UpdateOperation createOperation) {
 		    // this is a create, and an update (on the parent)
-		    return getStrategy().update(virtualSuperclass.getIncomingRelationship(), false,
-			    new UpdateOperation() {
-				@Override
-				public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-					FundementalDatabaseOperations dal) {
-				    
-				    Relationship newR = getStrategy().createNewNode(
-					    relationshipToGraphNodeToUpdate.getEndNode(), RelationshipTypes.MAP,
-					    createOperation);
-				    newR.setProperty(Parameters.Relationship.KEY.name(), key);
-				    return newR;
-				}
-			    });
+		    CreateNewMapElementUpdateOperation operation = new CreateNewMapElementUpdateOperation(key, createOperation);
+		    getStrategy().update(virtualSuperclass.getIncomingRelationship(), false,
+			    operation);
+		    return operation.newR;
 		}
 	    }, getStrategy());
 	}

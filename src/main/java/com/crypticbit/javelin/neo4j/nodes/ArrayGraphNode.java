@@ -37,6 +37,25 @@ import com.jayway.jsonpath.internal.PathToken;
  */
 public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4JGraphNode {
 
+    public final class CreateNewArrayElementUpdateOperation extends UpdateOperation {
+	private final UpdateOperation createOperation;
+	Relationship newR;
+
+	public CreateNewArrayElementUpdateOperation(UpdateOperation createOperation) {
+	    this.createOperation = createOperation;
+	}
+
+	@Override
+	public Relationship updateElement(Relationship relationship, FundementalDatabaseOperations dal) {
+	int nextUnusedIndex = findNextUnusedIndex(relationship.getEndNode());
+	newR = getStrategy().createNewNode(relationship.getEndNode(),
+		RelationshipTypes.ARRAY, createOperation);
+	newR.setProperty(Parameters.Relationship.INDEX.name(),
+		nextUnusedIndex);
+	return relationship;
+	}
+    }
+
     private Node node;
     private Neo4JGraphNode children[];
     private GraphNodeImpl virtualSuperclass;
@@ -154,18 +173,10 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
 	return new EmptyGraphNode(new PotentialRelationship() {
 
 	    @Override
-	    public Relationship create(final UpdateOperation createOperation) {
-		return getStrategy().update(virtualSuperclass.getIncomingRelationship(), false, new UpdateOperation() {
-		    @Override
-		    public Relationship updateElement(Relationship relationship, FundementalDatabaseOperations dal) {
-			int nextUnusedIndex = findNextUnusedIndex(relationship.getEndNode());
-			Relationship newR = getStrategy().createNewNode(relationship.getEndNode(),
-				RelationshipTypes.ARRAY, createOperation);
-			newR.setProperty(Parameters.Relationship.INDEX.name(),
-				nextUnusedIndex);
-			return newR;
-		    }
-		});
+	    public Relationship create(final UpdateOperation createOperation) {	
+		CreateNewArrayElementUpdateOperation operation = new CreateNewArrayElementUpdateOperation(createOperation);
+		getStrategy().update(virtualSuperclass.getIncomingRelationship(), false, operation);
+		return operation.newR;
 	    }
 	}, getStrategy());
 

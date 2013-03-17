@@ -81,20 +81,25 @@ public class GraphNodeImpl implements Neo4JGraphNode {
 	throw new UnsupportedOperationException("getDatabaseNode is to be provided locally");
     }
 
-    private List<History> history = null;
-
     private static final String DATE_FORMAT = "H:mm:ss.SSS yy-MM-dd";
     private static SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 
     @Override
     public List<History> getHistory() {
-	if (history == null) {
-	    history = new LinkedList<History>();
+	List<History> history = new LinkedList<History>();
+
+	System.out.println("History for: "+graphNode.getDatabaseNode().getId());
+	
+	for (Relationship r : graphNode.getDatabaseNode().getRelationships(RelationshipTypes.VERSION,
+		Direction.OUTGOING)) {
+
+	    Relationship readRelationship = getStrategy().read(r);
+	    final Neo4JGraphNode endNode = NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(), r, getStrategy());
 	    history.add(new History() {
 
 		@Override
 		public long getTimestamp() {
-		    return graphNode.getTimestamp();
+		    return endNode.getTimestamp();
 		}
 
 		public String toString() {
@@ -103,17 +108,10 @@ public class GraphNodeImpl implements Neo4JGraphNode {
 
 		@Override
 		public GraphNode getVersion() {
-		    return graphNode;
+		    return endNode;
 		}
 	    });
-	    for (Relationship r : graphNode.getDatabaseNode().getRelationships(RelationshipTypes.VERSION,
-		    Direction.OUTGOING)) {
 
-		Relationship readRelationship = getStrategy().read(r);
-		final Neo4JGraphNode endNode = NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(),
-			r, getStrategy());
-		history.addAll(endNode.getHistory());
-	    }
 	}
 	return history;
 
@@ -184,7 +182,7 @@ public class GraphNodeImpl implements Neo4JGraphNode {
 	    }
 	};
     }
-    
+
     @Override
     public boolean exists() {
 	return true;

@@ -54,7 +54,7 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
 		    relationshipToGraphNodeToUpdate.getEndNode(), RelationshipTypes.MAP,
 		    createOperation);
 	    newR.setProperty(Parameters.Relationship.KEY.name(), key);
-	    return newR;
+	    return relationshipToGraphNodeToUpdate;
 	}
     }
 
@@ -89,6 +89,7 @@ public class MapGraphNode extends AbstractMap<String, Neo4JGraphNode> implements
      * this class. Typically called lazily
      */
     public void updateNodes() {
+	System.out.println(node.getId());
 	if (children == null) {
 	    children = new HashSet<Map.Entry<String, Neo4JGraphNode>>();
 

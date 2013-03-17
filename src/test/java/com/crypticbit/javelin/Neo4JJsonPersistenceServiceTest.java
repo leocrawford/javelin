@@ -171,6 +171,8 @@ public class Neo4JJsonPersistenceServiceTest extends Neo4JTestSupport {
 	rootNode.write(JSON_TEXT);
 	rootNode.navigate("second").add().write("\"new value 1\"");
 
+//	ps.startWebServiceAndWait();
+	
 	assertEquals(2, ps.getRootNode().navigate("second").getHistory().size());
 
 	ps.getRootNode().navigate("second").add().write("\"new value 2\"");

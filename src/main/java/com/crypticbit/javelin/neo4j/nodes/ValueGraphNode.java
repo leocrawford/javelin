@@ -10,7 +10,7 @@ import com.crypticbit.javelin.History;
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.MergeableBlock;
-import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
+import com.crypticbit.javelin.neo4j.Neo4JJsonType;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.VectorClock;
 import com.crypticbit.javelin.neo4j.types.Parameters;
@@ -24,16 +24,16 @@ import com.fasterxml.jackson.databind.node.BaseJsonNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
 import com.jayway.jsonpath.internal.PathToken;
 
-public class ValueGraphNode extends ValueNode implements Neo4JGraphNode {
+public class ValueGraphNode extends ValueNode implements Neo4JJsonType {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private JsonNode delegate;
     private Node node;
-    private GraphNodeImpl virtualSuperclass;
+    private ComplexNode holder;
 
-    public ValueGraphNode(Node graphNode, Relationship incomingRelationship, FundementalDatabaseOperations fdo) {
+    public ValueGraphNode(Node graphNode, ComplexNode complexNode) {
 	this.node = graphNode;
-	virtualSuperclass = new GraphNodeImpl(this, incomingRelationship, fdo);
+	holder = complexNode;
 	try {
 	    if (graphNode.hasProperty(Parameters.Node.VALUE.name())) {
 		this.delegate = OBJECT_MAPPER.readTree((String) graphNode.getProperty(Parameters.Node.VALUE
@@ -66,10 +66,6 @@ public class ValueGraphNode extends ValueNode implements Neo4JGraphNode {
 	return delegate.equals(o);
     }
 
-    @Override
-    public Neo4JGraphNode navigate(String path) {
-	throw new Error("Not possible to navigate from leaf object");
-    }
 
     @Override
     public JsonNode toJsonNode() {
@@ -77,19 +73,11 @@ public class ValueGraphNode extends ValueNode implements Neo4JGraphNode {
     }
 
     @Override
-    public String toJsonString() {
-	return delegate.toString();
-    }
-
-    @Override
     public String toString() {
 	return delegate.toString();
     }
 
-    @Override
-    public Node getDatabaseNode() {
-	return node;
-    }
+
 
     @Override
     public void serialize(JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
@@ -97,64 +85,23 @@ public class ValueGraphNode extends ValueNode implements Neo4JGraphNode {
 
     }
 
-    // delegate methods
 
-    @Override
-    public void write(String values) throws IllegalJsonException, JsonPersistenceException {
-	virtualSuperclass.write(values);
-    }
-
-    @Override
-    public List<History> getHistory() {
-	return virtualSuperclass.getHistory();
-    }
-
-    @Override
-    public long getTimestamp() {
-	return virtualSuperclass.getTimestamp();
-    }
-
-    @Override
-    public Neo4JGraphNode put(String key) throws JsonPersistenceException {
-	throw new JsonPersistenceException("It's not possible to add data to a child node. ");
-    }
-
-    @Override
-    public EmptyGraphNode add() throws JsonPersistenceException {
-	throw new JsonPersistenceException("It's not possible to add data to a child node. ");
-    }
-
-    @Override
-    public FundementalDatabaseOperations getStrategy() {
-	return virtualSuperclass.getStrategy();
-    }
     
-    public Neo4JGraphNode navigate(PathToken token) throws IllegalJsonException {
+
+    @Override
+    public ComplexNode put(String key) throws JsonPersistenceException {
+	throw new JsonPersistenceException("It's not possible to add data to a child node. ");
+    }
+
+    @Override
+    public ComplexNode add() throws JsonPersistenceException {
+	throw new JsonPersistenceException("It's not possible to add data to a child node. ");
+    }
+
+    
+    
+    public ComplexNode navigate(PathToken token) throws IllegalJsonException {
    	    throw new IllegalJsonException("It's not possible to navigate within a child node: " + token.getFragment());
        }
-    
-    @Override
-    public Relationship getIncomingRelationship() {
-	return virtualSuperclass.getIncomingRelationship();
-    }
 
-    @Override
-    public VectorClock getVectorClock() {
-	return virtualSuperclass.getVectorClock();
-    }
-    
-    @Override
-    public void merge(MergeableBlock block) throws JsonProcessingException, IOException {
-	virtualSuperclass.merge(block);
-    }
-    
-    @Override
-    public MergeableBlock getExtract() {
-	return virtualSuperclass.getExtract();
-    }
-    
-    @Override
-    public boolean exists() {
-	return true;
-    }
 }

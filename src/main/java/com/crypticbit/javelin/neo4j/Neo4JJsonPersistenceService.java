@@ -11,15 +11,15 @@ import org.neo4j.kernel.AbstractGraphDatabase;
 import org.neo4j.server.WrappingNeoServerBootstrapper;
 
 import com.crypticbit.javelin.JsonPersistenceService;
-import com.crypticbit.javelin.neo4j.nodes.EmptyGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.ComplexNode;
 import com.crypticbit.javelin.neo4j.strategies.CompoundFdoAdapter;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
 import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
+import com.crypticbit.javelin.neo4j.strategies.RelationshipHolder;
 import com.crypticbit.javelin.neo4j.strategies.SimpleFdoAdapter;
 import com.crypticbit.javelin.neo4j.strategies.TimeStampedHistoryAdapter;
 import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter;
-import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 
 /**
@@ -121,22 +121,21 @@ public class Neo4JJsonPersistenceService implements JsonPersistenceService {
 
     }
 
-    public Neo4JGraphNode getRootNode() {
+    public ComplexNode getRootNode() {
 	final FundementalDatabaseOperations fdo = createDatabase();
 	if (getDatabaseNode().hasRelationship(RelationshipTypes.MAP, Direction.OUTGOING)) {
 	    Relationship r = getDatabaseNode().getRelationships(RelationshipTypes.MAP, Direction.OUTGOING).iterator()
 		    .next();
-	    Relationship readRelationship = fdo.read(r);
-	    return NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(), r, fdo);
+	    return new ComplexNode(new RelationshipHolder(r), fdo);
 	} else {
 
-	    return new EmptyGraphNode(new PotentialRelationship() {
+	    return new ComplexNode(new RelationshipHolder(new PotentialRelationship() {
 		@Override
 		public Relationship create(UpdateOperation createOperation) {
 		    Relationship newR =  fdo.createNewNode(getDatabaseNode(), RelationshipTypes.MAP, createOperation);
 		    return newR;
 		}
-	    }, fdo);
+	    }), fdo);
 	}
     }
 

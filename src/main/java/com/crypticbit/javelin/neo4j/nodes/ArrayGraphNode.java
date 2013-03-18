@@ -1,6 +1,5 @@
 package com.crypticbit.javelin.neo4j.nodes;
 
-import java.io.IOException;
 import java.util.AbstractList;
 import java.util.List;
 import java.util.Map;
@@ -10,20 +9,15 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
-import com.crypticbit.javelin.History;
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
-import com.crypticbit.javelin.MergeableBlock;
-import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
+import com.crypticbit.javelin.neo4j.Neo4JJsonType;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.NullUpdateOperation;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
-import com.crypticbit.javelin.neo4j.strategies.VectorClock;
-import com.crypticbit.javelin.neo4j.types.NodeTypes;
+import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
+import com.crypticbit.javelin.neo4j.strategies.RelationshipHolder;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.internal.PathToken;
@@ -35,7 +29,7 @@ import com.jayway.jsonpath.internal.PathToken;
  * @author leo
  * 
  */
-public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4JGraphNode {
+public class ArrayGraphNode extends AbstractList<ComplexNode> implements Neo4JJsonType {
 
     public final class CreateNewArrayElementUpdateOperation extends UpdateOperation {
 	private final UpdateOperation createOperation;
@@ -47,31 +41,34 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
 
 	@Override
 	public Relationship updateElement(Relationship relationship, FundementalDatabaseOperations dal) {
-	int nextUnusedIndex = findNextUnusedIndex(relationship.getEndNode());
-	newR = getStrategy().createNewNode(relationship.getEndNode(),
-		RelationshipTypes.ARRAY, createOperation);
-	newR.setProperty(Parameters.Relationship.INDEX.name(),
-		nextUnusedIndex);
-	return relationship;
+	    int nextUnusedIndex = findNextUnusedIndex(relationship.getEndNode());
+	    newR = getStrategy().createNewNode(relationship.getEndNode(), RelationshipTypes.ARRAY, createOperation);
+	    newR.setProperty(Parameters.Relationship.INDEX.name(), nextUnusedIndex);
+	    return relationship;
 	}
+
+    }
+
+    private FundementalDatabaseOperations getStrategy() {
+	return holder.getStrategy();
     }
 
     private Node node;
-    private Neo4JGraphNode children[];
-    private GraphNodeImpl virtualSuperclass;
+    private ComplexNode children[];
+    private ComplexNode holder;
 
     /**
      * Create a node that represents this graph node
      * 
      * @param incomingRelationship
      */
-    public ArrayGraphNode(Node node, Relationship incomingRelationship, FundementalDatabaseOperations fdo) {
+    public ArrayGraphNode(Node node, ComplexNode complexNode) {
 	this.node = node;
-	this.virtualSuperclass = new GraphNodeImpl(this, incomingRelationship, fdo);
+	this.holder = complexNode;
     }
 
     @Override
-    public Neo4JGraphNode get(int index) {
+    public ComplexNode get(int index) {
 	updateNodes();
 	if (index == children.length)
 	    return add();
@@ -98,13 +95,12 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
      */
     public void updateNodes() {
 	if (children == null) {
-	    Map<Integer, Neo4JGraphNode> map = new TreeMap<Integer, Neo4JGraphNode>();
+	    Map<Integer, ComplexNode> map = new TreeMap<Integer, ComplexNode>();
 	    for (Relationship r : node.getRelationships(RelationshipTypes.ARRAY, Direction.OUTGOING)) {
-		Relationship readRelationship = getStrategy().read(r);
-		map.put((Integer) r.getProperty(Parameters.Relationship.INDEX.name()),
-			NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(), r, getStrategy()));
+		map.put((Integer) r.getProperty(Parameters.Relationship.INDEX.name()), new ComplexNode(
+			new RelationshipHolder(r), getStrategy()));
 	    }
-	    children = map.values().toArray(new Neo4JGraphNode[map.size()]);
+	    children = map.values().toArray(new ComplexNode[map.size()]);
 	}
     }
 
@@ -120,7 +116,7 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
 
 	    @Override
 	    public JsonNode get(int index) {
-		return ArrayGraphNode.this.get(index).toJsonNode();
+		return ArrayGraphNode.this.get(index).getJsonNode().toJsonNode();
 	    }
 
 	    @Override
@@ -130,55 +126,28 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
 	};
     }
 
-    @Override
     public Node getDatabaseNode() {
 	return node;
     }
 
-    // delegate methods
-
     @Override
-    public Neo4JGraphNode navigate(String path) throws IllegalJsonException {
-	return virtualSuperclass.navigate(path);
-    }
-
-    @Override
-    public String toJsonString() {
-	return virtualSuperclass.toJsonString();
-    }
-
-    @Override
-    public void write(String values) throws IllegalJsonException, JsonPersistenceException {
-	virtualSuperclass.write(values);
-    }
-
-    @Override
-    public List<History> getHistory() {
-	return virtualSuperclass.getHistory();
-    }
-
-    @Override
-    public long getTimestamp() {
-	return virtualSuperclass.getTimestamp();
-    }
-
-    @Override
-    public Neo4JGraphNode put(String key) throws JsonPersistenceException {
+    public ComplexNode put(String key) throws JsonPersistenceException {
 	throw new JsonPersistenceException("It's not possible to add a map element to an array node");
     }
 
     @Override
-    public EmptyGraphNode add() {
+    public ComplexNode add() {
 
-	return new EmptyGraphNode(new PotentialRelationship() {
+	return new ComplexNode(new RelationshipHolder(new PotentialRelationship() {
 
 	    @Override
-	    public Relationship create(final UpdateOperation createOperation) {	
-		CreateNewArrayElementUpdateOperation operation = new CreateNewArrayElementUpdateOperation(createOperation);
-		getStrategy().update(virtualSuperclass.getIncomingRelationship(), false, operation);
+	    public Relationship create(final UpdateOperation createOperation) {
+		CreateNewArrayElementUpdateOperation operation = new CreateNewArrayElementUpdateOperation(
+			createOperation);
+		getStrategy().update(holder.getIncomingRelationship(), false, operation);
 		return operation.newR;
 	    }
-	}, getStrategy());
+	}), getStrategy());
 
     }
 
@@ -215,40 +184,10 @@ public class ArrayGraphNode extends AbstractList<Neo4JGraphNode> implements Neo4
     }
 
     @Override
-    public FundementalDatabaseOperations getStrategy() {
-	return virtualSuperclass.getStrategy();
-    }
-
-    @Override
-    public Neo4JGraphNode navigate(PathToken token) throws IllegalJsonException {
+    public ComplexNode navigate(PathToken token) throws IllegalJsonException {
 	if (!token.isArrayIndexToken())
 	    throw new IllegalJsonException("Expecting an array element in json path expression: " + token.getFragment());
 	return get(token.getArrayIndex());
-    }
-
-    @Override
-    public Relationship getIncomingRelationship() {
-	return virtualSuperclass.getIncomingRelationship();
-    }
-
-    @Override
-    public VectorClock getVectorClock() {
-	return virtualSuperclass.getVectorClock();
-    }
-
-    @Override
-    public void merge(MergeableBlock block) throws JsonProcessingException, IOException {
-	virtualSuperclass.merge(block);
-    }
-
-    @Override
-    public MergeableBlock getExtract() {
-	return virtualSuperclass.getExtract();
-    }
-
-    @Override
-    public boolean exists() {
-	return true;
     }
 
 }

@@ -1,11 +1,11 @@
-package com.crypticbit.javelin.neo4j.nodes;
+package com.crypticbit.javelin.neo4j.nodes.json;
 
 import java.io.IOException;
 
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
-import com.crypticbit.javelin.neo4j.Neo4JJsonType;
+import com.crypticbit.javelin.neo4j.nodes.ComplexNode;
 import com.crypticbit.javelin.neo4j.strategies.operations.JsonWriteUpdateOperation;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.fasterxml.jackson.core.JsonProcessingException;

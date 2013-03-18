@@ -12,6 +12,7 @@ import com.crypticbit.javelin.History;
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.MergeableBlock;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.json.JsonGraphNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
 import com.crypticbit.javelin.neo4j.strategies.RelationshipHolder;

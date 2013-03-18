@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.neo4j.nodes;
+package com.crypticbit.javelin.neo4j.nodes.json;
 
 import java.io.IOException;
 import java.util.List;
@@ -10,7 +10,7 @@ import com.crypticbit.javelin.History;
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.MergeableBlock;
-import com.crypticbit.javelin.neo4j.Neo4JJsonType;
+import com.crypticbit.javelin.neo4j.nodes.ComplexNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.VectorClock;
 import com.crypticbit.javelin.neo4j.types.Parameters;

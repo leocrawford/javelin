@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.neo4j;
+package com.crypticbit.javelin.neo4j.nodes.json;
 
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;

@@ -5,8 +5,8 @@ import java.util.Iterator;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
-import com.crypticbit.javelin.neo4j.nodes.ArrayGraphNode;
-import com.crypticbit.javelin.neo4j.nodes.MapGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.json.ArrayGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.json.MapGraphNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;

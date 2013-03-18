@@ -2,11 +2,11 @@ package com.crypticbit.javelin.neo4j.types;
 
 import org.neo4j.graphdb.Node;
 
-import com.crypticbit.javelin.neo4j.Neo4JJsonType;
-import com.crypticbit.javelin.neo4j.nodes.ArrayGraphNode;
 import com.crypticbit.javelin.neo4j.nodes.ComplexNode;
-import com.crypticbit.javelin.neo4j.nodes.MapGraphNode;
-import com.crypticbit.javelin.neo4j.nodes.ValueGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.json.ArrayGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.json.MapGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.json.Neo4JJsonType;
+import com.crypticbit.javelin.neo4j.nodes.json.ValueGraphNode;
 
 public enum NodeTypes {
     ARRAY() {

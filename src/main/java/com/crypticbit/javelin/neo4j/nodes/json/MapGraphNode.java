@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.neo4j.nodes;
+package com.crypticbit.javelin.neo4j.nodes.json;
 
 import java.util.AbstractMap;
 import java.util.AbstractSet;
@@ -13,7 +13,7 @@ import org.neo4j.graphdb.Relationship;
 
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
-import com.crypticbit.javelin.neo4j.Neo4JJsonType;
+import com.crypticbit.javelin.neo4j.nodes.ComplexNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
 import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;

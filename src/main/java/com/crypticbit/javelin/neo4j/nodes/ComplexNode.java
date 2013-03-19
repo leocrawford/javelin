@@ -10,6 +10,7 @@ import org.neo4j.graphdb.Relationship;
 
 import com.crypticbit.javelin.History;
 import com.crypticbit.javelin.IllegalJsonException;
+import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.MergeableBlock;
 import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
 import com.crypticbit.javelin.neo4j.nodes.json.JsonGraphNode;
@@ -20,12 +21,12 @@ import com.crypticbit.javelin.neo4j.strategies.VectorClock;
 import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter;
 import com.crypticbit.javelin.neo4j.strategies.operations.JsonWriteUpdateOperation;
 import com.crypticbit.javelin.neo4j.strategies.operations.WriteVectorClock;
-import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.internal.PathToken;
 
-public class ComplexNode {
+public class ComplexNode implements Neo4JGraphNode {
 
     private RelationshipHolder incomingRelationship;
     private FundementalDatabaseOperations fdo;
@@ -105,10 +106,6 @@ public class ComplexNode {
 return null;
     }
 
-    private Neo4JGraphNode getGraphNode() {
-	// TODO Auto-generated method stub
-	throw new Error();
-    }
 
     public long getTimestamp() {
 	return (long) getIncomingRelationship().getProperty("timestamp");
@@ -150,6 +147,37 @@ return null;
 //		return json + " (" + vc + ")";
 //	    }
 //	};
+    }
+
+    @Override
+    public ComplexNode put(String key) throws IllegalJsonException, JsonPersistenceException {
+	return getJsonNode().put(key);
+    }
+
+    @Override
+    public ComplexNode add() throws IllegalJsonException, JsonPersistenceException {
+	return getJsonNode().add();
+    }
+
+    @Override
+    public JsonNode toJsonNode() {
+	return getJsonNode().toJsonNode();
+    }
+
+    @Override
+    public ComplexNode navigate(String jsonPath) throws IllegalJsonException {
+	return getJsonNode().navigate(jsonPath);
+    }
+
+    @Override
+    public String toJsonString() {
+	return getJsonNode().toJsonString();
+    }
+
+    @Override
+    public void write(String json) throws IllegalJsonException, JsonPersistenceException {
+	getJsonNode().write(json);
+	
     }
 
     

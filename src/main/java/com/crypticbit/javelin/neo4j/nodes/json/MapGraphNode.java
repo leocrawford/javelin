@@ -14,10 +14,10 @@ import org.neo4j.graphdb.Relationship;
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.nodes.ComplexNode;
+import com.crypticbit.javelin.neo4j.nodes.PotentialRelationship;
+import com.crypticbit.javelin.neo4j.nodes.RelationshipHolder;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
-import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
-import com.crypticbit.javelin.neo4j.strategies.RelationshipHolder;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,29 +28,8 @@ import com.jayway.jsonpath.internal.PathToken;
  * Wraps a database node as a node that holds Map's
  * 
  */
-public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Neo4JJsonType {
+public class MapGraphNode extends AbstractMap<String, ComplexNode> implements JsonGraphNode {
 
-    public final class CreateNewMapElementUpdateOperation extends UpdateOperation {
-	private final String key;
-	private final UpdateOperation createOperation;
-	Relationship newR;
-	
-	public CreateNewMapElementUpdateOperation(String key, UpdateOperation createOperation) {
-	    this.key = key;
-	    this.createOperation = createOperation;
-	}
-
-	@Override
-	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		FundementalDatabaseOperations dal) {
-	    
-	    newR = getStrategy().createNewNode(
-		    relationshipToGraphNodeToUpdate.getEndNode(), RelationshipTypes.MAP,
-		    createOperation);
-	    newR.setProperty(Parameters.Relationship.KEY.name(), key);
-	    return relationshipToGraphNodeToUpdate;
-	}
-    }
 
     private Node node;
     private Set<Map.Entry<String, ComplexNode>> children;
@@ -192,6 +171,35 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Ne
 	if (token.isArrayIndexToken())
 	    throw new IllegalJsonException("Expecting a map element in json path expression: " + token.getFragment());
 	return put(token.getFragment());
+    }
+    
+
+    @Override
+    public String toJsonString() {
+	return toJsonNode().toString();
+    }
+    
+
+    public static final class CreateNewMapElementUpdateOperation extends UpdateOperation {
+	private final String key;
+	private final UpdateOperation createOperation;
+	Relationship newR;
+	
+	public CreateNewMapElementUpdateOperation(String key, UpdateOperation createOperation) {
+	    this.key = key;
+	    this.createOperation = createOperation;
+	}
+
+	@Override
+	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
+		FundementalDatabaseOperations dal) {
+	    
+	    newR = dal.createNewNode(
+		    relationshipToGraphNodeToUpdate.getEndNode(), RelationshipTypes.MAP,
+		    createOperation);
+	    newR.setProperty(Parameters.Relationship.KEY.name(), key);
+	    return relationshipToGraphNodeToUpdate;
+	}
     }
 
 

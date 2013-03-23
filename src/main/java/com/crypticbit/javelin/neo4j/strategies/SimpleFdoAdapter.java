@@ -7,6 +7,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
+import com.crypticbit.javelin.neo4j.nodes.json.JsonNodeFactory;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 
@@ -67,9 +68,10 @@ public class SimpleFdoAdapter implements FundementalDatabaseOperations {
     }
 
     @Override
-    public Relationship read(Relationship r) {
+    public Relationship read(Relationship r, Class<?> desiredInterface) {
 	return r;
     }
+
 
     @Override
     public void delete(Relationship relationshipToNodeToDelete) {

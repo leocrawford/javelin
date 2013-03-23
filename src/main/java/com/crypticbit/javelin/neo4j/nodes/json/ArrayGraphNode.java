@@ -12,10 +12,10 @@ import org.neo4j.graphdb.Relationship;
 import com.crypticbit.javelin.IllegalJsonException;
 import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.nodes.ComplexNode;
+import com.crypticbit.javelin.neo4j.nodes.PotentialRelationship;
+import com.crypticbit.javelin.neo4j.nodes.RelationshipHolder;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
-import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
-import com.crypticbit.javelin.neo4j.strategies.RelationshipHolder;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,29 +29,7 @@ import com.jayway.jsonpath.internal.PathToken;
  * @author leo
  * 
  */
-public class ArrayGraphNode extends AbstractList<ComplexNode> implements Neo4JJsonType {
-
-    public final class CreateNewArrayElementUpdateOperation extends UpdateOperation {
-	private final UpdateOperation createOperation;
-	Relationship newR;
-
-	public CreateNewArrayElementUpdateOperation(UpdateOperation createOperation) {
-	    this.createOperation = createOperation;
-	}
-
-	@Override
-	public Relationship updateElement(Relationship relationship, FundementalDatabaseOperations dal) {
-	    int nextUnusedIndex = findNextUnusedIndex(relationship.getEndNode());
-	    newR = getStrategy().createNewNode(relationship.getEndNode(), RelationshipTypes.ARRAY, createOperation);
-	    newR.setProperty(Parameters.Relationship.INDEX.name(), nextUnusedIndex);
-	    return relationship;
-	}
-
-    }
-
-    private FundementalDatabaseOperations getStrategy() {
-	return holder.getStrategy();
-    }
+public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGraphNode {
 
     private Node node;
     private ComplexNode children[];
@@ -137,27 +115,9 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements Neo4JJs
 
     @Override
     public ComplexNode add() {
-
-	return new ComplexNode(new RelationshipHolder(new PotentialRelationship() {
-
-	    @Override
-	    public Relationship create(final UpdateOperation createOperation) {
-		CreateNewArrayElementUpdateOperation operation = new CreateNewArrayElementUpdateOperation(
-			createOperation);
-		getStrategy().update(holder.getIncomingRelationship(), false, operation);
-		return operation.newR;
-	    }
-	}), getStrategy());
-
+	return new ComplexNode(new RelationshipHolder(new AddElementToArrayPotentialRelationship()), getStrategy());
     }
 
-    // FIXME - should be package protected
-    // FIXME - is this in a transaction?
-    public static Relationship addElementToArray(FundementalDatabaseOperations dal, Node node, int index, Node newNode) {
-	Relationship r = node.createRelationshipTo(newNode, RelationshipTypes.ARRAY);
-	r.setProperty(Parameters.Relationship.INDEX.name(), index);
-	return r;
-    }
 
     public void removeElementFromArray(final Relationship relationshipToParent, final int index) {
 	// this is a delete (on node) and update (on parent)
@@ -188,6 +148,44 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements Neo4JJs
 	if (!token.isArrayIndexToken())
 	    throw new IllegalJsonException("Expecting an array element in json path expression: " + token.getFragment());
 	return get(token.getArrayIndex());
+    }
+
+    private FundementalDatabaseOperations getStrategy() {
+	return holder.getStrategy();
+    }
+
+    public final class AddElementToArrayPotentialRelationship implements PotentialRelationship {
+	@Override
+	public Relationship create(final UpdateOperation createOperation) {
+	CreateNewArrayElementUpdateOperation operation = new CreateNewArrayElementUpdateOperation( findNextUnusedIndex(node),
+		createOperation);
+	holder.getStrategy().update(holder.getIncomingRelationship(), false, operation);
+	return operation.newR;
+	}
+    }
+
+    final static class CreateNewArrayElementUpdateOperation extends UpdateOperation {
+	private final UpdateOperation createOperation;
+	private Relationship newR;
+	private int index;
+	
+	public CreateNewArrayElementUpdateOperation(int index, UpdateOperation createOperation) {
+	    this.createOperation = createOperation;
+	    this.index = index;
+	}
+
+	@Override
+	public Relationship updateElement(Relationship relationship, FundementalDatabaseOperations dal) {
+	    newR = dal.createNewNode(relationship.getEndNode(), RelationshipTypes.ARRAY, createOperation);
+	    newR.setProperty(Parameters.Relationship.INDEX.name(), index);
+	    return relationship;
+	}
+
+    }
+
+    @Override
+    public String toJsonString() {
+	return toJsonNode().toString();
     }
 
 }

@@ -4,6 +4,8 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 
+import com.crypticbit.javelin.neo4j.nodes.json.ComplexGraphNode;
+
 /**
  * The CRUD Operations a database needs to implement - and which can be
  * intercepted, to change behaviour
@@ -45,7 +47,7 @@ public interface FundementalDatabaseOperations {
      * @param relationshipToNode
      */
 
-    public Relationship read(Relationship relationshipToNode);
+    public Relationship read(Relationship relationshipToNode, Class<?> desiredInterface);
 
     /**
      * Delete the relationship and the node at the end of it

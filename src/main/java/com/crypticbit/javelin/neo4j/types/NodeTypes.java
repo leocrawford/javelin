@@ -4,31 +4,32 @@ import org.neo4j.graphdb.Node;
 
 import com.crypticbit.javelin.neo4j.nodes.ComplexNode;
 import com.crypticbit.javelin.neo4j.nodes.json.ArrayGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.json.JsonGraphNode;
 import com.crypticbit.javelin.neo4j.nodes.json.MapGraphNode;
-import com.crypticbit.javelin.neo4j.nodes.json.Neo4JJsonType;
 import com.crypticbit.javelin.neo4j.nodes.json.ValueGraphNode;
+import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.NullUpdateOperation;
 
 public enum NodeTypes {
     ARRAY() {
 	@Override
-	Neo4JJsonType _wrapAsGraphNode(Node graphNode, ComplexNode complexNode) {
+	JsonGraphNode _wrapAsGraphNode(Node graphNode, ComplexNode complexNode) {
 	    return new ArrayGraphNode(graphNode, complexNode);
 	}
 
     },
     MAP() {
 	@Override
-	Neo4JJsonType _wrapAsGraphNode(Node graphNode, ComplexNode complexNode) {
+	JsonGraphNode _wrapAsGraphNode(Node graphNode, ComplexNode complexNode) {
 	    return new MapGraphNode(graphNode, complexNode);
 	}
     },
     VALUE() {
 	@Override
-	Neo4JJsonType _wrapAsGraphNode(Node graphNode, ComplexNode complexNode) {
+	JsonGraphNode _wrapAsGraphNode(Node graphNode, ComplexNode complexNode) {
 	    return new ValueGraphNode(graphNode, complexNode);
 	}
     };
-    public static Neo4JJsonType wrapAsGraphNode(Node graphNode, ComplexNode complexNode) {
+    public static JsonGraphNode wrapAsGraphNode(Node graphNode, ComplexNode complexNode) {
 	if (graphNode.hasProperty(Parameters.Node.TYPE.name()))
 	    return valueOf((String) graphNode.getProperty(Parameters.Node.TYPE.name()))._wrapAsGraphNode(graphNode,complexNode);
 	else
@@ -36,5 +37,6 @@ public enum NodeTypes {
 	// FIXME throw exceptiom
     }
 
-    abstract Neo4JJsonType _wrapAsGraphNode(Node graphNode, ComplexNode complexNode);
+
+    abstract JsonGraphNode _wrapAsGraphNode(Node graphNode, ComplexNode complexNode);
 }

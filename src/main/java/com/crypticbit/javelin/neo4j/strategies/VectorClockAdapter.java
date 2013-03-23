@@ -60,14 +60,20 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
     public Relationship update(Relationship relationshipToParent, boolean removeEverything, UpdateOperation operation) {
 	return super.update(relationshipToParent, removeEverything, operation.add(new IncrementVectorClock()));
     }
+    
 
     @Override
-    public Relationship read(Relationship relationshipToNode) {
+    public boolean doesExposeInterface(Class<?> exposesInterface) {
+	return false;
+    }
+
+    @Override
+    public Relationship readNext(Relationship relationshipToNode,  Class<?> desiredInterface) {
 	Node node = relationshipToNode.getEndNode();
 
 	// if no incoming nodes, do nothing
 	if (!node.hasRelationship(Direction.OUTGOING, RelationshipTypes.INCOMING_VERSION))
-	    return super.read(relationshipToNode);
+	    return getNextAdapter().read(relationshipToNode, desiredInterface);
 
 	Map<VectorClock, Relationship> candidates = new HashMap<>();
 	// copy the candidate relationships into the map
@@ -131,8 +137,9 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 	else
 	    return super.update(relationshipToNode, true, new WriteVectorClock(acc));
 	// return selected.getValue();
-
     }
+
+
 
     public void addIncoming(final Relationship relationshipToNode, UpdateOperation operation) {
 	// FIXME - do we update the VectorClock twice?
@@ -155,4 +162,5 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
     public enum VectorComparison {
 	GREATER, EQUAL, SMALLER, SIMULTANEOUS
     }
+
 }

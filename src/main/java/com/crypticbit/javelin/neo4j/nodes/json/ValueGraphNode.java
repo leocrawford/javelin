@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.node.BaseJsonNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
 import com.jayway.jsonpath.internal.PathToken;
 
-public class ValueGraphNode extends ValueNode implements Neo4JJsonType {
+public class ValueGraphNode extends ValueNode implements JsonGraphNode {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private JsonNode delegate;
@@ -104,4 +104,9 @@ public class ValueGraphNode extends ValueNode implements Neo4JJsonType {
    	    throw new IllegalJsonException("It's not possible to navigate within a child node: " + token.getFragment());
        }
 
+
+    @Override
+    public String toJsonString() {
+	return toJsonNode().toString();
+    }
 }

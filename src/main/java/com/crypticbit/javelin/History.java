@@ -1,10 +1,10 @@
 package com.crypticbit.javelin;
 
-import com.crypticbit.javelin.neo4j.Neo4JGraphNode;
+import com.crypticbit.javelin.neo4j.nodes.json.ComplexGraphNode;
 
 public interface History {
 
     public long getTimestamp();
-    public Neo4JGraphNode getVersion();
+    public ComplexGraphNode getVersion();
     
 }

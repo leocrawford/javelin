@@ -7,6 +7,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
+import com.crypticbit.javelin.History;
 import com.crypticbit.javelin.neo4j.strategies.operations.ReplaceNodeUpdateOperation;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 
@@ -55,7 +56,7 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 	Transaction tx = getGraphDB().beginTx();
 	try {
 	    Relationship result = super.createNewNode(relationshipToParent.getEndNode(), RelationshipTypes.VERSION,
-		    new ReplaceNodeUpdateOperation(read(relationshipToParent).getEndNode(), removeEverything,
+		    new ReplaceNodeUpdateOperation(read(relationshipToParent,null).getEndNode(), removeEverything,
 			    relationshipToParent).add(operation).add(getTimestampOperation()));
 	    tx.success();
 	    return result;
@@ -64,32 +65,37 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 	}
 
     }
+    
+    @Override
+    public boolean doesExposeInterface(Class<?> exposesInterface) {
+	return exposesInterface == History.class;
+    }
 
     @Override
-    public Relationship read(Relationship relationshipToNode) {
+    public Relationship readNext(Relationship relationshipToNode,  Class<?> desiredInterface) {
 	// FIXME - addin current version, but make it work
-//	if (currentVersion != null)
-//	    return currentVersion;
-//	else {
-	    Node node = relationshipToNode.getEndNode();
+//		if (currentVersion != null)
+//		    return currentVersion;
+//		else {
+		    Node node = relationshipToNode.getEndNode();
 
-	    Relationship found = null;
-	    Long timestamp = null;
+		    Relationship found = null;
+		    Long timestamp = null;
 
-	    for (Relationship r : node.getRelationships(Direction.OUTGOING, RelationshipTypes.VERSION)) {
-		if (timestamp == null || (Long) r.getProperty("timestamp") > timestamp) {
-		    found = r;
-		    timestamp = (Long) r.getProperty("timestamp");
-		}
-	    }
-	    return found;
-
-//	}
+		    for (Relationship r : node.getRelationships(Direction.OUTGOING, RelationshipTypes.VERSION)) {
+			if (timestamp == null || (Long) r.getProperty("timestamp") > timestamp) {
+			    found = r;
+			    timestamp = (Long) r.getProperty("timestamp");
+			}
+		    }
+		    return found;
     }
 
     @Override
     public void delete(Relationship relationshipToNodeToDelete) {
 	// FIXME - not implemented
     }
+
+
 
 }

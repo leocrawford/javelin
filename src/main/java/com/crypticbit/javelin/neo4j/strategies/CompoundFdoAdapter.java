@@ -32,16 +32,23 @@ public abstract class CompoundFdoAdapter implements FundementalDatabaseOperation
     }
 
     @Override
-    public Relationship read(Relationship relationshipToNode) {
-	return nextAdapter.read(relationshipToNode);
+    public Relationship read(Relationship relationshipToNode, Class<?> desiredInterface) {
+	if (doesExposeInterface(desiredInterface))
+	    return relationshipToNode;
+	else
+	    return readNext(relationshipToNode, desiredInterface);
     }
+
+    public abstract boolean doesExposeInterface(Class<?> exposesInterface);
+
+    public abstract Relationship readNext(Relationship relationshipToNode, Class<?> desiredInterface);
 
     @Override
     public void delete(Relationship relationshipToNodeToDelete) {
 	nextAdapter.delete(relationshipToNodeToDelete);
 
     }
-    
+
     public void setTopFdo(FundementalDatabaseOperations fdo) {
 	this.fdo = fdo;
 	this.nextAdapter.setTopFdo(fdo);
@@ -50,6 +57,9 @@ public abstract class CompoundFdoAdapter implements FundementalDatabaseOperation
     public FundementalDatabaseOperations getFdo() {
 	return fdo;
     }
-
+    
+    public FundementalDatabaseOperations getNextAdapter() {
+	return nextAdapter;
+    }
 
 }

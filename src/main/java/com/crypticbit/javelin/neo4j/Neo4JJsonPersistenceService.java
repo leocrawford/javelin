@@ -12,11 +12,11 @@ import org.neo4j.server.WrappingNeoServerBootstrapper;
 
 import com.crypticbit.javelin.JsonPersistenceService;
 import com.crypticbit.javelin.neo4j.nodes.ComplexNode;
+import com.crypticbit.javelin.neo4j.nodes.PotentialRelationship;
+import com.crypticbit.javelin.neo4j.nodes.RelationshipHolder;
 import com.crypticbit.javelin.neo4j.strategies.CompoundFdoAdapter;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
-import com.crypticbit.javelin.neo4j.strategies.PotentialRelationship;
-import com.crypticbit.javelin.neo4j.strategies.RelationshipHolder;
 import com.crypticbit.javelin.neo4j.strategies.SimpleFdoAdapter;
 import com.crypticbit.javelin.neo4j.strategies.TimeStampedHistoryAdapter;
 import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter;

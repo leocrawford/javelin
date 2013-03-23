@@ -7,10 +7,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.jayway.jsonpath.internal.PathToken;
 
 public interface JsonGraphNode {
-    public ComplexGraphNode navigate(PathToken token) throws IllegalJsonException;   
-    public ComplexNode put(String key) throws IllegalJsonException, JsonPersistenceException;
     public ComplexNode add() throws IllegalJsonException, JsonPersistenceException;
+
+    public ComplexGraphNode navigate(PathToken token) throws IllegalJsonException;
+
+    public ComplexNode put(String key) throws IllegalJsonException, JsonPersistenceException;
+
     public JsonNode toJsonNode();
+
     public String toJsonString();
 }
-

@@ -5,13 +5,11 @@ import com.crypticbit.javelin.JsonPersistenceException;
 
 public interface ComplexGraphNode extends JsonGraphNode {
 
-    
     public ComplexGraphNode navigate(String jsonPath) throws IllegalJsonException;
+
+    @Override
     public String toJsonString();
+
     public void write(String json) throws IllegalJsonException, JsonPersistenceException;
-
-
-
-
 
 }

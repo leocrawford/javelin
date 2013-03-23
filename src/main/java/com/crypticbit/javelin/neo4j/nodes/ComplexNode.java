@@ -29,30 +29,42 @@ public class ComplexNode implements ComplexGraphNode {
     private FundementalDatabaseOperations fdo;
     private JsonNodeFactory jsonNodeFactory;
 
+    private static final String DATE_FORMAT = "H:mm:ss.SSS yy-MM-dd";
+
+    private static SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+
     public ComplexNode(RelationshipHolder incomingRelationship, FundementalDatabaseOperations fdo) {
 	this.incomingRelationship = incomingRelationship;
 	this.fdo = fdo;
 	this.jsonNodeFactory = new JsonNodeFactory(this, incomingRelationship);
     }
 
-    public ComplexGraphNode getJsonNode() {
-	return jsonNodeFactory;
+    @Override
+    public ComplexNode add() throws IllegalJsonException, JsonPersistenceException {
+	return getJsonNode().add();
     }
 
-    public FundementalDatabaseOperations getStrategy() {
-	return fdo;
+    public MergeableBlock getExtract() {
+	return null;
+	// new MergeableBlock() {
+	// private String json = getGraphNode().toJsonNode().toString();
+	// private VectorClock vc = getGraphNode().getVectorClock();
+	//
+	// @Override
+	// public VectorClock getVectorClock() {
+	// return vc;
+	// }
+	//
+	// @Override
+	// public String getJson() {
+	// return json;
+	// }
+	//
+	// public String toString() {
+	// return json + " (" + vc + ")";
+	// }
+	// };
     }
-
-    public Relationship getIncomingRelationship() {
-	return incomingRelationship.getRelationship();
-    }
-
-    public ComplexGraphNode navigate(PathToken token) throws IllegalJsonException {
-	return jsonNodeFactory.navigate(token);
-    }
-
-    private static final String DATE_FORMAT = "H:mm:ss.SSS yy-MM-dd";
-    private static SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 
     public List<History> getHistory() {
 	List<History> history = new LinkedList<History>();
@@ -89,6 +101,18 @@ public class ComplexNode implements ComplexGraphNode {
 	return null;
     }
 
+    public Relationship getIncomingRelationship() {
+	return incomingRelationship.getRelationship();
+    }
+
+    public ComplexGraphNode getJsonNode() {
+	return jsonNodeFactory;
+    }
+
+    public FundementalDatabaseOperations getStrategy() {
+	return fdo;
+    }
+
     public long getTimestamp() {
 	return (long) getIncomingRelationship().getProperty("timestamp");
     }
@@ -110,26 +134,14 @@ public class ComplexNode implements ComplexGraphNode {
 
     }
 
-    public MergeableBlock getExtract() {
-	return null;
-	// new MergeableBlock() {
-	// private String json = getGraphNode().toJsonNode().toString();
-	// private VectorClock vc = getGraphNode().getVectorClock();
-	//
-	// @Override
-	// public VectorClock getVectorClock() {
-	// return vc;
-	// }
-	//
-	// @Override
-	// public String getJson() {
-	// return json;
-	// }
-	//
-	// public String toString() {
-	// return json + " (" + vc + ")";
-	// }
-	// };
+    @Override
+    public ComplexGraphNode navigate(PathToken token) throws IllegalJsonException {
+	return jsonNodeFactory.navigate(token);
+    }
+
+    @Override
+    public ComplexGraphNode navigate(String jsonPath) throws IllegalJsonException {
+	return getJsonNode().navigate(jsonPath);
     }
 
     @Override
@@ -138,18 +150,8 @@ public class ComplexNode implements ComplexGraphNode {
     }
 
     @Override
-    public ComplexNode add() throws IllegalJsonException, JsonPersistenceException {
-	return getJsonNode().add();
-    }
-
-    @Override
     public JsonNode toJsonNode() {
 	return getJsonNode().toJsonNode();
-    }
-
-    @Override
-    public ComplexGraphNode navigate(String jsonPath) throws IllegalJsonException {
-	return getJsonNode().navigate(jsonPath);
     }
 
     @Override

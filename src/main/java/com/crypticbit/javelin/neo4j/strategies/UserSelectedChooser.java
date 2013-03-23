@@ -6,9 +6,9 @@ import java.util.Scanner;
 
 import org.neo4j.graphdb.Relationship;
 
-
 public class UserSelectedChooser implements Chooser {
 
+    @Override
     public Entry<VectorClock, Relationship> select(List<Entry<VectorClock, Relationship>> candidates) {
 
 	System.out.println("Concurrent updates. please choose one");

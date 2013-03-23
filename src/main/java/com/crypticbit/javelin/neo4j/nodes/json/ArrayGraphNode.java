@@ -23,8 +23,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonpath.internal.PathToken;
 
 /**
- * This class hold GraphNodes that represent array's. It provides conversions to
- * JsonNode.
+ * This class hold GraphNodes that represent array's. It provides conversions to JsonNode.
  * 
  * @author leo
  * 
@@ -46,13 +45,49 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGra
     }
 
     @Override
+    public ComplexNode add() {
+	return new ComplexNode(new RelationshipHolder(new AddElementToArrayPotentialRelationship()), getStrategy());
+    }
+
+    @Override
     public ComplexNode get(int index) {
 	updateNodes();
-	if (index == children.length)
-	    return add();
+	if (index == children.length) return add();
 	else
 	    return children[index];
 
+    }
+
+    public Node getDatabaseNode() {
+	return node;
+    }
+
+    @Override
+    public ComplexNode navigate(PathToken token) throws IllegalJsonException {
+	if (!token.isArrayIndexToken()) throw new IllegalJsonException(
+		"Expecting an array element in json path expression: " + token.getFragment());
+	return get(token.getArrayIndex());
+    }
+
+    @Override
+    public ComplexNode put(String key) throws JsonPersistenceException {
+	throw new JsonPersistenceException("It's not possible to add a map element to an array node");
+    }
+
+    public void removeElementFromArray(final Relationship relationshipToParent, final int index) {
+	// this is a delete (on node) and update (on parent)
+	getStrategy().update(relationshipToParent, false, new UpdateOperation() {
+	    @Override
+	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
+		    FundementalDatabaseOperations dal) {
+		for (Relationship relationshipToNodeToDelete : relationshipToGraphNodeToUpdate.getEndNode()
+			.getRelationships(Direction.OUTGOING, RelationshipTypes.ARRAY))
+		    if (relationshipToNodeToDelete.getProperty(Parameters.Relationship.INDEX.name()).equals(index)) {
+			dal.delete(relationshipToNodeToDelete);
+		    }
+		return null;
+	    }
+	});
     }
 
     @Override
@@ -67,9 +102,13 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGra
 	};
     }
 
+    @Override
+    public String toJsonString() {
+	return toJsonNode().toString();
+    }
+
     /**
-     * Read the node's relationships to build the children list. This is
-     * typically done lazily
+     * Read the node's relationships to build the children list. This is typically done lazily
      */
     public void updateNodes() {
 	if (children == null) {
@@ -82,10 +121,23 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGra
 	}
     }
 
+    private int findNextUnusedIndex(Node parent) {
+	int max = 0;
+	for (Relationship a : parent.getRelationships(Direction.OUTGOING, RelationshipTypes.ARRAY)) {
+	    if ((int) a.getProperty(Parameters.Relationship.INDEX.name()) > max) {
+		max = (int) a.getProperty(Parameters.Relationship.INDEX.name());
+	    }
+	}
+	return max + 1;
+    }
+
+    private FundementalDatabaseOperations getStrategy() {
+	return holder.getStrategy();
+    }
+
     /**
-     * The children are exposed as a collection of GraphNode's. In order to
-     * build a JsonNode, they need to be converted to a collection of
-     * JsonNode's.
+     * The children are exposed as a collection of GraphNode's. In order to build a JsonNode, they need to be converted
+     * to a collection of JsonNode's.
      * 
      * @return the children collection, exposed as a collection of JsonNode's
      */
@@ -104,63 +156,13 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGra
 	};
     }
 
-    public Node getDatabaseNode() {
-	return node;
-    }
-
-    @Override
-    public ComplexNode put(String key) throws JsonPersistenceException {
-	throw new JsonPersistenceException("It's not possible to add a map element to an array node");
-    }
-
-    @Override
-    public ComplexNode add() {
-	return new ComplexNode(new RelationshipHolder(new AddElementToArrayPotentialRelationship()), getStrategy());
-    }
-
-
-    public void removeElementFromArray(final Relationship relationshipToParent, final int index) {
-	// this is a delete (on node) and update (on parent)
-	getStrategy().update(relationshipToParent, false, new UpdateOperation() {
-	    @Override
-	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		    FundementalDatabaseOperations dal) {
-		for (Relationship relationshipToNodeToDelete : relationshipToGraphNodeToUpdate.getEndNode()
-			.getRelationships(Direction.OUTGOING, RelationshipTypes.ARRAY))
-		    if (relationshipToNodeToDelete.getProperty(Parameters.Relationship.INDEX.name()).equals(index))
-			dal.delete(relationshipToNodeToDelete);
-		return null;
-	    }
-	});
-    }
-
-    private int findNextUnusedIndex(Node parent) {
-	int max = 0;
-	for (Relationship a : parent.getRelationships(Direction.OUTGOING, RelationshipTypes.ARRAY)) {
-	    if ((int) a.getProperty(Parameters.Relationship.INDEX.name()) > max)
-		max = (int) a.getProperty(Parameters.Relationship.INDEX.name());
-	}
-	return max + 1;
-    }
-
-    @Override
-    public ComplexNode navigate(PathToken token) throws IllegalJsonException {
-	if (!token.isArrayIndexToken())
-	    throw new IllegalJsonException("Expecting an array element in json path expression: " + token.getFragment());
-	return get(token.getArrayIndex());
-    }
-
-    private FundementalDatabaseOperations getStrategy() {
-	return holder.getStrategy();
-    }
-
     public final class AddElementToArrayPotentialRelationship implements PotentialRelationship {
 	@Override
 	public Relationship create(final UpdateOperation createOperation) {
-	CreateNewArrayElementUpdateOperation operation = new CreateNewArrayElementUpdateOperation( findNextUnusedIndex(node),
-		createOperation);
-	holder.getStrategy().update(holder.getIncomingRelationship(), false, operation);
-	return operation.newR;
+	    CreateNewArrayElementUpdateOperation operation = new CreateNewArrayElementUpdateOperation(
+		    findNextUnusedIndex(node), createOperation);
+	    holder.getStrategy().update(holder.getIncomingRelationship(), false, operation);
+	    return operation.newR;
 	}
     }
 
@@ -168,7 +170,7 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGra
 	private final UpdateOperation createOperation;
 	private Relationship newR;
 	private int index;
-	
+
 	public CreateNewArrayElementUpdateOperation(int index, UpdateOperation createOperation) {
 	    this.createOperation = createOperation;
 	    this.index = index;
@@ -181,11 +183,6 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGra
 	    return relationship;
 	}
 
-    }
-
-    @Override
-    public String toJsonString() {
-	return toJsonNode().toString();
     }
 
 }

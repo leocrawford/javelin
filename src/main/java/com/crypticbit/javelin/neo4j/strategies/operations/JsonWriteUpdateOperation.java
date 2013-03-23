@@ -5,8 +5,6 @@ import java.util.Iterator;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
-import com.crypticbit.javelin.neo4j.nodes.json.ArrayGraphNode;
-import com.crypticbit.javelin.neo4j.nodes.json.MapGraphNode;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
@@ -29,10 +27,10 @@ public final class JsonWriteUpdateOperation extends UpdateOperation {
 	    if (jsonNode.isArray()) {
 		updateNode.setProperty(Parameters.Node.TYPE.name(), NodeTypes.ARRAY.toString());
 		for (int loop = 0; loop < jsonNode.size(); loop++) {
-	    
-			Relationship newR = dal.createNewNode(relationshipToGraphNodeToUpdate.getEndNode(),
-				RelationshipTypes.ARRAY,  new JsonWriteUpdateOperation(jsonNode.get(loop)));
-			newR.setProperty(Parameters.Relationship.INDEX.name(),loop);
+
+		    Relationship newR = dal.createNewNode(relationshipToGraphNodeToUpdate.getEndNode(),
+			    RelationshipTypes.ARRAY, new JsonWriteUpdateOperation(jsonNode.get(loop)));
+		    newR.setProperty(Parameters.Relationship.INDEX.name(), loop);
 		}
 	    }
 	    if (jsonNode.isObject()) {
@@ -41,13 +39,13 @@ public final class JsonWriteUpdateOperation extends UpdateOperation {
 		// FIXME - very wrong - copy and paste from Map
 		while (fieldNamesIterator.hasNext()) {
 		    String f = fieldNamesIterator.next();
-		    Relationship newR = dal.createNewNode(
-			    relationshipToGraphNodeToUpdate.getEndNode(), RelationshipTypes.MAP,
-			    new JsonWriteUpdateOperation(jsonNode.get(f)));
+		    Relationship newR = dal.createNewNode(relationshipToGraphNodeToUpdate.getEndNode(),
+			    RelationshipTypes.MAP, new JsonWriteUpdateOperation(jsonNode.get(f)));
 		    newR.setProperty(Parameters.Relationship.KEY.name(), f);
 		}
 	    }
-	} else {
+	}
+	else {
 	    updateNode.setProperty(Parameters.Node.TYPE.name(), NodeTypes.VALUE.toString());
 	    updateNode.setProperty(Parameters.Node.VALUE.name(), jsonNode.toString());
 	}

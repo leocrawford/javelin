@@ -6,7 +6,8 @@ import com.crypticbit.javelin.neo4j.nodes.json.ComplexGraphNode;
 
 public interface NodeFactory<T> {
 
-    public Class<? extends ComplexGraphNode> getInterface();
     public T create(Relationship r);
+
+    public Class<? extends ComplexGraphNode> getInterface();
 
 }

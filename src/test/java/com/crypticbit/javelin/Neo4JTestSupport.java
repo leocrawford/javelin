@@ -14,13 +14,13 @@ public class Neo4JTestSupport {
     public Neo4JTestSupport() {
 	super();
     }
-    
+
     protected Neo4JJsonPersistenceService createNewService() throws IOException {
 	return createNewService("unidentified-identity");
     }
 
     protected Neo4JJsonPersistenceService createNewService(String identity) throws IOException {
-        return new Neo4JJsonPersistenceService(Files.createTempDirectory("neo4j_test").toFile(),identity);
+	return new Neo4JJsonPersistenceService(Files.createTempDirectory("neo4j_test").toFile(), identity);
     }
 
 }

@@ -1,9 +1,5 @@
 package com.crypticbit.javelin;
 
+public interface JsonPersistenceService {
 
-public interface JsonPersistenceService  {
-
-
-
-    
 }

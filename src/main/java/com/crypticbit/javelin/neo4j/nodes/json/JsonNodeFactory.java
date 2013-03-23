@@ -30,43 +30,20 @@ public class JsonNodeFactory implements ComplexGraphNode {
 	this.incomingRelationship = incomingRelationship;
     }
 
-    private JsonGraphNode getJsonNode() {
-	if (jsonNode == null)
-	    if (incomingRelationship.isRealRelationship())
-		jsonNode = NodeTypes.wrapAsGraphNode(holder.getStrategy().read(incomingRelationship.getRelationship(),null).getEndNode(), holder);
-	return jsonNode;
-    }
-
-    @Override
-    public ComplexGraphNode navigate(final PathToken token) throws IllegalJsonException {
-	if (getJsonNode() == null)
-	    return createComplexNodeFromUpdateOperation(getUpdateOperationForNavToken(token));
-	else
-	    return getJsonNode().navigate(token);
-    }
-
-    @Override
-    public ComplexNode put(final String key) throws IllegalJsonException, JsonPersistenceException {
-	if (getJsonNode() == null)
-	    return createComplexNodeFromUpdateOperation(new MapGraphNode.CreateNewMapElementUpdateOperation(key,
-		    NullUpdateOperation.INSTANCE));
-	else
-	    return getJsonNode().put(key);
-    }
-
     @Override
     public ComplexNode add() throws IllegalJsonException, JsonPersistenceException {
-	if (getJsonNode() == null)
-	    return createComplexNodeFromUpdateOperation(new ArrayGraphNode.CreateNewArrayElementUpdateOperation(0,
-		    NullUpdateOperation.INSTANCE));
+	if (getJsonNode() == null) return createComplexNodeFromUpdateOperation(new ArrayGraphNode.CreateNewArrayElementUpdateOperation(
+		0, NullUpdateOperation.INSTANCE));
 	else
 	    return getJsonNode().add();
 
     }
 
     @Override
-    public JsonNode toJsonNode() {
-	return getJsonNode().toJsonNode();
+    public ComplexGraphNode navigate(final PathToken token) throws IllegalJsonException {
+	if (getJsonNode() == null) return createComplexNodeFromUpdateOperation(getUpdateOperationForNavToken(token));
+	else
+	    return getJsonNode().navigate(token);
     }
 
     @Override
@@ -74,10 +51,24 @@ public class JsonNodeFactory implements ComplexGraphNode {
 	PathTokenizer tokens = new PathTokenizer(jsonPath);
 	ComplexGraphNode currentNode = this;
 	for (PathToken token : tokens) {
-	    if (!token.isRootToken())
+	    if (!token.isRootToken()) {
 		currentNode = currentNode.navigate(token);
+	    }
 	}
 	return currentNode;
+    }
+
+    @Override
+    public ComplexNode put(final String key) throws IllegalJsonException, JsonPersistenceException {
+	if (getJsonNode() == null) return createComplexNodeFromUpdateOperation(new MapGraphNode.CreateNewMapElementUpdateOperation(
+		key, NullUpdateOperation.INSTANCE));
+	else
+	    return getJsonNode().put(key);
+    }
+
+    @Override
+    public JsonNode toJsonNode() {
+	return getJsonNode().toJsonNode();
     }
 
     @Override
@@ -90,20 +81,13 @@ public class JsonNodeFactory implements ComplexGraphNode {
 	try {
 	    final JsonNode values = new ObjectMapper().readTree(json);
 	    incomingRelationship.createOrUpdateRelationship(new JsonWriteUpdateOperation(values), holder.getStrategy());
-	} catch (JsonProcessingException jpe) {
+	}
+	catch (JsonProcessingException jpe) {
 	    throw new IllegalJsonException("The JSON string was badly formed: " + json, jpe);
-	} catch (IOException e) {
+	}
+	catch (IOException e) {
 	    throw new JsonPersistenceException("IOException whilst writing data to database", e);
 	}
-    }
-
-    private UpdateOperation getUpdateOperationForNavToken(PathToken token) {
-	if (token.isArrayIndexToken())
-	    return new ArrayGraphNode.CreateNewArrayElementUpdateOperation(token.getArrayIndex(),
-		    NullUpdateOperation.INSTANCE);
-	else
-	    return new MapGraphNode.CreateNewMapElementUpdateOperation(token.getFragment(),
-		    NullUpdateOperation.INSTANCE);
     }
 
     private ComplexNode createComplexNodeFromUpdateOperation(final UpdateOperation operationToMakeIncomingRelationship) {
@@ -116,6 +100,22 @@ public class JsonNodeFactory implements ComplexGraphNode {
 	    }
 
 	}), holder.getStrategy());
+    }
+
+    private JsonGraphNode getJsonNode() {
+	if (jsonNode == null) if (incomingRelationship.isRealRelationship()) {
+	    jsonNode = NodeTypes.wrapAsGraphNode(holder.getStrategy()
+		    .read(incomingRelationship.getRelationship(), null).getEndNode(), holder);
+	}
+	return jsonNode;
+    }
+
+    private UpdateOperation getUpdateOperationForNavToken(PathToken token) {
+	if (token.isArrayIndexToken()) return new ArrayGraphNode.CreateNewArrayElementUpdateOperation(
+		token.getArrayIndex(), NullUpdateOperation.INSTANCE);
+	else
+	    return new MapGraphNode.CreateNewMapElementUpdateOperation(token.getFragment(),
+		    NullUpdateOperation.INSTANCE);
     }
 
 }

@@ -1,11 +1,6 @@
 package com.crypticbit.javelin.neo4j.nodes.json;
 
-import java.util.AbstractMap;
-import java.util.AbstractSet;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -30,20 +25,19 @@ import com.jayway.jsonpath.internal.PathToken;
  */
 public class MapGraphNode extends AbstractMap<String, ComplexNode> implements JsonGraphNode {
 
-
     private Node node;
     private Set<Map.Entry<String, ComplexNode>> children;
-    private ComplexNode  holder;
+    private ComplexNode holder;
 
     public MapGraphNode(Node node, ComplexNode complexNode) {
 	this.node = node;
 	this.holder = complexNode;
     }
 
-    private FundementalDatabaseOperations getStrategy() {
-  	return holder.getStrategy();
-      }
-
+    @Override
+    public ComplexNode add() throws JsonPersistenceException {
+	throw new JsonPersistenceException("It's not possible to add an array element to a map node. ");
+    }
 
     @Override
     public Set<java.util.Map.Entry<String, ComplexNode>> entrySet() {
@@ -52,14 +46,67 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
     }
 
     @Override
+    public ComplexNode navigate(PathToken token) throws IllegalJsonException {
+	if (token.isArrayIndexToken()) throw new IllegalJsonException(
+		"Expecting a map element in json path expression: " + token.getFragment());
+	return put(token.getFragment());
+    }
+
+    @Override
+    public ComplexNode put(final String key) {
+	if (this.containsKey(key)) return this.get(key);
+	else
+	    return new ComplexNode(new RelationshipHolder(new PotentialRelationship() {
+
+		@Override
+		public Relationship create(final UpdateOperation createOperation) {
+		    // this is a create, and an update (on the parent)
+		    CreateNewMapElementUpdateOperation operation = new CreateNewMapElementUpdateOperation(key,
+			    createOperation);
+		    getStrategy().update(holder.getIncomingRelationship(), false, operation);
+		    return operation.newR;
+		}
+	    }), getStrategy());
+    }
+
+    public void removeElementFromMap(final Relationship relationshipToParent, final String key) {
+	// this is a delete (on node) and update (on parent)
+	getStrategy().update(relationshipToParent, false, new UpdateOperation() {
+	    @Override
+	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
+		    FundementalDatabaseOperations dal) {
+		for (Relationship relationshipToNodeToDelete : relationshipToGraphNodeToUpdate.getEndNode()
+			.getRelationships(Direction.OUTGOING, RelationshipTypes.MAP))
+		    if (relationshipToNodeToDelete.getProperty(Parameters.Relationship.KEY.name()).equals(key)) {
+			dal.delete(relationshipToNodeToDelete);
+		    }
+		return null;
+	    }
+	});
+    }
+
+    // delegate methods
+
+    @Override
     public JsonNode toJsonNode() {
 	return new ObjectNode(null, wrapChildrenAsJsonNode()) {
 	};
     }
 
+    // public static Relationship addElementToMap(FundementalDatabaseOperations dal, Node node, final String key,
+    // Node newNode) {
+    // Relationship r = node.createRelationshipTo(newNode, RelationshipTypes.MAP);
+    // r.setProperty(Parameters.Relationship.KEY.name(), key);
+    // return r;
+    // }
+
+    @Override
+    public String toJsonString() {
+	return toJsonNode().toString();
+    }
+
     /**
-     * Loads all the relationships, and packages them up as a Map which backs
-     * this class. Typically called lazily
+     * Loads all the relationships, and packages them up as a Map which backs this class. Typically called lazily
      */
     public void updateNodes() {
 	if (children == null) {
@@ -67,7 +114,8 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 
 	    for (Relationship r : node.getRelationships(RelationshipTypes.MAP, Direction.OUTGOING)) {
 		children.add(new AbstractMap.SimpleImmutableEntry<String, ComplexNode>((String) r
-			.getProperty(Parameters.Relationship.KEY.name()), new ComplexNode(new RelationshipHolder(r), getStrategy())));
+			.getProperty(Parameters.Relationship.KEY.name()), new ComplexNode(new RelationshipHolder(r),
+			getStrategy())));
 	    }
 	}
     }
@@ -115,76 +163,15 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 	};
     }
 
-    // delegate methods
-
-   
-
-    @Override
-    public ComplexNode put(final String key) {
-	if (this.containsKey(key))
-	    return this.get(key);
-	else {
-	    return new ComplexNode(new RelationshipHolder(new PotentialRelationship() {
-
-		@Override
-		public Relationship create(final UpdateOperation createOperation) {
-		    // this is a create, and an update (on the parent)
-		    CreateNewMapElementUpdateOperation operation = new CreateNewMapElementUpdateOperation(key, createOperation);
-		    getStrategy().update(holder.getIncomingRelationship(), false,
-			    operation);
-		    return operation.newR;
-		}
-	    }), getStrategy());
-	}
+    private FundementalDatabaseOperations getStrategy() {
+	return holder.getStrategy();
     }
-
-//    public static Relationship addElementToMap(FundementalDatabaseOperations dal, Node node, final String key,
-//	    Node newNode) {
-//	Relationship r = node.createRelationshipTo(newNode, RelationshipTypes.MAP);
-//	r.setProperty(Parameters.Relationship.KEY.name(), key);
-//	return r;
-//    }
-
-    public void removeElementFromMap(final Relationship relationshipToParent, final String key) {
-	// this is a delete (on node) and update (on parent)
-	getStrategy().update(relationshipToParent, false, new UpdateOperation() {
-	    @Override
-	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		    FundementalDatabaseOperations dal) {
-		for (Relationship relationshipToNodeToDelete : relationshipToGraphNodeToUpdate.getEndNode()
-			.getRelationships(Direction.OUTGOING, RelationshipTypes.MAP))
-		    if (relationshipToNodeToDelete.getProperty(Parameters.Relationship.KEY.name()).equals(key))
-			dal.delete(relationshipToNodeToDelete);
-		return null;
-	    }
-	});
-    }
-
-    @Override
-    public ComplexNode add() throws JsonPersistenceException {
-	throw new JsonPersistenceException("It's not possible to add an array element to a map node. ");
-    }
-
-
-    @Override
-    public ComplexNode navigate(PathToken token) throws IllegalJsonException {
-	if (token.isArrayIndexToken())
-	    throw new IllegalJsonException("Expecting a map element in json path expression: " + token.getFragment());
-	return put(token.getFragment());
-    }
-    
-
-    @Override
-    public String toJsonString() {
-	return toJsonNode().toString();
-    }
-    
 
     public static final class CreateNewMapElementUpdateOperation extends UpdateOperation {
 	private final String key;
 	private final UpdateOperation createOperation;
 	Relationship newR;
-	
+
 	public CreateNewMapElementUpdateOperation(String key, UpdateOperation createOperation) {
 	    this.key = key;
 	    this.createOperation = createOperation;
@@ -193,15 +180,12 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 	@Override
 	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
 		FundementalDatabaseOperations dal) {
-	    
-	    newR = dal.createNewNode(
-		    relationshipToGraphNodeToUpdate.getEndNode(), RelationshipTypes.MAP,
+
+	    newR = dal.createNewNode(relationshipToGraphNodeToUpdate.getEndNode(), RelationshipTypes.MAP,
 		    createOperation);
 	    newR.setProperty(Parameters.Relationship.KEY.name(), key);
 	    return relationshipToGraphNodeToUpdate;
 	}
     }
-
-
 
 }

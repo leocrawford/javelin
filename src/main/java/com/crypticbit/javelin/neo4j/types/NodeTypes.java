@@ -7,7 +7,6 @@ import com.crypticbit.javelin.neo4j.nodes.json.ArrayGraphNode;
 import com.crypticbit.javelin.neo4j.nodes.json.JsonGraphNode;
 import com.crypticbit.javelin.neo4j.nodes.json.MapGraphNode;
 import com.crypticbit.javelin.neo4j.nodes.json.ValueGraphNode;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.NullUpdateOperation;
 
 public enum NodeTypes {
     ARRAY() {
@@ -29,14 +28,13 @@ public enum NodeTypes {
 	    return new ValueGraphNode(graphNode, complexNode);
 	}
     };
+    abstract JsonGraphNode _wrapAsGraphNode(Node graphNode, ComplexNode complexNode);
+
     public static JsonGraphNode wrapAsGraphNode(Node graphNode, ComplexNode complexNode) {
-	if (graphNode.hasProperty(Parameters.Node.TYPE.name()))
-	    return valueOf((String) graphNode.getProperty(Parameters.Node.TYPE.name()))._wrapAsGraphNode(graphNode,complexNode);
+	if (graphNode.hasProperty(Parameters.Node.TYPE.name())) return valueOf(
+		(String) graphNode.getProperty(Parameters.Node.TYPE.name()))._wrapAsGraphNode(graphNode, complexNode);
 	else
-	  throw new Error("Found node with no type. Node id: "+graphNode.getId());
+	    throw new Error("Found node with no type. Node id: " + graphNode.getId());
 	// FIXME throw exceptiom
     }
-
-
-    abstract JsonGraphNode _wrapAsGraphNode(Node graphNode, ComplexNode complexNode);
 }

@@ -1,13 +1,7 @@
 package com.crypticbit.javelin.neo4j.strategies;
 
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.*;
 
-import com.crypticbit.javelin.neo4j.nodes.json.JsonNodeFactory;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 
@@ -29,10 +23,36 @@ public class SimpleFdoAdapter implements FundementalDatabaseOperations {
 	    Relationship newRelationship = parentNode.createRelationshipTo(node, type);
 	    result = createOperation.updateElement(newRelationship, fdo);
 	    tx.success();
-	} finally {
+	}
+	finally {
 	    tx.finish();
 	}
 	return result;
+    }
+
+    @Override
+    public void delete(Relationship relationshipToNodeToDelete) {
+	Transaction tx = graphDb.beginTx();
+	try {
+	    Node nodeAtOtherEnd = relationshipToNodeToDelete.getEndNode();
+	    relationshipToNodeToDelete.delete();
+	    nodeAtOtherEnd.delete();
+	    tx.success();
+	}
+	finally {
+	    tx.finish();
+	}
+    }
+
+    @Override
+    public Relationship read(Relationship r, Class<?> desiredInterface) {
+	return r;
+    }
+
+    @Override
+    public void setTopFdo(FundementalDatabaseOperations fdo) {
+	this.fdo = fdo;
+
     }
 
     @Override
@@ -46,7 +66,8 @@ public class SimpleFdoAdapter implements FundementalDatabaseOperations {
 	    }
 	    result = o.updateElement(relationshipToParent, fdo);
 	    tx.success();
-	} finally {
+	}
+	finally {
 	    tx.finish();
 	}
 	return result;
@@ -65,30 +86,5 @@ public class SimpleFdoAdapter implements FundementalDatabaseOperations {
 	}
 	// FIXME - what do we do at other end? Actually delete (and possibly
 	// screw up history, or garbage collect?
-    }
-
-    @Override
-    public Relationship read(Relationship r, Class<?> desiredInterface) {
-	return r;
-    }
-
-
-    @Override
-    public void delete(Relationship relationshipToNodeToDelete) {
-	Transaction tx = graphDb.beginTx();
-	try {
-	    Node nodeAtOtherEnd = relationshipToNodeToDelete.getEndNode();
-	    relationshipToNodeToDelete.delete();
-	    nodeAtOtherEnd.delete();
-	    tx.success();
-	} finally {
-	    tx.finish();
-	}
-    }
-
-    @Override
-    public void setTopFdo(FundementalDatabaseOperations fdo) {
-	this.fdo = fdo;
-
     }
 }

@@ -47,8 +47,8 @@ public class ComplexNode implements ComplexGraphNode {
 	return incomingRelationship.getRelationship();
     }
 
-    public ComplexGraphNode navigate(PathToken token) {
-	return jsonNodeFactory;
+    public ComplexGraphNode navigate(PathToken token) throws IllegalJsonException {
+	return jsonNodeFactory.navigate(token);
     }
 
     private static final String DATE_FORMAT = "H:mm:ss.SSS yy-MM-dd";

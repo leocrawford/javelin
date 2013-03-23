@@ -1,8 +1,6 @@
 package com.crypticbit.javelin.neo4j.nodes;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.neo4j.graphdb.Relationship;
@@ -29,10 +27,7 @@ public class ComplexNode implements ComplexGraphNode {
     private FundementalDatabaseOperations fdo;
     private JsonNodeFactory jsonNodeFactory;
 
-    private static final String DATE_FORMAT = "H:mm:ss.SSS yy-MM-dd";
-
-    private static SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-
+    
     public ComplexNode(RelationshipHolder incomingRelationship, FundementalDatabaseOperations fdo) {
 	this.incomingRelationship = incomingRelationship;
 	this.fdo = fdo;
@@ -66,40 +61,7 @@ public class ComplexNode implements ComplexGraphNode {
 	// };
     }
 
-    public List<History> getHistory() {
-	List<History> history = new LinkedList<History>();
 
-	// System.out.println("History for: "+getGraphNode().getDatabaseNode().getId());
-	//
-	// for (Relationship r :
-	// getGraphNode().getDatabaseNode().getRelationships(RelationshipTypes.VERSION,
-	// Direction.OUTGOING)) {
-
-	// Relationship readRelationship = getStrategy().read(r);
-	// final Neo4JGraphNode endNode =
-	// NodeTypes.wrapAsGraphNode(readRelationship.getEndNode(), r,
-	// getStrategy());
-	// history.add(new History() {
-	//
-	// @Override
-	// public long getTimestamp() {
-	// return endNode.getTimestamp();
-	// }
-	//
-	// public String toString() {
-	// return sdf.format(new Date(getTimestamp()));
-	// }
-	//
-	// @Override
-	// public GraphNode getVersion() {
-	// return endNode;
-	// }
-	// });
-
-	// }
-	// return history;
-	return null;
-    }
 
     public Relationship getIncomingRelationship() {
 	return incomingRelationship.getRelationship();
@@ -113,9 +75,7 @@ public class ComplexNode implements ComplexGraphNode {
 	return fdo;
     }
 
-    public long getTimestamp() {
-	return (long) getIncomingRelationship().getProperty("timestamp");
-    }
+
 
     public VectorClock getVectorClock() {
 	// FIXME - what if VC is not at top of stack?
@@ -162,6 +122,10 @@ public class ComplexNode implements ComplexGraphNode {
     @Override
     public void write(String json) throws IllegalJsonException, JsonPersistenceException {
 	getJsonNode().write(json);
+    }
+
+    public List<History> getHistory() {
+	return new HistoryImpl(this,getStrategy().read(incomingRelationship.getRelationship(), History.class)).getHistory();
     }
 
 }

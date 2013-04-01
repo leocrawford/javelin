@@ -1,6 +1,5 @@
 package com.crypticbit.javelin;
 
-import com.crypticbit.javelin.neo4j.nodes.json.ComplexGraphNode;
 import com.crypticbit.javelin.neo4j.nodes.json.JsonGraphNode;
 
 public interface History {

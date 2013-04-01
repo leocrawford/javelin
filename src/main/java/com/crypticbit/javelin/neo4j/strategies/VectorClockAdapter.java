@@ -58,8 +58,9 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 	Node node = relationshipToNode.getEndNode();
 
 	// if no incoming nodes, do nothing
-	if (!node.hasRelationship(Direction.OUTGOING, RelationshipTypes.INCOMING_VERSION)) return getNextAdapter()
-		.read(relationshipToNode, desiredInterface);
+	if (!node.hasRelationship(Direction.OUTGOING, RelationshipTypes.INCOMING_VERSION)) {
+	    return getNextAdapter().read(relationshipToNode, desiredInterface);
+	}
 
 	Map<VectorClock, Relationship> candidates = new HashMap<>();
 	// copy the candidate relationships into the map
@@ -122,11 +123,14 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 	    }
 
 	}
-	if (selected.getValue() != relationshipToNode.getEndNode()) return super.update(relationshipToNode, true,
-		new PopulateFromNodeUpdate(selected.getValue().getEndNode()).add(new WriteVectorClock(acc)));
-	else
+	if (selected.getValue() != relationshipToNode.getEndNode()) {
+	    return super.update(relationshipToNode, true, new PopulateFromNodeUpdate(selected.getValue().getEndNode())
+		    .add(new WriteVectorClock(acc)));
+	}
+	else {
 	    return super.update(relationshipToNode, true, new WriteVectorClock(acc));
-	// return selected.getValue();
+	    // return selected.getValue();
+	}
     }
 
     @Override
@@ -135,6 +139,11 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
     }
 
     public class IncrementVectorClock extends UpdateOperation {
+
+	@Override
+	public Relationship[] getNewRelationships() {
+	    return null;
+	}
 
 	@Override
 	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
@@ -149,11 +158,6 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 		e.printStackTrace();
 	    }
 	    return relationshipToGraphNodeToUpdate;
-	}
-
-	@Override
-	public Relationship[] getNewRelationships() {
-	    return null;
 	}
 
     }

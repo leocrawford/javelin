@@ -22,7 +22,6 @@ import com.jayway.jsonpath.internal.PathToken;
 
 /**
  * Wraps a database node as a node that holds Map's
- * 
  */
 public class MapGraphNode extends AbstractMap<String, ComplexNode> implements JsonGraphNode {
 
@@ -48,15 +47,18 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 
     @Override
     public ComplexNode navigate(PathToken token) throws IllegalJsonException {
-	if (token.isArrayIndexToken()) throw new IllegalJsonException(
-		"Expecting a map element in json path expression: " + token.getFragment());
+	if (token.isArrayIndexToken()) {
+	    throw new IllegalJsonException("Expecting a map element in json path expression: " + token.getFragment());
+	}
 	return put(token.getFragment());
     }
 
     @Override
     public ComplexNode put(final String key) {
-	if (this.containsKey(key)) return this.get(key);
-	else
+	if (this.containsKey(key)) {
+	    return this.get(key);
+	}
+	else {
 	    return new ComplexNode(new RelationshipHolder(new PotentialRelationship() {
 
 		@Override
@@ -68,24 +70,26 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 		    return operation.newR;
 		}
 	    }), getStrategy());
+	}
     }
 
     public void removeElementFromMap(final Relationship relationshipToParent, final String key) {
 	// this is a delete (on node) and update (on parent)
 	getStrategy().update(relationshipToParent, false, new UpdateOperation() {
 	    @Override
-	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		    FundementalDatabaseOperations dal) {
-		for (Relationship relationshipToNodeToDelete : relationshipToGraphNodeToUpdate.getEndNode()
-			.getRelationships(Direction.OUTGOING, RelationshipTypes.MAP))
-		    if (relationshipToNodeToDelete.getProperty(Parameters.Relationship.KEY.name()).equals(key)) {
-			dal.delete(relationshipToNodeToDelete);
-		    }
+	    public Relationship[] getNewRelationships() {
 		return null;
 	    }
 
 	    @Override
-	    public Relationship[] getNewRelationships() {
+	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
+		    FundementalDatabaseOperations dal) {
+		for (Relationship relationshipToNodeToDelete : relationshipToGraphNodeToUpdate.getEndNode()
+			.getRelationships(Direction.OUTGOING, RelationshipTypes.MAP)) {
+		    if (relationshipToNodeToDelete.getProperty(Parameters.Relationship.KEY.name()).equals(key)) {
+			dal.delete(relationshipToNodeToDelete);
+		    }
+		}
 		return null;
 	    }
 	});
@@ -98,7 +102,6 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 	return new ObjectNode(null, wrapChildrenAsJsonNode()) {
 	};
     }
-
 
     @Override
     public String toJsonString() {
@@ -178,21 +181,22 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 	}
 
 	@Override
+	public Relationship[] getNewRelationships() {
+	    return new Relationship[] { newR };
+	}
+
+	@Override
 	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
 		FundementalDatabaseOperations dal) {
 	    // FIXME - copy from UpdateJson and sometimes not needed
-	    relationshipToGraphNodeToUpdate.getEndNode().setProperty(Parameters.Node.TYPE.name(), NodeTypes.MAP.toString());
+	    relationshipToGraphNodeToUpdate.getEndNode().setProperty(Parameters.Node.TYPE.name(),
+		    NodeTypes.MAP.toString());
 	    newR = dal.createNewNode(relationshipToGraphNodeToUpdate.getEndNode(), RelationshipTypes.MAP,
 		    createOperation);
 	    newR.setProperty(Parameters.Relationship.KEY.name(), key);
 	    return relationshipToGraphNodeToUpdate;
 	}
-	
-	@Override
-	public Relationship[] getNewRelationships() {
-	    return new Relationship[]{newR};
-	}
-	
+
     }
 
 }

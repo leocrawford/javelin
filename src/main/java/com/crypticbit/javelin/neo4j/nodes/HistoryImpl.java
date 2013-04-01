@@ -18,16 +18,16 @@ public class HistoryImpl {
     private Relationship incomingRelationship;
     private ComplexNode holder;
 
+    private static final String DATE_FORMAT = "H:mm:ss.SSS yy-MM-dd";
+
+    private static SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+
     public HistoryImpl(ComplexNode holder, Relationship incomingRelationship) {
 	this.holder = holder;
 	this.incomingRelationship = incomingRelationship;
 
 	System.out.println("Creating history for :" + incomingRelationship.getEndNode());
     }
-
-    private static final String DATE_FORMAT = "H:mm:ss.SSS yy-MM-dd";
-
-    private static SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 
     public List<History> getHistory() {
 	List<History> history = new LinkedList<History>();
@@ -46,13 +46,14 @@ public class HistoryImpl {
 		    return HistoryImpl.this.getTimestamp(readRelationship);
 		}
 
-		public String toString() {
-		    return sdf.format(new Date(getTimestamp()));
-		}
-
 		@Override
 		public JsonGraphNode getVersion() {
 		    return endNode;
+		}
+
+		@Override
+		public String toString() {
+		    return sdf.format(new Date(getTimestamp()));
 		}
 	    });
 

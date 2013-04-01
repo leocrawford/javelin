@@ -8,7 +8,6 @@ import org.neo4j.graphdb.RelationshipType;
  * The CRUD Operations a database needs to implement - and which can be intercepted, to change behaviour
  * 
  * @author leo
- * 
  */
 public interface FundementalDatabaseOperations {
 
@@ -61,14 +60,14 @@ public interface FundementalDatabaseOperations {
 	public static NullUpdateOperation INSTANCE = new NullUpdateOperation();
 
 	@Override
-	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		FundementalDatabaseOperations dal) {
-	    return relationshipToGraphNodeToUpdate;
+	public Relationship[] getNewRelationships() {
+	    return new Relationship[] {};
 	}
 
 	@Override
-	public Relationship[] getNewRelationships() {
-		    return new Relationship[]{};
+	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
+		FundementalDatabaseOperations dal) {
+	    return relationshipToGraphNodeToUpdate;
 	}
 
     }
@@ -77,11 +76,15 @@ public interface FundementalDatabaseOperations {
      * The operation (command pattern) that is to be executed to perform an s update
      * 
      * @author leo
-     * 
      */
     public abstract class UpdateOperation {
 	public UpdateOperation add(final UpdateOperation newOperation) {
 	    return new UpdateOperation() {
+
+		@Override
+		public Relationship[] getNewRelationships() {
+		    return FundementalDatabaseOperations.UpdateOperation.this.getNewRelationships();
+		}
 
 		@Override
 		public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
@@ -96,17 +99,12 @@ public interface FundementalDatabaseOperations {
 		    return relationshipToGraphNodeToUpdate;
 		}
 
-		@Override
-		public Relationship[] getNewRelationships() {
-		    return FundementalDatabaseOperations.UpdateOperation.this.getNewRelationships();
-		}
-
 	    };
 	}
 
+	public abstract Relationship[] getNewRelationships();
+
 	public abstract Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
 		FundementalDatabaseOperations dal);
-	
-	public abstract Relationship[] getNewRelationships();
     }
 }

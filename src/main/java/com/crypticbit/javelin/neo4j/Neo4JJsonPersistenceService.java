@@ -23,7 +23,6 @@ import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
  * Jackson-JsonPaths.
  * 
  * @author leo
- * 
  */
 public class Neo4JJsonPersistenceService implements JsonPersistenceService {
 
@@ -47,7 +46,7 @@ public class Neo4JJsonPersistenceService implements JsonPersistenceService {
      *            the location of an existing db, or location to create one
      * @param identity
      *            the unique identity of the machine/user combo (which is used for VectorClock)
-     * */
+     */
     public Neo4JJsonPersistenceService(File file, String identity) {
 	this.file = file;
 	this.identity = identity;
@@ -81,7 +80,7 @@ public class Neo4JJsonPersistenceService implements JsonPersistenceService {
 		    .next();
 	    return new ComplexNode(new RelationshipHolder(r), fdo);
 	}
-	else
+	else {
 	    return new ComplexNode(new RelationshipHolder(new PotentialRelationship() {
 		@Override
 		public Relationship create(UpdateOperation createOperation) {
@@ -89,6 +88,7 @@ public class Neo4JJsonPersistenceService implements JsonPersistenceService {
 		    return newR;
 		}
 	    }), fdo);
+	}
     }
 
     public void startWebService() {

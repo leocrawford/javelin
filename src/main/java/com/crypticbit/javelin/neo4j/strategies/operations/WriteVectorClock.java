@@ -15,6 +15,11 @@ public class WriteVectorClock extends UpdateOperation {
     }
 
     @Override
+    public Relationship[] getNewRelationships() {
+	return null;
+    }
+
+    @Override
     public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, FundementalDatabaseOperations dal) {
 	try {
 	    relationshipToGraphNodeToUpdate.getEndNode().setProperty("VERSION_CLOCK", vc.serializeToString());
@@ -24,11 +29,6 @@ public class WriteVectorClock extends UpdateOperation {
 	    e.printStackTrace();
 	}
 	return relationshipToGraphNodeToUpdate;
-    }
-
-    @Override
-    public Relationship[] getNewRelationships() {
-	return null;
     }
 
 }

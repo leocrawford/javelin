@@ -117,7 +117,6 @@ public class VectorClock extends HashMap<String, Integer> implements Serializabl
 
     /**
      * VectorClock compare operation. Returns one of four possible values indicating how clock one relates to clock two:
-     * 
      * VectorComparison.GREATER If One > Two. VectorComparison.EQUAL If One = Two. VectorComparison.SMALLER If One <
      * Two. VectorComparison.SIMULTANEOUS If One <> Two.
      * 
@@ -125,7 +124,6 @@ public class VectorClock extends HashMap<String, Integer> implements Serializabl
      *            - First Clock being compared.
      * @param pTwo
      *            - Second Clock being compared.
-     * 
      * @return VectorComparison value indicating how One relates to Two.
      */
     public static VectorComparison compare(VectorClock pOne, VectorClock pTwo) {
@@ -167,11 +165,18 @@ public class VectorClock extends HashMap<String, Integer> implements Serializabl
 	}
 
 	// Return based on determined information.
-	if (lEqual) return VectorComparison.EQUAL;
-	else if (lGreater && !lSmaller) return VectorComparison.GREATER;
-	else if (lSmaller && !lGreater) return VectorComparison.SMALLER;
-	else
+	if (lEqual) {
+	    return VectorComparison.EQUAL;
+	}
+	else if (lGreater && !lSmaller) {
+	    return VectorComparison.GREATER;
+	}
+	else if (lSmaller && !lGreater) {
+	    return VectorComparison.SMALLER;
+	}
+	else {
 	    return VectorComparison.SIMULTANEOUS;
+	}
     }
 
     public static VectorClock deSerialize(String serialized) throws JsonParseException, JsonMappingException,
@@ -189,7 +194,6 @@ public class VectorClock extends HashMap<String, Integer> implements Serializabl
      *            - First Clock being merged.
      * @param pTwo
      *            - Second Clock being merged.
-     * 
      * @return A new VectorClock with the maximum for each element in either clock.
      */
     public static VectorClock max(VectorClock pOne, VectorClock pTwo) {

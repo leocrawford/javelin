@@ -27,7 +27,6 @@ public class ComplexNode implements ComplexGraphNode {
     private FundementalDatabaseOperations fdo;
     private JsonNodeFactory jsonNodeFactory;
 
-    
     public ComplexNode(RelationshipHolder incomingRelationship, FundementalDatabaseOperations fdo) {
 	this.incomingRelationship = incomingRelationship;
 	this.fdo = fdo;
@@ -61,7 +60,10 @@ public class ComplexNode implements ComplexGraphNode {
 	// };
     }
 
-
+    public List<History> getHistory() {
+	return new HistoryImpl(this, getStrategy().read(incomingRelationship.getRelationship(), History.class))
+		.getHistory();
+    }
 
     public Relationship getIncomingRelationship() {
 	return incomingRelationship.getRelationship();
@@ -75,8 +77,6 @@ public class ComplexNode implements ComplexGraphNode {
 	return fdo;
     }
 
-
-
     public VectorClock getVectorClock() {
 	// FIXME - what if VC is not at top of stack?
 	return null;
@@ -88,9 +88,8 @@ public class ComplexNode implements ComplexGraphNode {
 	// FIXME - what if VC is not at top of stack?
 	// FIXME Factor out Object Mapper
 	VectorClockAdapter vca2 = ((VectorClockAdapter) getStrategy());
-	vca2.addIncoming(getIncomingRelationship(),
-		new JsonWriteUpdateOperation(new ObjectMapper().readTree(block.getJson())).add(new WriteVectorClock(
-			block.getVectorClock())));
+	vca2.addIncoming(getIncomingRelationship(), new JsonWriteUpdateOperation(new ObjectMapper().readTree(block
+		.getJson())).add(new WriteVectorClock(block.getVectorClock())));
 
     }
 
@@ -122,10 +121,6 @@ public class ComplexNode implements ComplexGraphNode {
     @Override
     public void write(String json) throws IllegalJsonException, JsonPersistenceException {
 	getJsonNode().write(json);
-    }
-
-    public List<History> getHistory() {
-	return new HistoryImpl(this,getStrategy().read(incomingRelationship.getRelationship(), History.class)).getHistory();
     }
 
 }

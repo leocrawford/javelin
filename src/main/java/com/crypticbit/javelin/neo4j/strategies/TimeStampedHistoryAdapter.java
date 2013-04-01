@@ -20,8 +20,8 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 	try {
 	    Node node = getGraphDB().createNode();
 	    Relationship newRelationship = parentNode.createRelationshipTo(node, type);
-	    Relationship version0 = super.createNewNode(node, RelationshipTypes.VERSION,
-		    createOperation.add(getTimestampOperation()));
+	    Relationship version0 = super.createNewNode(node, RelationshipTypes.VERSION, createOperation
+		    .add(getTimestampOperation()));
 
 	    tx.success();
 	    currentVersion = version0;
@@ -84,15 +84,15 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
     private UpdateOperation getTimestampOperation() {
 	return new UpdateOperation() {
 	    @Override
+	    public Relationship[] getNewRelationships() {
+		return null;
+	    }
+
+	    @Override
 	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
 		    FundementalDatabaseOperations dal) {
 		relationshipToGraphNodeToUpdate.setProperty("timestamp", System.currentTimeMillis());
 		return relationshipToGraphNodeToUpdate;
-	    }
-
-	    @Override
-	    public Relationship[] getNewRelationships() {
-		return null;
 	    }
 	};
     }

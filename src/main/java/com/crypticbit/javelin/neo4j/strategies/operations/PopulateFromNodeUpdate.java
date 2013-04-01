@@ -16,16 +16,16 @@ public class PopulateFromNodeUpdate extends UpdateOperation {
     }
 
     @Override
-    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, FundementalDatabaseOperations dal) {
-	CloneUtils.copyOutgoingRelationships(nodeToCopyFrom, relationshipToGraphNodeToUpdate.getEndNode());
-	CloneUtils.copyProperties(nodeToCopyFrom, relationshipToGraphNodeToUpdate.getEndNode(),
-		Parameters.Node.values());
-	return relationshipToGraphNodeToUpdate;
+    public Relationship[] getNewRelationships() {
+	return null;
     }
 
     @Override
-    public Relationship[] getNewRelationships() {
-	return null;
+    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, FundementalDatabaseOperations dal) {
+	CloneUtils.copyOutgoingRelationships(nodeToCopyFrom, relationshipToGraphNodeToUpdate.getEndNode());
+	CloneUtils.copyProperties(nodeToCopyFrom, relationshipToGraphNodeToUpdate.getEndNode(), Parameters.Node
+		.values());
+	return relationshipToGraphNodeToUpdate;
     }
 
 }

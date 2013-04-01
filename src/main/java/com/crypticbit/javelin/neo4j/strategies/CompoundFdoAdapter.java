@@ -39,9 +39,12 @@ public abstract class CompoundFdoAdapter implements FundementalDatabaseOperation
 
     @Override
     public Relationship read(Relationship relationshipToNode, Class<?> desiredInterface) {
-	if (doesExposeInterface(desiredInterface)) return relationshipToNode;
-	else
+	if (doesExposeInterface(desiredInterface)) {
+	    return relationshipToNode;
+	}
+	else {
 	    return readNext(relationshipToNode, desiredInterface);
+	}
     }
 
     public abstract Relationship readNext(Relationship relationshipToNode, Class<?> desiredInterface);

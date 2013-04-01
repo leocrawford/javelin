@@ -19,6 +19,11 @@ public final class ReplaceNodeUpdateOperation extends UpdateOperation {
     }
 
     @Override
+    public Relationship[] getNewRelationships() {
+	return null;
+    }
+
+    @Override
     public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, FundementalDatabaseOperations dal) {
 
 	Node newGraphNode = relationshipToGraphNodeToUpdate.getEndNode();
@@ -31,11 +36,6 @@ public final class ReplaceNodeUpdateOperation extends UpdateOperation {
 	}
 	CloneUtils.copyProperties(relationshipToParent, relationshipToGraphNodeToUpdate);
 	return relationshipToGraphNodeToUpdate;
-    }
-
-    @Override
-    public Relationship[] getNewRelationships() {
-	return null;
     }
 
 }

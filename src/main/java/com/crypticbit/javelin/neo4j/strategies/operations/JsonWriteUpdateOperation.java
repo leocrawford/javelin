@@ -23,6 +23,11 @@ public final class JsonWriteUpdateOperation extends UpdateOperation {
     }
 
     @Override
+    public Relationship[] getNewRelationships() {
+	return newRelationships.toArray(new Relationship[newRelationships.size()]);
+    }
+
+    @Override
     public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, FundementalDatabaseOperations dal) {
 
 	Node updateNode = relationshipToGraphNodeToUpdate.getEndNode();
@@ -54,10 +59,5 @@ public final class JsonWriteUpdateOperation extends UpdateOperation {
 	    updateNode.setProperty(Parameters.Node.VALUE.name(), jsonNode.toString());
 	}
 	return relationshipToGraphNodeToUpdate;
-    }
-
-    @Override
-    public Relationship[] getNewRelationships() {
-	return newRelationships.toArray(new Relationship[newRelationships.size()]);
     }
 }

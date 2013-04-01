@@ -16,6 +16,7 @@ import com.crypticbit.javelin.neo4j.nodes.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.nodes.RelationshipHolder;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -85,6 +86,11 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGra
 		    if (relationshipToNodeToDelete.getProperty(Parameters.Relationship.INDEX.name()).equals(index)) {
 			dal.delete(relationshipToNodeToDelete);
 		    }
+		return null;
+	    }
+
+	    @Override
+	    public Relationship[] getNewRelationships() {
 		return null;
 	    }
 	});
@@ -177,10 +183,18 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGra
 	}
 
 	@Override
-	public Relationship updateElement(Relationship relationship, FundementalDatabaseOperations dal) {
-	    newR = dal.createNewNode(relationship.getEndNode(), RelationshipTypes.ARRAY, createOperation);
+	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, FundementalDatabaseOperations dal) {   
+	    // FIXME - copy from UpdateJson and sometimes not needed
+	    relationshipToGraphNodeToUpdate.getEndNode().setProperty(Parameters.Node.TYPE.name(), NodeTypes.ARRAY.toString());
+	    newR = dal.createNewNode(relationshipToGraphNodeToUpdate.getEndNode(), RelationshipTypes.ARRAY, createOperation);
 	    newR.setProperty(Parameters.Relationship.INDEX.name(), index);
-	    return relationship;
+	    System.out.println("created array element: "+newR.getEndNode());
+	    return relationshipToGraphNodeToUpdate;
+	}
+
+	@Override
+	public Relationship[] getNewRelationships() {
+	    return new Relationship[]{newR};
 	}
 
     }

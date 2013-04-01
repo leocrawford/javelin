@@ -32,28 +32,27 @@ public class Neo4JJsonPersistenceServiceTest extends Neo4JTestSupport {
 	// assertTrue("Check most recent history comes first", ps.getRootNode().getHistory().get(0).getTimestamp() > ps
 	// .getRootNode().getHistory().get(3).getTimestamp());
 
-//	assertEquals(MAPPER.readTree("\"new value 2\""),
-//		MAPPER.readTree(ps.getRootNode().getHistory().get(2).getVersion().toJsonString()));
+	// assertEquals(MAPPER.readTree("\"new value 2\""),
+	// MAPPER.readTree(ps.getRootNode().getHistory().get(2).getVersion().toJsonString()));
     }
 
-    
-     @Test
-     public void getHistoryOfAdd() throws IOException, JsonPersistenceException, IllegalJsonException {
-     Neo4JJsonPersistenceService ps = createNewService();
-    
-     ComplexNode rootNode = ps.getRootNode();
-     rootNode.write(JSON_TEXT);
-     rootNode.navigate("second").add().write("\"new value 1\"");
-    
-     // ps.startWebServiceAndWait();
-    
-     assertEquals(2, ((ComplexNode)ps.getRootNode().navigate("second")).getHistory().size());
-    
-     ps.getRootNode().navigate("second").add().write("\"new value 2\"");
-    
-     // FIXME - stop need for cast
-     assertEquals(3,  ((ComplexNode)ps.getRootNode().navigate("second")).getHistory().size());
-     }
+    @Test
+    public void getHistoryOfAdd() throws IOException, JsonPersistenceException, IllegalJsonException {
+	Neo4JJsonPersistenceService ps = createNewService();
+
+	ComplexNode rootNode = ps.getRootNode();
+	rootNode.write(JSON_TEXT);
+	rootNode.navigate("second").add().write("\"new value 1\"");
+
+	// ps.startWebServiceAndWait();
+
+	assertEquals(2, ((ComplexNode) ps.getRootNode().navigate("second")).getHistory().size());
+
+	ps.getRootNode().navigate("second").add().write("\"new value 2\"");
+
+	// FIXME - stop need for cast
+	assertEquals(3, ((ComplexNode) ps.getRootNode().navigate("second")).getHistory().size());
+    }
 
     @Test
     public void testAddOfNewNonRootArrayNode() throws IOException, JsonPersistenceException, IllegalJsonException {
@@ -126,32 +125,30 @@ public class Neo4JJsonPersistenceServiceTest extends Neo4JTestSupport {
 		MAPPER.readTree(ps.getRootNode().toJsonString()));
     }
 
-     @Test
-     public void testNavigateToNewNode() throws IOException, JsonPersistenceException, IllegalJsonException {
-     Neo4JJsonPersistenceService ps = createNewService();
-    
-     ps.getRootNode().write(JSON_TEXT);
-     ps.getRootNode().navigate("second[0].k1.newNode").write("\"very new stuff\"");
-    
-     assertEquals(MAPPER.readTree("{\"newNode\":\"very new stuff\",\"id\":\"sd1 p\"}"),
-     MAPPER.readTree(ps.getRootNode().navigate("second[0].k1").toJsonString()));
-    
-     // FIXME - remove cast
-     ComplexNode foundNode =  ((ComplexNode)ps.getRootNode().navigate("second[0].k1.a1.a2"));
-     foundNode.write("\"even newer stuff\"");
-    
-     // ps.startWebServiceAndWait();
-    
-     assertEquals(
-     MAPPER.readTree("{\"id\":\"sd1 p\", \"newNode\":\"very new stuff\", \"a1\":{\"a2\":\"even newer stuff\"}}"),
-     MAPPER.readTree(ps.getRootNode().navigate("second[0].k1").toJsonString()));
-    
-     ps.getRootNode().navigate("second[0].k1.a1.a3[0].b.c").write("\"at end of newly created chain\"");
-     assertEquals(
-     MAPPER.readTree("{\"a3\":[{\"b\":{\"c\":\"at end of newly created chain\"}}], \"a2\":\"even newer stuff\"}"),
-     MAPPER.readTree(ps.getRootNode().navigate("second[0].k1.a1").toJsonString()));
-    
-     }
+    @Test
+    public void testNavigateToNewNode() throws IOException, JsonPersistenceException, IllegalJsonException {
+	Neo4JJsonPersistenceService ps = createNewService();
+
+	ps.getRootNode().write(JSON_TEXT);
+	ps.getRootNode().navigate("second[0].k1.newNode").write("\"very new stuff\"");
+
+	assertEquals(MAPPER.readTree("{\"newNode\":\"very new stuff\",\"id\":\"sd1 p\"}"),
+		MAPPER.readTree(ps.getRootNode().navigate("second[0].k1").toJsonString()));
+
+	// FIXME - remove cast
+	ComplexNode foundNode = ((ComplexNode) ps.getRootNode().navigate("second[0].k1.a1.a2"));
+	foundNode.write("\"even newer stuff\"");
+
+	assertEquals(
+		MAPPER.readTree("{\"id\":\"sd1 p\", \"newNode\":\"very new stuff\", \"a1\":{\"a2\":\"even newer stuff\"}}"),
+		MAPPER.readTree(ps.getRootNode().navigate("second[0].k1").toJsonString()));
+
+	ps.getRootNode().navigate("second[0].k1.a1.a3[0].b.c").write("\"at end of newly created chain\"");
+	assertEquals(
+		MAPPER.readTree("{\"a3\":[{\"b\":{\"c\":\"at end of newly created chain\"}}], \"a2\":\"even newer stuff\"}"),
+		MAPPER.readTree(ps.getRootNode().navigate("second[0].k1.a1").toJsonString()));
+
+    }
 
     @Test
     public void testOverwriteRoot() throws IOException, JsonPersistenceException, IllegalJsonException {
@@ -205,19 +202,19 @@ public class Neo4JJsonPersistenceServiceTest extends Neo4JTestSupport {
 		MAPPER.readTree(ps.getRootNode().toJsonString()));
     }
 
-     @Test
-     public void testMultipleWriteToSameNode() throws IOException, JsonPersistenceException, IllegalJsonException {
-     Neo4JJsonPersistenceService ps = createNewService();
-    
-     ps.getRootNode().write(JSON_TEXT);
-     // FIXME remove cast
-     ComplexNode aNode = (ComplexNode) ps.getRootNode().navigate("second");
-     aNode.write("[2,3,4]");
-     String writeValue = "[2,3,4,5]";
-         
-     aNode.write(writeValue);
-     assertEquals(MAPPER.readTree(writeValue), MAPPER.readTree(ps.getRootNode().navigate("second").toJsonString()));
-     }
+    @Test
+    public void testMultipleWriteToSameNode() throws IOException, JsonPersistenceException, IllegalJsonException {
+	Neo4JJsonPersistenceService ps = createNewService();
+
+	ps.getRootNode().write(JSON_TEXT);
+	// FIXME remove cast
+	ComplexNode aNode = (ComplexNode) ps.getRootNode().navigate("second");
+	aNode.write("[2,3,4]");
+	String writeValue = "[2,3,4,5]";
+
+	aNode.write(writeValue);
+	assertEquals(MAPPER.readTree(writeValue), MAPPER.readTree(ps.getRootNode().navigate("second").toJsonString()));
+    }
 
     // @Test
     // public void testUpdateToSameNodeAfterWrite() throws IOException, JsonPersistenceException, IllegalJsonException {

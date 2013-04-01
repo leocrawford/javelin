@@ -151,6 +151,11 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 	    return relationshipToGraphNodeToUpdate;
 	}
 
+	@Override
+	public Relationship[] getNewRelationships() {
+	    return null;
+	}
+
     }
 
     public enum VectorComparison {

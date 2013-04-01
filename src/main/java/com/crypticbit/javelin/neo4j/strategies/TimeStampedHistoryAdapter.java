@@ -89,6 +89,11 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 		relationshipToGraphNodeToUpdate.setProperty("timestamp", System.currentTimeMillis());
 		return relationshipToGraphNodeToUpdate;
 	    }
+
+	    @Override
+	    public Relationship[] getNewRelationships() {
+		return null;
+	    }
 	};
     }
 

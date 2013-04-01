@@ -33,4 +33,9 @@ public final class ReplaceNodeUpdateOperation extends UpdateOperation {
 	return relationshipToGraphNodeToUpdate;
     }
 
+    @Override
+    public Relationship[] getNewRelationships() {
+	return null;
+    }
+
 }

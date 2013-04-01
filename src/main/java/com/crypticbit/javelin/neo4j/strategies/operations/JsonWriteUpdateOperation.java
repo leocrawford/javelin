@@ -1,6 +1,8 @@
 package com.crypticbit.javelin.neo4j.strategies.operations;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -14,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public final class JsonWriteUpdateOperation extends UpdateOperation {
     private final JsonNode jsonNode;
+    private List<Relationship> newRelationships = new LinkedList<>();
 
     public JsonWriteUpdateOperation(JsonNode jsonNode) {
 	this.jsonNode = jsonNode;
@@ -31,6 +34,7 @@ public final class JsonWriteUpdateOperation extends UpdateOperation {
 		    Relationship newR = dal.createNewNode(relationshipToGraphNodeToUpdate.getEndNode(),
 			    RelationshipTypes.ARRAY, new JsonWriteUpdateOperation(jsonNode.get(loop)));
 		    newR.setProperty(Parameters.Relationship.INDEX.name(), loop);
+		    newRelationships.add(newR);
 		}
 	    }
 	    if (jsonNode.isObject()) {
@@ -50,5 +54,10 @@ public final class JsonWriteUpdateOperation extends UpdateOperation {
 	    updateNode.setProperty(Parameters.Node.VALUE.name(), jsonNode.toString());
 	}
 	return relationshipToGraphNodeToUpdate;
+    }
+
+    @Override
+    public Relationship[] getNewRelationships() {
+	return newRelationships.toArray(new Relationship[newRelationships.size()]);
     }
 }

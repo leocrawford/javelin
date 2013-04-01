@@ -26,4 +26,9 @@ public class WriteVectorClock extends UpdateOperation {
 	return relationshipToGraphNodeToUpdate;
     }
 
+    @Override
+    public Relationship[] getNewRelationships() {
+	return null;
+    }
+
 }

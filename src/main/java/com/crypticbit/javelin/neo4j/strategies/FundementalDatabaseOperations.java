@@ -66,6 +66,11 @@ public interface FundementalDatabaseOperations {
 	    return relationshipToGraphNodeToUpdate;
 	}
 
+	@Override
+	public Relationship[] getNewRelationships() {
+		    return new Relationship[]{};
+	}
+
     }
 
     /**
@@ -91,10 +96,17 @@ public interface FundementalDatabaseOperations {
 		    return relationshipToGraphNodeToUpdate;
 		}
 
+		@Override
+		public Relationship[] getNewRelationships() {
+		    return FundementalDatabaseOperations.UpdateOperation.this.getNewRelationships();
+		}
+
 	    };
 	}
 
 	public abstract Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
 		FundementalDatabaseOperations dal);
+	
+	public abstract Relationship[] getNewRelationships();
     }
 }

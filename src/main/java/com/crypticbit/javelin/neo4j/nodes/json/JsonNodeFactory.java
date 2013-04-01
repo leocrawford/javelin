@@ -94,9 +94,13 @@ public class JsonNodeFactory implements ComplexGraphNode {
 	return new ComplexNode(new RelationshipHolder(new PotentialRelationship() {
 	    @Override
 	    public Relationship create(UpdateOperation updateOperation) {
-		return holder.getStrategy().update(
-			incomingRelationship.createOrUpdateRelationship(operationToMakeIncomingRelationship,
-				holder.getStrategy()), true, updateOperation);
+		Relationship realisedIncomingRelationship = incomingRelationship.createOrUpdateRelationship(
+			NullUpdateOperation.INSTANCE, holder.getStrategy());
+		holder.getStrategy().update(realisedIncomingRelationship, false, operationToMakeIncomingRelationship);
+		assert (operationToMakeIncomingRelationship.getNewRelationships().length == 1);
+		Relationship relationshipToNewNode = operationToMakeIncomingRelationship.getNewRelationships()[0];
+		holder.getStrategy().update(relationshipToNewNode, true, updateOperation);
+		return relationshipToNewNode;
 	    }
 
 	}), holder.getStrategy());

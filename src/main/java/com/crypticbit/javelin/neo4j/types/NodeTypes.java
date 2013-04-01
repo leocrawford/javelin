@@ -31,6 +31,7 @@ public enum NodeTypes {
     abstract JsonGraphNode _wrapAsGraphNode(Node graphNode, ComplexNode complexNode);
 
     public static JsonGraphNode wrapAsGraphNode(Node graphNode, ComplexNode complexNode) {
+System.out.println("Found type @ :"+graphNode.getId());
 	if (graphNode.hasProperty(Parameters.Node.TYPE.name())) return valueOf(
 		(String) graphNode.getProperty(Parameters.Node.TYPE.name()))._wrapAsGraphNode(graphNode, complexNode);
 	else

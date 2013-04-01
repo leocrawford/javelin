@@ -13,6 +13,7 @@ import com.crypticbit.javelin.neo4j.nodes.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.nodes.RelationshipHolder;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
 import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -82,6 +83,11 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 		    }
 		return null;
 	    }
+
+	    @Override
+	    public Relationship[] getNewRelationships() {
+		return null;
+	    }
 	});
     }
 
@@ -93,12 +99,6 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 	};
     }
 
-    // public static Relationship addElementToMap(FundementalDatabaseOperations dal, Node node, final String key,
-    // Node newNode) {
-    // Relationship r = node.createRelationshipTo(newNode, RelationshipTypes.MAP);
-    // r.setProperty(Parameters.Relationship.KEY.name(), key);
-    // return r;
-    // }
 
     @Override
     public String toJsonString() {
@@ -180,12 +180,19 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 	@Override
 	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
 		FundementalDatabaseOperations dal) {
-
+	    // FIXME - copy from UpdateJson and sometimes not needed
+	    relationshipToGraphNodeToUpdate.getEndNode().setProperty(Parameters.Node.TYPE.name(), NodeTypes.MAP.toString());
 	    newR = dal.createNewNode(relationshipToGraphNodeToUpdate.getEndNode(), RelationshipTypes.MAP,
 		    createOperation);
 	    newR.setProperty(Parameters.Relationship.KEY.name(), key);
 	    return relationshipToGraphNodeToUpdate;
 	}
+	
+	@Override
+	public Relationship[] getNewRelationships() {
+	    return new Relationship[]{newR};
+	}
+	
     }
 
 }

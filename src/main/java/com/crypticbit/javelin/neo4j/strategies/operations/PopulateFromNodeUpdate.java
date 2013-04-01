@@ -23,4 +23,9 @@ public class PopulateFromNodeUpdate extends UpdateOperation {
 	return relationshipToGraphNodeToUpdate;
     }
 
+    @Override
+    public Relationship[] getNewRelationships() {
+	return null;
+    }
+
 }

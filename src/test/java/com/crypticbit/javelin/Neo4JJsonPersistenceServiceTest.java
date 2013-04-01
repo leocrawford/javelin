@@ -138,7 +138,7 @@ public class Neo4JJsonPersistenceServiceTest extends Neo4JTestSupport {
 	// FIXME - remove cast
 	ComplexNode foundNode = ((ComplexNode) ps.getRootNode().navigate("second[0].k1.a1.a2"));
 	foundNode.write("\"even newer stuff\"");
-
+	
 	assertEquals(
 		MAPPER.readTree("{\"id\":\"sd1 p\", \"newNode\":\"very new stuff\", \"a1\":{\"a2\":\"even newer stuff\"}}"),
 		MAPPER.readTree(ps.getRootNode().navigate("second[0].k1").toJsonString()));

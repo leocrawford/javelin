@@ -176,7 +176,7 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGra
 	}
     }
 
-    final static class CreateNewArrayElementUpdateOperation extends UpdateOperation {
+    public final static class CreateNewArrayElementUpdateOperation extends UpdateOperation {
 	private final UpdateOperation createOperation;
 	private Relationship newR;
 	private int index;

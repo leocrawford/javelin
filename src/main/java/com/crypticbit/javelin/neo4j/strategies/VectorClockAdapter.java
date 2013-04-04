@@ -18,7 +18,7 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 
     private String identity;
 
-    public VectorClockAdapter(GraphDatabaseService graphDb, FundementalDatabaseOperations nextAdapter, String identity) {
+    public VectorClockAdapter(GraphDatabaseService graphDb, DatabaseStrategy nextAdapter, String identity) {
 	super(graphDb, nextAdapter);
 	this.identity = identity;
 
@@ -110,7 +110,7 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 	}
 	else {
 	    Chooser chooser = new UserSelectedChooser();
-	    selected = chooser.select(new ArrayList(candidates.entrySet()));
+	    selected = chooser.select(new ArrayList<>(candidates.entrySet()));
 	}
 
 	VectorClock acc = null;
@@ -147,7 +147,7 @@ public class VectorClockAdapter extends CompoundFdoAdapter {
 
 	@Override
 	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		FundementalDatabaseOperations dal) {
+		DatabaseStrategy dal) {
 	    VectorClock vc = getVectorClock(relationshipToGraphNodeToUpdate.getEndNode());
 	    vc.incrementClock(identity);
 	    try {

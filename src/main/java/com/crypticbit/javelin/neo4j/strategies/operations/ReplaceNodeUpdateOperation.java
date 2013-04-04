@@ -3,8 +3,8 @@ package com.crypticbit.javelin.neo4j.strategies.operations;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.DatabaseStrategy;
+import com.crypticbit.javelin.neo4j.strategies.DatabaseStrategy.UpdateOperation;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 
 public final class ReplaceNodeUpdateOperation extends UpdateOperation {
@@ -24,7 +24,7 @@ public final class ReplaceNodeUpdateOperation extends UpdateOperation {
     }
 
     @Override
-    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, FundementalDatabaseOperations dal) {
+    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, DatabaseStrategy dal) {
 
 	Node newGraphNode = relationshipToGraphNodeToUpdate.getEndNode();
 	if (!removeEverything) {

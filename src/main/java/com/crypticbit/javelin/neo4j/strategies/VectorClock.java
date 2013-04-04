@@ -22,6 +22,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class VectorClock extends HashMap<String, Integer> implements Serializable {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -4032596263224118604L;
+
     @Override
     public VectorClock clone() {
 	return (VectorClock) super.clone();

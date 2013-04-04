@@ -11,7 +11,7 @@ import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.MergeableBlock;
 import com.crypticbit.javelin.neo4j.nodes.json.ComplexGraphNode;
 import com.crypticbit.javelin.neo4j.nodes.json.JsonNodeFactory;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
+import com.crypticbit.javelin.neo4j.strategies.DatabaseStrategy;
 import com.crypticbit.javelin.neo4j.strategies.VectorClock;
 import com.crypticbit.javelin.neo4j.strategies.VectorClockAdapter;
 import com.crypticbit.javelin.neo4j.strategies.operations.JsonWriteUpdateOperation;
@@ -24,10 +24,10 @@ import com.jayway.jsonpath.internal.PathToken;
 public class ComplexNode implements ComplexGraphNode {
 
     private RelationshipHolder incomingRelationship;
-    private FundementalDatabaseOperations fdo;
+    private DatabaseStrategy fdo;
     private JsonNodeFactory jsonNodeFactory;
 
-    public ComplexNode(RelationshipHolder incomingRelationship, FundementalDatabaseOperations fdo) {
+    public ComplexNode(RelationshipHolder incomingRelationship, DatabaseStrategy fdo) {
 	this.incomingRelationship = incomingRelationship;
 	this.fdo = fdo;
 	this.jsonNodeFactory = new JsonNodeFactory(this, incomingRelationship);
@@ -73,7 +73,7 @@ public class ComplexNode implements ComplexGraphNode {
 	return jsonNodeFactory;
     }
 
-    public FundementalDatabaseOperations getStrategy() {
+    public DatabaseStrategy getStrategy() {
 	return fdo;
     }
 

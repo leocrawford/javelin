@@ -9,11 +9,10 @@ import org.neo4j.graphdb.Relationship;
 
 import com.crypticbit.javelin.neo4j.nodes.json.ArrayGraphNode.CreateNewArrayElementUpdateOperation;
 import com.crypticbit.javelin.neo4j.nodes.json.MapGraphNode.CreateNewMapElementUpdateOperation;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.DatabaseStrategy;
+import com.crypticbit.javelin.neo4j.strategies.DatabaseStrategy.UpdateOperation;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.crypticbit.javelin.neo4j.types.Parameters;
-import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public final class JsonWriteUpdateOperation extends UpdateOperation {
@@ -30,7 +29,7 @@ public final class JsonWriteUpdateOperation extends UpdateOperation {
     }
 
     @Override
-    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, FundementalDatabaseOperations dal) {
+    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate, DatabaseStrategy dal) {
 
 	Node updateNode = relationshipToGraphNodeToUpdate.getEndNode();
 	if (jsonNode.isContainerNode()) {

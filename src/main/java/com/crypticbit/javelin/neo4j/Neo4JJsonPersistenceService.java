@@ -10,12 +10,11 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.kernel.AbstractGraphDatabase;
 import org.neo4j.server.WrappingNeoServerBootstrapper;
 
-import com.crypticbit.javelin.JsonPersistenceService;
 import com.crypticbit.javelin.neo4j.nodes.ComplexNode;
 import com.crypticbit.javelin.neo4j.nodes.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.nodes.RelationshipHolder;
 import com.crypticbit.javelin.neo4j.strategies.*;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.DatabaseStrategy.UpdateOperation;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 
 /**
@@ -24,17 +23,17 @@ import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
  * 
  * @author leo
  */
-public class Neo4JJsonPersistenceService implements JsonPersistenceService {
+public class Neo4JJsonPersistenceService {
 
-    private static final String ROOT = "ROOT";
+    private static final RelationshipTypes ROOT_RELATIONSHIP_TYPE = RelationshipTypes.ROOT;
 
     /**
      * The location of the database (this is actually a directory)
      */
     private File file;
 
-    private transient GraphDatabaseService graphDb;
-    private transient Node referenceNode;
+    private GraphDatabaseService graphDb;
+    private Node referenceNode;
     private String identity;
     // only for server
     private WrappingNeoServerBootstrapper srv;
@@ -58,37 +57,72 @@ public class Neo4JJsonPersistenceService implements JsonPersistenceService {
     }
 
     /**
-     * Delete the loaded database, and recreate an empty one at the same location
+     * Gets (and if necessary) created the root node for the database. In Json speak this is $.
      * 
-     * @param iAgreeThisisVeryDangerous
-     *            if you don't agree - it won't delete
+     * @return the one and only root node for this database
      */
-    public void empty(boolean iAgreeThisisVeryDangerous) {
-	if (iAgreeThisisVeryDangerous) {
-	    if (graphDb != null) {
-		graphDb.shutdown();
-	    }
-	    file.delete();
-	    setup();
-	}
-    }
-
     public ComplexNode getRootNode() {
-	final FundementalDatabaseOperations fdo = createDatabase();
-	if (getDatabaseNode().hasRelationship(RelationshipTypes.MAP, Direction.OUTGOING)) {
-	    Relationship r = getDatabaseNode().getRelationships(RelationshipTypes.MAP, Direction.OUTGOING).iterator()
-		    .next();
+	// Neo4J already has a root node, but we want to create another and link it to the existing root node - because
+	// this gives us a relationship between the two, which lots of other code expects to exist, and we want to avoid
+	// lots of special cases. We therefore offer up our root that has an association back to Neo4J's root.
+	final DatabaseStrategy fdo = createDatabaseStrategyChain();
+	// have we already created a root
+	if (getUnderlyingRootNode().hasRelationship(ROOT_RELATIONSHIP_TYPE, Direction.OUTGOING)) {
+	    Relationship r = getUnderlyingRootNode().getRelationships(ROOT_RELATIONSHIP_TYPE, Direction.OUTGOING)
+		    .iterator().next();
 	    return new ComplexNode(new RelationshipHolder(r), fdo);
 	}
 	else {
 	    return new ComplexNode(new RelationshipHolder(new PotentialRelationship() {
 		@Override
 		public Relationship create(UpdateOperation createOperation) {
-		    Relationship newR = fdo.createNewNode(getDatabaseNode(), RelationshipTypes.MAP, createOperation);
+		    Relationship newR = fdo.createNewNode(getUnderlyingRootNode(), ROOT_RELATIONSHIP_TYPE,
+			    createOperation);
 		    return newR;
 		}
 	    }), fdo);
 	}
+    }
+
+    /** Get the root of the graph (which is not the same as the root of the root of the database we expose */
+    protected Node getUnderlyingRootNode() {
+	return referenceNode;
+    }
+
+    /**
+     * Create the set of persistence strategies that are invoked in turn (as a chain) in order to access the underlying
+     * database.
+     * 
+     * @return the chain of database strategies required for the root node
+     */
+    private DatabaseStrategy createDatabaseStrategyChain() {
+	CompoundFdoAdapter fdo = new VectorClockAdapter(graphDb, new TimeStampedHistoryAdapter(graphDb,
+		new SimpleFdoAdapter(graphDb)), identity);
+	fdo.setTopFdo(fdo);
+	return fdo;
+
+    }
+
+    /** Do everything that's needed to actually create the database */
+    @SuppressWarnings("deprecation")
+    // until they actually remove this, it works well for us
+    private void setup() {
+	graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(file.getAbsolutePath());
+	registerShutdownHook(graphDb);
+	referenceNode = graphDb.getReferenceNode();
+    }
+
+    /**
+     * Registers a shutdown hook for the Neo4j instance so that it shuts down nicely when the VM exits (even if you
+     * "Ctrl-C" the running example before it's completed)
+     */
+    private static void registerShutdownHook(final GraphDatabaseService graphDb) {
+	Runtime.getRuntime().addShutdownHook(new Thread() {
+	    @Override
+	    public void run() {
+		graphDb.shutdown();
+	    }
+	});
     }
 
     public void startWebService() {
@@ -110,38 +144,4 @@ public class Neo4JJsonPersistenceService implements JsonPersistenceService {
     public void stopWebService() {
 	srv.stop();
     }
-
-    /** Get the root of the graph */
-    protected Node getDatabaseNode() {
-	return referenceNode;
-    }
-
-    private FundementalDatabaseOperations createDatabase() {
-	CompoundFdoAdapter fdo = new VectorClockAdapter(graphDb, new TimeStampedHistoryAdapter(graphDb,
-		new SimpleFdoAdapter(graphDb)), identity);
-	fdo.setTopFdo(fdo);
-	return fdo;
-
-    }
-
-    /** Do everything that's needed to actually create the database */
-    private void setup() {
-	graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(file.getAbsolutePath());
-	registerShutdownHook(graphDb);
-	referenceNode = graphDb.getReferenceNode();
-    }
-
-    /**
-     * Registers a shutdown hook for the Neo4j instance so that it shuts down nicely when the VM exits (even if you
-     * "Ctrl-C" the running example before it's completed)
-     */
-    private static void registerShutdownHook(final GraphDatabaseService graphDb) {
-	Runtime.getRuntime().addShutdownHook(new Thread() {
-	    @Override
-	    public void run() {
-		graphDb.shutdown();
-	    }
-	});
-    }
-
 }

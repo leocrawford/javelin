@@ -5,7 +5,6 @@ import com.crypticbit.javelin.neo4j.nodes.json.JsonGraphNode;
 public interface History {
 
     public long getTimestamp();
-
     public JsonGraphNode getVersion();
 
 }

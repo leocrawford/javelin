@@ -11,8 +11,8 @@ import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.nodes.ComplexNode;
 import com.crypticbit.javelin.neo4j.nodes.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.nodes.RelationshipHolder;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.DatabaseStrategy;
+import com.crypticbit.javelin.neo4j.strategies.DatabaseStrategy.UpdateOperation;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
@@ -83,7 +83,7 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 
 	    @Override
 	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		    FundementalDatabaseOperations dal) {
+		    DatabaseStrategy dal) {
 		for (Relationship relationshipToNodeToDelete : relationshipToGraphNodeToUpdate.getEndNode()
 			.getRelationships(Direction.OUTGOING, RelationshipTypes.MAP)) {
 		    if (relationshipToNodeToDelete.getProperty(Parameters.Relationship.KEY.name()).equals(key)) {
@@ -166,7 +166,7 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 	};
     }
 
-    private FundementalDatabaseOperations getStrategy() {
+    private DatabaseStrategy getStrategy() {
 	return holder.getStrategy();
     }
 
@@ -187,7 +187,7 @@ public class MapGraphNode extends AbstractMap<String, ComplexNode> implements Js
 
 	@Override
 	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		FundementalDatabaseOperations dal) {
+		DatabaseStrategy dal) {
 	    // FIXME - copy from UpdateJson and sometimes not needed
 	    relationshipToGraphNodeToUpdate.getEndNode().setProperty(Parameters.Node.TYPE.name(),
 		    NodeTypes.MAP.toString());

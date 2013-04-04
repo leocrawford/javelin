@@ -14,8 +14,8 @@ import com.crypticbit.javelin.JsonPersistenceException;
 import com.crypticbit.javelin.neo4j.nodes.ComplexNode;
 import com.crypticbit.javelin.neo4j.nodes.PotentialRelationship;
 import com.crypticbit.javelin.neo4j.nodes.RelationshipHolder;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.DatabaseStrategy;
+import com.crypticbit.javelin.neo4j.strategies.DatabaseStrategy.UpdateOperation;
 import com.crypticbit.javelin.neo4j.types.NodeTypes;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
@@ -88,7 +88,7 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGra
 
 	    @Override
 	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		    FundementalDatabaseOperations dal) {
+		    DatabaseStrategy dal) {
 		for (Relationship relationshipToNodeToDelete : relationshipToGraphNodeToUpdate.getEndNode()
 			.getRelationships(Direction.OUTGOING, RelationshipTypes.ARRAY)) {
 		    if (relationshipToNodeToDelete.getProperty(Parameters.Relationship.INDEX.name()).equals(index)) {
@@ -141,7 +141,7 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGra
 	return max + 1;
     }
 
-    private FundementalDatabaseOperations getStrategy() {
+    private DatabaseStrategy getStrategy() {
 	return holder.getStrategy();
     }
 
@@ -193,7 +193,7 @@ public class ArrayGraphNode extends AbstractList<ComplexNode> implements JsonGra
 
 	@Override
 	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		FundementalDatabaseOperations dal) {
+		DatabaseStrategy dal) {
 	    // FIXME - copy from UpdateJson and sometimes not needed
 	    relationshipToGraphNodeToUpdate.getEndNode().setProperty(Parameters.Node.TYPE.name(),
 		    NodeTypes.ARRAY.toString());

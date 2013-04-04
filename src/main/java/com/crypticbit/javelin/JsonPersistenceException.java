@@ -1,5 +1,6 @@
 package com.crypticbit.javelin;
 
+@SuppressWarnings("serial")
 public class JsonPersistenceException extends Exception {
 
     public JsonPersistenceException(String message) {

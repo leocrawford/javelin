@@ -5,13 +5,13 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 
-public abstract class CompoundFdoAdapter implements FundementalDatabaseOperations {
+public abstract class CompoundFdoAdapter implements DatabaseStrategy {
 
-    private FundementalDatabaseOperations nextAdapter;
+    private DatabaseStrategy nextAdapter;
     private GraphDatabaseService graphDb;
-    private FundementalDatabaseOperations fdo;
+    private DatabaseStrategy fdo;
 
-    public CompoundFdoAdapter(GraphDatabaseService graphDb, FundementalDatabaseOperations nextAdapter) {
+    public CompoundFdoAdapter(GraphDatabaseService graphDb, DatabaseStrategy nextAdapter) {
 	this.nextAdapter = nextAdapter;
 	this.graphDb = graphDb;
     }
@@ -29,11 +29,11 @@ public abstract class CompoundFdoAdapter implements FundementalDatabaseOperation
 
     public abstract boolean doesExposeInterface(Class<?> exposesInterface);
 
-    public FundementalDatabaseOperations getFdo() {
+    public DatabaseStrategy getFdo() {
 	return fdo;
     }
 
-    public FundementalDatabaseOperations getNextAdapter() {
+    public DatabaseStrategy getNextAdapter() {
 	return nextAdapter;
     }
 
@@ -50,7 +50,7 @@ public abstract class CompoundFdoAdapter implements FundementalDatabaseOperation
     public abstract Relationship readNext(Relationship relationshipToNode, Class<?> desiredInterface);
 
     @Override
-    public void setTopFdo(FundementalDatabaseOperations fdo) {
+    public void setTopFdo(DatabaseStrategy fdo) {
 	this.fdo = fdo;
 	this.nextAdapter.setTopFdo(fdo);
     }

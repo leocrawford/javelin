@@ -2,8 +2,8 @@ package com.crypticbit.javelin.neo4j.nodes;
 
 import org.neo4j.graphdb.Relationship;
 
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations;
-import com.crypticbit.javelin.neo4j.strategies.FundementalDatabaseOperations.UpdateOperation;
+import com.crypticbit.javelin.neo4j.strategies.DatabaseStrategy;
+import com.crypticbit.javelin.neo4j.strategies.DatabaseStrategy.UpdateOperation;
 
 public class RelationshipHolder {
 
@@ -18,7 +18,7 @@ public class RelationshipHolder {
 	this.relationship = relationship;
     }
 
-    public Relationship createOrUpdateRelationship(UpdateOperation operation, FundementalDatabaseOperations strategy) {
+    public Relationship createOrUpdateRelationship(UpdateOperation operation, DatabaseStrategy strategy) {
 	if (relationship == null) {
 	    relationship = potentialRelationship.create(operation);
 	}

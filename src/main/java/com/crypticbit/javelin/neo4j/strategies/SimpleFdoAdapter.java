@@ -5,10 +5,10 @@ import org.neo4j.graphdb.*;
 import com.crypticbit.javelin.neo4j.types.Parameters;
 import com.crypticbit.javelin.neo4j.types.RelationshipTypes;
 
-public class SimpleFdoAdapter implements FundementalDatabaseOperations {
+public class SimpleFdoAdapter implements DatabaseStrategy {
 
     private GraphDatabaseService graphDb;
-    private FundementalDatabaseOperations fdo;
+    private DatabaseStrategy fdo;
 
     public SimpleFdoAdapter(GraphDatabaseService graphDb) {
 	this.graphDb = graphDb;
@@ -50,7 +50,7 @@ public class SimpleFdoAdapter implements FundementalDatabaseOperations {
     }
 
     @Override
-    public void setTopFdo(FundementalDatabaseOperations fdo) {
+    public void setTopFdo(DatabaseStrategy fdo) {
 	this.fdo = fdo;
 
     }

@@ -10,7 +10,7 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 
     private Relationship currentVersion;
 
-    public TimeStampedHistoryAdapter(GraphDatabaseService graphDb, FundementalDatabaseOperations nextAdapter) {
+    public TimeStampedHistoryAdapter(GraphDatabaseService graphDb, DatabaseStrategy nextAdapter) {
 	super(graphDb, nextAdapter);
     }
 
@@ -69,7 +69,7 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 	// final Node nodeToUpdate = relationshipToParent.getEndNode();
 	Transaction tx = getGraphDB().beginTx();
 	try {
-	    Relationship result = super.createNewNode(relationshipToParent.getEndNode(), RelationshipTypes.VERSION,
+	    super.createNewNode(relationshipToParent.getEndNode(), RelationshipTypes.VERSION,
 		    new ReplaceNodeUpdateOperation(read(relationshipToParent, null).getEndNode(), removeEverything,
 			    relationshipToParent).add(operation).add(getTimestampOperation()));
 	    tx.success();
@@ -90,7 +90,7 @@ public class TimeStampedHistoryAdapter extends CompoundFdoAdapter {
 
 	    @Override
 	    public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		    FundementalDatabaseOperations dal) {
+		    DatabaseStrategy dal) {
 		relationshipToGraphNodeToUpdate.setProperty("timestamp", System.currentTimeMillis());
 		return relationshipToGraphNodeToUpdate;
 	    }

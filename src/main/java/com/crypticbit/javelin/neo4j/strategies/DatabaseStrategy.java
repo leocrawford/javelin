@@ -9,7 +9,7 @@ import org.neo4j.graphdb.RelationshipType;
  * 
  * @author leo
  */
-public interface FundementalDatabaseOperations {
+public interface DatabaseStrategy {
 
     /**
      * Create a new node - with no content
@@ -39,7 +39,7 @@ public interface FundementalDatabaseOperations {
 
     public Relationship read(Relationship relationshipToNode, Class<?> desiredInterface);
 
-    public void setTopFdo(FundementalDatabaseOperations fdo);
+    public void setTopFdo(DatabaseStrategy fdo);
 
     /**
      * Update a the node at the end of the relationship, by applying the operation (Sort of command pattern).
@@ -66,7 +66,7 @@ public interface FundementalDatabaseOperations {
 
 	@Override
 	public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		FundementalDatabaseOperations dal) {
+		DatabaseStrategy dal) {
 	    return relationshipToGraphNodeToUpdate;
 	}
 
@@ -83,12 +83,12 @@ public interface FundementalDatabaseOperations {
 
 		@Override
 		public Relationship[] getNewRelationships() {
-		    return FundementalDatabaseOperations.UpdateOperation.this.getNewRelationships();
+		    return DatabaseStrategy.UpdateOperation.this.getNewRelationships();
 		}
 
 		@Override
 		public Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-			FundementalDatabaseOperations dal) {
+			DatabaseStrategy dal) {
 		    Relationship r = UpdateOperation.this.updateElement(relationshipToGraphNodeToUpdate, dal);
 		    if (r != relationshipToGraphNodeToUpdate) {
 			System.err.println(UpdateOperation.this.getClass()
@@ -105,6 +105,6 @@ public interface FundementalDatabaseOperations {
 	public abstract Relationship[] getNewRelationships();
 
 	public abstract Relationship updateElement(Relationship relationshipToGraphNodeToUpdate,
-		FundementalDatabaseOperations dal);
+		DatabaseStrategy dal);
     }
 }

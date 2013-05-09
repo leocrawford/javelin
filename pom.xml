@@ -22,25 +22,9 @@
 
 
 	<dependencies>
-		<dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>neo4j</artifactId>
-			<version>1.9.M01</version>
-		</dependency>
 
 
 		<!-- Only for web server - can be removed later -->
-		<dependency>
-			<groupId>org.neo4j.app</groupId>
-			<artifactId>neo4j-server</artifactId>
-			<version>1.9.M01</version>
-		</dependency>
-		<dependency>
-			<groupId>org.neo4j.app</groupId>
-			<artifactId>neo4j-server</artifactId>
-			<classifier>static-web</classifier>
-			<version>1.9.M01</version>
-		</dependency>
 
 
 

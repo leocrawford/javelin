@@ -44,7 +44,7 @@ public class DigestFactory {
     public Digest getDigest(DigestMethod method, byte[] data) {
 	MessageDigest digest = method.createDigest();
 	digest.update(data);
-	return new ImmutableComparableMessageDigest(digest);
+	return new Digest(digest);
     }
 
 }

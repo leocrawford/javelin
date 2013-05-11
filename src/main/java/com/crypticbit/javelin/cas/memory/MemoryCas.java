@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 
 import com.crypticbit.javelin.cas.ContentAddressableStorage;
 import com.crypticbit.javelin.cas.Digest;
@@ -22,20 +21,12 @@ public class MemoryCas implements ContentAddressableStorage {
 
     private DigestFactory digestFactory;
 
-    public MemoryCas(DigestFactory digestFactory) {
-	this.digestFactory = digestFactory;
-    }
+    // private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.cas");
 
-    private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.cas");
     private final TreeMap<Digest, byte[]> map = new TreeMap<>();
 
-    @Override
-    public Digest store(InputStream is) throws IOException {
-	byte[] data;
-	data = ByteStreams.toByteArray(is);
-	Digest digest = digestFactory.getDefaultDigest(data);
-	map.put(digest, data);
-	return digest;
+    public MemoryCas(DigestFactory digestFactory) {
+	this.digestFactory = digestFactory;
     }
 
     @Override
@@ -49,8 +40,8 @@ public class MemoryCas implements ContentAddressableStorage {
     }
 
     @Override
-    public List<Digest> list(Digest start) {
-	return new LinkedList<Digest>(map.tailMap(start).keySet());
+    public DigestFactory getDigestFactory() {
+	return digestFactory;
     }
 
     @Override
@@ -59,8 +50,17 @@ public class MemoryCas implements ContentAddressableStorage {
     }
 
     @Override
-    public DigestFactory getDigestFactory() {
-	return digestFactory;
+    public List<Digest> list(Digest start) {
+	return new LinkedList<Digest>(map.tailMap(start).keySet());
+    }
+
+    @Override
+    public Digest store(InputStream is) throws IOException {
+	byte[] data;
+	data = ByteStreams.toByteArray(is);
+	Digest digest = digestFactory.getDefaultDigest(data);
+	map.put(digest, data);
+	return digest;
     }
 
 }

@@ -22,6 +22,17 @@ public class MemoryCasTest {
     private CasFactory cf = new CasFactory();
 
     @Test
+    public void testChangeDigestBetweenOperations() throws UnsupportedEncodingException, CasException, IOException {
+	ContentAddressableStorage cas = cf.createMemoryCas();
+
+	Digest md1 = cas.store(isFromString("message 1"));
+	cas.getDigestFactory().setDefault(DigestMethod.SHA256);
+	Digest md2 = cas.store(isFromString("message 2"));
+	assertEquals("488689298c2102300d595c5fce004ffc73565050", md1.getDigestAsString());
+	assertEquals("84768ddee659efeafdeb972b55143141bc23b6e333c70e8b68d29774ab09a548", md2.getDigestAsString());
+    }
+
+    @Test
     public void testCheck() throws UnsupportedEncodingException, CasException, IOException, NoSuchAlgorithmException {
 	ContentAddressableStorage cas = cf.createMemoryCas();
 	Digest md1 = cas.store(isFromString("message 1"));
@@ -40,28 +51,19 @@ public class MemoryCasTest {
     }
 
     @Test
-    public void testChangeDigestBetweenOperations() throws UnsupportedEncodingException, CasException, IOException {
-	ContentAddressableStorage cas = cf.createMemoryCas();
-
-	Digest md1 = cas.store(isFromString("message 1"));
-	cas.getDigestFactory().setDefault(DigestMethod.SHA256);
-	Digest md2 = cas.store(isFromString("message 2"));
-	assertEquals("488689298c2102300d595c5fce004ffc73565050", md1.getDigestAsString());
-	assertEquals("84768ddee659efeafdeb972b55143141bc23b6e333c70e8b68d29774ab09a548", md2.getDigestAsString());
-    }
-
-    @Test
     public void testList() throws UnsupportedEncodingException, CasException, IOException {
 	ContentAddressableStorage cas = cf.createMemoryCas();
 	Digest md[] = new Digest[10];
-	for (int loop = 0; loop < 10; loop++)
+	for (int loop = 0; loop < 10; loop++) {
 	    md[loop] = cas.store(isFromString("message" + loop));
+	}
 	List<Digest> list = cas.list();
 	assertEquals(10, list.size());
 	// check they're in ascehnding order - and they exist
 	for (int loop = 0; loop < 10; loop++) {
-	    if (loop >= 1)
+	    if (loop >= 1) {
 		assertTrue(list.get(loop - 1).compareTo(list.get(loop)) < 0);
+	    }
 	    assertTrue(cas.check(list.get(loop)));
 	}
     }
@@ -70,15 +72,17 @@ public class MemoryCasTest {
     public void testListAfterStart() throws UnsupportedEncodingException, CasException, IOException {
 	ContentAddressableStorage cas = cf.createMemoryCas();
 	List<Digest> createList = new LinkedList<Digest>();
-	for (int loop = 0; loop < 10; loop++)
+	for (int loop = 0; loop < 10; loop++) {
 	    createList.add(cas.store(isFromString("message" + loop)));
+	}
 	Collections.sort(createList);
 	List<Digest> list = cas.list(createList.get(5));
 	assertEquals(5, list.size());
 	// check they're in ascending order - and they exist
 	for (int loop = 0; loop < 5; loop++) {
-	    if (loop >= 1)
+	    if (loop >= 1) {
 		assertTrue(list.get(loop - 1).compareTo(list.get(loop)) < 0);
+	    }
 	    assertTrue(cas.check(list.get(loop)));
 	}
     }

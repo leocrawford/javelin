@@ -4,11 +4,10 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
-
 /**
  * Subclases must implement Comparable
+ * 
  * @author leo
- *
  */
 public class Digest implements Comparable<Digest> {
 
@@ -26,6 +25,11 @@ public class Digest implements Comparable<Digest> {
 	digest = ByteBuffer.wrap(delegate.digest());
     }
 
+    @Override
+    public int compareTo(Digest o) {
+	return digest.compareTo(o.digest);
+    }
+
     public byte[] getDigestAsByte() {
 	return digest.array();
     }
@@ -34,13 +38,9 @@ public class Digest implements Comparable<Digest> {
 	return new BigInteger(1, getDigestAsByte()).toString(16);
     }
 
+    @Override
     public String toString() {
 	return delegate.toString();
-    }
-
-    @Override
-    public int compareTo(Digest o) {
-	return digest.compareTo(o.digest);
     }
 
 }

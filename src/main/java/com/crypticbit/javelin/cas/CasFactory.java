@@ -4,7 +4,7 @@ import com.crypticbit.javelin.cas.memory.MemoryCas;
 
 /* Create or access any of the standard CAS types (memory, disk, remote, etc) */
 public class CasFactory {
-       
+
     public CasFactory() {
     }
 

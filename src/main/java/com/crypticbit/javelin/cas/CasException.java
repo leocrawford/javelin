@@ -3,7 +3,6 @@ package com.crypticbit.javelin.cas;
 @SuppressWarnings("serial")
 public class CasException extends Exception {
 
-
     public CasException(String message) {
 	super(message);
     }

@@ -72,9 +72,7 @@ public class MemoryCasTest {
 	List<Digest> createList = new LinkedList<Digest>();
 	for (int loop = 0; loop < 10; loop++)
 	    createList.add(cas.store(isFromString("message" + loop)));
-	System.out.println(createList.size());
 	Collections.sort(createList);
-	System.out.println(createList.size());
 	List<Digest> list = cas.list(createList.get(5));
 	assertEquals(5, list.size());
 	// check they're in ascending order - and they exist

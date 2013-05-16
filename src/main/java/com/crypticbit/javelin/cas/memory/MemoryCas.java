@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.crypticbit.javelin.cas.ContentAddressableStorage;
 import com.crypticbit.javelin.cas.Digest;
@@ -21,7 +23,7 @@ public class MemoryCas implements ContentAddressableStorage {
 
     private DigestFactory digestFactory;
 
-    // private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.cas");
+    private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.cas");
 
     private final TreeMap<Digest, byte[]> map = new TreeMap<>();
 
@@ -58,7 +60,10 @@ public class MemoryCas implements ContentAddressableStorage {
     public Digest store(InputStream is) throws IOException {
 	byte[] data;
 	data = ByteStreams.toByteArray(is);
+	is.close();
 	Digest digest = digestFactory.getDefaultDigest(data);
+	if (LOG.isLoggable(Level.FINER))
+	    LOG.log(Level.FINER, "Adding " + digest + " to memory CAS");
 	map.put(digest, data);
 	return digest;
     }

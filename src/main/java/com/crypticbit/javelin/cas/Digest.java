@@ -40,7 +40,7 @@ public class Digest implements Comparable<Digest> {
 
     @Override
     public String toString() {
-	return getDigestAsString().substring(0,10)+"...";
+	return getDigestAsString().substring(0,6)+"...";
     }
 
 

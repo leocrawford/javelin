@@ -14,7 +14,7 @@ public interface ContentAddressableStorage {
     public boolean check(Digest digest) throws CasException;
 
     /** Return the content found described by digest. Will throw a runtime exception if not exists */
-    public InputStream get(Digest digest) throws CasException;
+    public PersistableResource get(Digest digest) throws CasException;
 
     /** List all digests */
     public List<Digest> list();
@@ -30,6 +30,6 @@ public interface ContentAddressableStorage {
      * 
      * @throws IOException
      */
-    Digest store(InputStream is) throws CasException, IOException;
+    Digest store(PersistableResource po) throws CasException, IOException;
 
 }

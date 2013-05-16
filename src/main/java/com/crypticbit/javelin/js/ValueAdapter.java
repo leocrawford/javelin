@@ -17,7 +17,7 @@ public class ValueAdapter extends NodeAdapter{
 
     @Override
     Digest write(ContentAddressableStorage cas) throws CasException, IOException {
-	return store(cas);
+	return store(cas,node);
     }
     
 }

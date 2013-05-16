@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class MapAdapter extends NodeAdapter {
 
-    private Map<String, String> rewrittenMap;
+    private Map<String, Digest> rewrittenMap;
     private transient JsonNode node;
     
     public MapAdapter(JsonNode node) {
@@ -28,9 +28,9 @@ public class MapAdapter extends NodeAdapter {
 	ObjectNode n = (ObjectNode) node;
 	for (Iterator<Entry<String, JsonNode>> fields = n.fields(); fields.hasNext();) {
 	    Entry<String, JsonNode> field  = fields.next();    
-	    rewrittenMap.put(field.getKey(), new JsonCasAdapter(field.getValue()).write(cas).getDigestAsString()); 
+	    rewrittenMap.put(field.getKey(), new JsonCasAdapter(field.getValue()).write(cas)); 
 	}
-	return store(cas);
+	return store(cas,rewrittenMap);
     }
 
 

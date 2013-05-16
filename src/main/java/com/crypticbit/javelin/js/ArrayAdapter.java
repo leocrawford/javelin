@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 public class ArrayAdapter extends NodeAdapter {
 
     private transient JsonNode node;
-    private List<String> rewrittenArray;
+    private List<Digest> rewrittenArray;
 
     public ArrayAdapter(JsonNode node) {
 	this.node = node;
@@ -21,12 +21,12 @@ public class ArrayAdapter extends NodeAdapter {
 
     @Override
     Digest write(ContentAddressableStorage cas) throws CasException, IOException {
-	rewrittenArray = new ArrayList<String>();
+	rewrittenArray = new ArrayList<Digest>();
 	ArrayNode n = (ArrayNode) node;
 	for (JsonNode tn : n) {
-	    rewrittenArray.add(new JsonCasAdapter(tn).write(cas).getDigestAsString());
+	    rewrittenArray.add(new JsonCasAdapter(tn).write(cas));
 	}
-	return store(cas);
+	return store(cas,rewrittenArray);
     }
 
 }

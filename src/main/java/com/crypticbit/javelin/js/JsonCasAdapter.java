@@ -1,8 +1,6 @@
 package com.crypticbit.javelin.js;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.crypticbit.javelin.cas.CasException;
 import com.crypticbit.javelin.cas.ContentAddressableStorage;
@@ -11,8 +9,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class JsonCasAdapter {
 

@@ -24,7 +24,7 @@ public class JsonCasAdapterTest {
 	LOG.addHandler(handler);
 	LOG.setLevel(Level.FINEST);
 	
-	JsonCasAdapter jca = new JsonCasAdapter("[\"foo\",100,1000.21,true,null]");
+	JsonCasAdapter jca = new JsonCasAdapter("[\"foo\",100,\"a\",1000.21,true,null]");
 	ContentAddressableStorage cas = new CasFactory().createMemoryCas();
 	jca.write(cas);
 	

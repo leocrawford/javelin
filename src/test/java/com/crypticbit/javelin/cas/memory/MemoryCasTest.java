@@ -14,8 +14,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.cas.*;
-import com.crypticbit.javelin.cas.DigestFactory.DigestMethod;
+import com.crypticbit.javelin.store.JsonPersistableResource;
+import com.crypticbit.javelin.store.cas.*;
+import com.crypticbit.javelin.store.cas.DigestFactory.DigestMethod;
 
 public class MemoryCasTest {
 
@@ -109,7 +110,7 @@ public class MemoryCasTest {
     }
 
     private PersistableResource prFromString(String string) throws UnsupportedEncodingException {
-	return new ByteBasedPersistableResource(string);
+	return new JsonPersistableResource(string);
     }
 
     private String prToString(PersistableResource pr) throws UnsupportedEncodingException, IOException {

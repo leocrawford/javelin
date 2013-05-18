@@ -8,10 +8,10 @@ import java.util.logging.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.crypticbit.javelin.cas.CasException;
-import com.crypticbit.javelin.cas.CasFactory;
-import com.crypticbit.javelin.cas.ContentAddressableStorage;
-import com.crypticbit.javelin.cas.Digest;
+import com.crypticbit.javelin.store.cas.CasException;
+import com.crypticbit.javelin.store.cas.CasFactory;
+import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
+import com.crypticbit.javelin.store.cas.Digest;
 import com.google.gson.JsonElement;
 
 public class JsonCasAdapterTest {

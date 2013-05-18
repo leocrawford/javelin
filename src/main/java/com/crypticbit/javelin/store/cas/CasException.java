@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.cas;
+package com.crypticbit.javelin.store.cas;
 
 @SuppressWarnings("serial")
 public class CasException extends Exception {

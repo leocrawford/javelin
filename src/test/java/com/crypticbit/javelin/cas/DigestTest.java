@@ -5,6 +5,9 @@ import java.util.Random;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.crypticbit.javelin.store.cas.Digest;
+import com.crypticbit.javelin.store.cas.DigestFactory;
+
 public class DigestTest {
 
     @BeforeClass

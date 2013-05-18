@@ -7,10 +7,10 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.crypticbit.javelin.cas.ByteBasedPersistableResource;
-import com.crypticbit.javelin.cas.CasException;
-import com.crypticbit.javelin.cas.ContentAddressableStorage;
-import com.crypticbit.javelin.cas.Digest;
+import com.crypticbit.javelin.store.JsonPersistableResource;
+import com.crypticbit.javelin.store.cas.CasException;
+import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
+import com.crypticbit.javelin.store.cas.Digest;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -44,17 +44,17 @@ public class JsonCasAdapter {
 	    for (JsonElement e : element.getAsJsonArray()) {
 		array.add(write(e, cas));
 	    }
-	    return cas.store(new ByteBasedPersistableResource(gson.toJson(array)));
+	    return cas.store(new JsonPersistableResource(gson.toJson(array)));
 	}
 	else if (element.isJsonObject()) {
 	    Map<String, Digest> map = new HashMap<>();
 	    for (Entry<String, JsonElement> e : element.getAsJsonObject().entrySet()) {
 		map.put(e.getKey(), write(e.getValue(), cas));
 	    }
-	    return cas.store(new ByteBasedPersistableResource(gson.toJson(map)));
+	    return cas.store(new JsonPersistableResource(gson.toJson(map)));
 	}
 	else
-	    return cas.store(new ByteBasedPersistableResource(gson.toJson(element)));
+	    return cas.store(new JsonPersistableResource(gson.toJson(element)));
     }
 
     public static JsonElement read(Digest digest, ContentAddressableStorage cas) throws JsonSyntaxException,

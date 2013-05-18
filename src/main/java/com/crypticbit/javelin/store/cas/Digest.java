@@ -1,9 +1,9 @@
-package com.crypticbit.javelin.cas;
+package com.crypticbit.javelin.store.cas;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
+import com.crypticbit.javelin.store.Identity;
 import com.google.common.io.BaseEncoding;
 
 /**
@@ -11,7 +11,7 @@ import com.google.common.io.BaseEncoding;
  * 
  * @author leo
  */
-public class Digest implements Comparable<Digest> {
+public class Digest implements Identity<Digest> {
 
     private ByteBuffer digest;
 
@@ -23,8 +23,8 @@ public class Digest implements Comparable<Digest> {
 	this.digest = ByteBuffer.wrap(BaseEncoding.base32Hex().decode(string));
     }
 
-    public Digest(byte[] originalDigestAsByte) {
-	this.digest = ByteBuffer.wrap(originalDigestAsByte);
+    public Digest(byte[] digestAsByte) {
+	this.digest = ByteBuffer.wrap(digestAsByte);
     }
 
     @Override

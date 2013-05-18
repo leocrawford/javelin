@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.cas.memory;
+package com.crypticbit.javelin.store.cas.memory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -9,7 +9,8 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.crypticbit.javelin.cas.*;
+import com.crypticbit.javelin.store.JsonPersistableResource;
+import com.crypticbit.javelin.store.cas.*;
 import com.google.common.io.ByteStreams;
 
 /**
@@ -36,7 +37,7 @@ public class MemoryCas implements ContentAddressableStorage {
 
     @Override
     public PersistableResource get(Digest digest) {
-	ByteBasedPersistableResource pr = new ByteBasedPersistableResource(map.get(digest));
+	JsonPersistableResource pr = new JsonPersistableResource(map.get(digest));
 	if (LOG.isLoggable(Level.FINER))
 	    LOG.log(Level.FINER, "Read "+pr.getBytes().length+" bytes from " + digest +" using memory CAS");
 	return pr;

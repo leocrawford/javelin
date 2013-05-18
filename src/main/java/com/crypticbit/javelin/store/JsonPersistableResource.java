@@ -1,34 +1,36 @@
-package com.crypticbit.javelin.cas;
+package com.crypticbit.javelin.store;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
-public class ByteBasedPersistableResource implements PersistableResource {
+import com.crypticbit.javelin.store.cas.PersistableResource;
 
-    private byte[] resource;
+public class JsonPersistableResource implements PersistableResource {
 
-    public ByteBasedPersistableResource(byte[] resource) {
-	this.resource = resource;
+    private byte[] data;
+
+    public JsonPersistableResource(byte[] data) {
+	this.data = data;
     }
 
-    public ByteBasedPersistableResource(String string) {
+    public JsonPersistableResource(String string) {
 	try {
-	    this.resource = string.getBytes("UTF-8");
+	    this.data = string.getBytes("UTF-8");
 	}
 	catch (UnsupportedEncodingException e) {
 	    throw new Error("UTF-8 is not supported on this platform");
 	}
     }
-
+    
     @Override
     public InputStream getInputStream() {
-	return new ByteArrayInputStream(resource);
+	return new ByteArrayInputStream(getBytes());
     }
 
     @Override
     public byte[] getBytes() {
-	return resource;
+	return data;
     }
 
     public String toString() {

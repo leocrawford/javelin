@@ -5,4 +5,4 @@
  * @author leo
  *
  */
-package com.crypticbit.javelin.cas;
+package com.crypticbit.javelin.store;

@@ -4,6 +4,8 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 
+import com.google.common.io.BaseEncoding;
+
 /**
  * Subclases must implement Comparable
  * 
@@ -11,18 +13,18 @@ import java.security.MessageDigest;
  */
 public class Digest implements Comparable<Digest> {
 
-    private MessageDigest delegate;
     private ByteBuffer digest;
 
     public Digest(MessageDigest messageDigest) {
-	// ideally clone so that we know it's not being changed in the background
-	try {
-	    this.delegate = (MessageDigest) messageDigest.clone();
-	}
-	catch (CloneNotSupportedException e) {
-	    this.delegate = messageDigest;
-	}
-	digest = ByteBuffer.wrap(delegate.digest());
+	digest = ByteBuffer.wrap(messageDigest.digest());
+    }
+
+    public Digest(String string) {
+	this.digest = ByteBuffer.wrap(BaseEncoding.base32Hex().decode(string));
+    }
+
+    public Digest(byte[] originalDigestAsByte) {
+	this.digest = ByteBuffer.wrap(originalDigestAsByte);
     }
 
     @Override
@@ -35,7 +37,7 @@ public class Digest implements Comparable<Digest> {
     }
 
     public String getDigestAsString() {
-	return new BigInteger(1, getDigestAsByte()).toString(16);
+	return  BaseEncoding.base32Hex().encode(getDigestAsByte());
     }
 
     @Override

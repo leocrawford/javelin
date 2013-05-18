@@ -33,7 +33,7 @@ public class ByteBasedPersistableResource implements PersistableResource {
 
     public String toString() {
 	try {
-	    String full = new String(getBytes(), "UTF-8");
+	    String full = getAsString();
 	    if (full.length() > 60)
 		return full.substring(0, 60) + "...";
 	    else
@@ -42,6 +42,11 @@ public class ByteBasedPersistableResource implements PersistableResource {
 	catch (UnsupportedEncodingException e) {
 	    throw new Error("UTF-8 is not supported on this platform");
 	}
+    }
+
+    @Override
+    public String getAsString() throws UnsupportedEncodingException {
+	return new String(getBytes(), "UTF-8");
     }
 
 }

@@ -1,82 +1,89 @@
 package com.crypticbit.javelin.js;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import com.crypticbit.javelin.cas.ByteBasedPersistableResource;
 import com.crypticbit.javelin.cas.CasException;
 import com.crypticbit.javelin.cas.ContentAddressableStorage;
 import com.crypticbit.javelin.cas.Digest;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 public class JsonCasAdapter {
 
-    private enum NodeType {
-	MAP {
-	    @Override
-	    boolean isType(JsonNode node) {
-		return node.isObject();
-	    }
+    // private static final Type DIGEST_COLLECTION_TYPE = new TypeToken<Collection<Digest>>() {
+    // }.getType();
 
-	    @Override
-	    NodeAdapter getAdapter(JsonNode node) {
-		return new MapAdapter(node);
-	    }
+    private JsonElement element;
+    private static final Gson gson = new GsonBuilder().registerTypeAdapter(Digest.class, new TypeAdapter<Digest>() {
 
-	},
-	ARRAY {
-	    @Override
-	    boolean isType(JsonNode node) {
-		return node.isArray();
-	    }
-	    
-	    @Override
-	    NodeAdapter getAdapter(JsonNode node) {
-		return new ArrayAdapter(node);
-	    }
-
-	    
-	},
-	VALUE {
-	    @Override
-	    boolean isType(JsonNode node) {
-		return node.isValueNode();
-	    }
-	    
-	    @Override
-	    NodeAdapter getAdapter(JsonNode node) {
-		return new ValueAdapter(node);
-	    }
-
-	  
-	};
-	abstract boolean isType(JsonNode node);
-	abstract NodeAdapter getAdapter(JsonNode node);
-
-	static NodeType findType(JsonNode node) {
-	    for (NodeType nt : NodeType.values())
-		if (nt.isType(node))
-		    return nt;
-	    throw new Error("An unknown Json type was discovered: " + node.getClass());
+	@Override
+	public void write(JsonWriter out, Digest value) throws IOException {
+	    out.value(value.getDigestAsString());
 	}
 
-	
+	@Override
+	public Digest read(JsonReader in) throws IOException {
+	    return new Digest(in.nextString());
+	}
+    }).create();
+
+    public JsonCasAdapter(String string) {
+	element = new JsonParser().parse(string);
     }
 
-    private JsonNode node;
-
-    public JsonCasAdapter(String data) throws JsonParseException, JsonMappingException, IOException {
-	ObjectMapper mapper = new ObjectMapper();
-	node = mapper.readValue(data, JsonNode.class); // src can be a File, URL, InputStream etc
-
+    public static Digest write(JsonElement element, ContentAddressableStorage cas) throws CasException, IOException {
+	if (element.isJsonArray()) {
+	    LinkedList<Digest> array = new LinkedList<>();
+	    for (JsonElement e : element.getAsJsonArray()) {
+		array.add(write(e, cas));
+	    }
+	    return cas.store(new ByteBasedPersistableResource(gson.toJson(array)));
+	}
+	else if (element.isJsonObject()) {
+	    Map<String, Digest> map = new HashMap<>();
+	    for (Entry<String, JsonElement> e : element.getAsJsonObject().entrySet()) {
+		map.put(e.getKey(), write(e.getValue(), cas));
+	    }
+	    return cas.store(new ByteBasedPersistableResource(gson.toJson(map)));
+	}
+	else
+	    return cas.store(new ByteBasedPersistableResource(gson.toJson(element)));
     }
 
-    public JsonCasAdapter(JsonNode node) {
-	this.node = node;
+    public static JsonElement read(Digest digest, ContentAddressableStorage cas) throws JsonSyntaxException,
+	    UnsupportedEncodingException, CasException {
+	JsonElement in = new JsonParser().parse(cas.get(digest).getAsString());
+	if (in.isJsonArray()) {
+	    JsonArray r = new JsonArray();
+	    for (JsonElement e : in.getAsJsonArray()) {
+		r.add(read(gson.fromJson(e, Digest.class), cas));
+	    }
+	    return r;
+	}
+	else if (in.isJsonObject()) {
+	    JsonObject o = new JsonObject();
+	    for (Entry<String, JsonElement> e : in.getAsJsonObject().entrySet()) {
+		o.add(e.getKey(), read(gson.fromJson(e.getValue(), Digest.class), cas));
+	    }
+	    return o;
+	}
+	else
+	    return in;
     }
 
     public Digest write(ContentAddressableStorage cas) throws CasException, IOException {
-	return NodeType.findType(node).getAdapter(node).write(cas);
+	return write(element, cas);
     }
+
+    public JsonElement getElement() {
+	return element;
+    }
+
 }

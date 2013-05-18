@@ -36,7 +36,10 @@ public class MemoryCas implements ContentAddressableStorage {
 
     @Override
     public PersistableResource get(Digest digest) {
-	return new ByteBasedPersistableResource(map.get(digest));
+	ByteBasedPersistableResource pr = new ByteBasedPersistableResource(map.get(digest));
+	if (LOG.isLoggable(Level.FINER))
+	    LOG.log(Level.FINER, "Read "+pr.getBytes().length+" bytes from " + digest +" using memory CAS");
+	return pr;
     }
 
     @Override
@@ -58,7 +61,7 @@ public class MemoryCas implements ContentAddressableStorage {
     public Digest store(PersistableResource pr) throws IOException {
 	Digest digest = digestFactory.getDefaultDigest(pr.getBytes());
 	if (LOG.isLoggable(Level.FINER))
-	    LOG.log(Level.FINER, "Adding " + digest + " to memory CAS");
+	    LOG.log(Level.FINER, "Adding "+pr.getBytes().length+" bytes to " + digest +" in memory CAS");
 	map.put(digest, pr.getBytes());
 	return digest;
     }

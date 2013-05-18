@@ -31,16 +31,6 @@
 
 
 
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.jayway.jsonpath</groupId>
-			<artifactId>json-path</artifactId>
-			<version>0.8.1</version>
-		</dependency>
 
 
 		<dependency>
@@ -61,7 +51,12 @@
 	<artifactId>guava</artifactId>
 	<version>14.0.1</version>
 </dependency>
-            
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.2.3</version>
+		</dependency>
 	</dependencies>
 	<reporting>
 		<plugins>

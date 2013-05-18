@@ -6,15 +6,15 @@ import java.io.UnsupportedEncodingException;
 
 import com.crypticbit.javelin.store.cas.PersistableResource;
 
-public class JsonPersistableResource implements PersistableResource {
+public class GeneralPersistableResource implements PersistableResource {
 
     private byte[] data;
 
-    public JsonPersistableResource(byte[] data) {
+    public GeneralPersistableResource(byte[] data) {
 	this.data = data;
     }
 
-    public JsonPersistableResource(String string) {
+    public GeneralPersistableResource(String string) {
 	try {
 	    this.data = string.getBytes("UTF-8");
 	}

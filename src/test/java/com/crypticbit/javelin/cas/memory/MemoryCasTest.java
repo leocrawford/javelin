@@ -14,7 +14,9 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.store.JsonPersistableResource;
+import com.crypticbit.javelin.store.StoreException;
+import com.crypticbit.javelin.store.GeneralPersistableResource;
+import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.cas.*;
 import com.crypticbit.javelin.store.cas.DigestFactory.DigestMethod;
 
@@ -23,42 +25,42 @@ public class MemoryCasTest {
     private CasFactory cf = new CasFactory();
 
     @Test
-    public void testChangeDigestBetweenOperations() throws UnsupportedEncodingException, CasException, IOException {
+    public void testChangeDigestBetweenOperations() throws UnsupportedEncodingException, StoreException, IOException {
 	ContentAddressableStorage cas = cf.createMemoryCas();
 
-	Digest md1 = cas.store(prFromString("message 1"));
+	Identity md1 = cas.store(prFromString("message 1"));
 	cas.getDigestFactory().setDefault(DigestMethod.SHA256);
-	Digest md2 = cas.store(prFromString("message 2"));
-	assertEquals("488689298c2102300d595c5fce004ffc73565050", md1.getDigestAsString());
-	assertEquals("84768ddee659efeafdeb972b55143141bc23b6e333c70e8b68d29774ab09a548", md2.getDigestAsString());
+	Identity md2 = cas.store(prFromString("message 2"));
+	assertEquals("9238IACC441303APBHFSS02FVHPLCK2G", md1.getDigestAsString());
+	assertEquals("GHR8RNN6B7NULVFBISLLA51H86U27DN36F3GT2R8QABN9AO9KL40====", md2.getDigestAsString());
     }
 
     @Test
-    public void testCheck() throws UnsupportedEncodingException, CasException, IOException, NoSuchAlgorithmException {
+    public void testCheck() throws UnsupportedEncodingException, StoreException, IOException, NoSuchAlgorithmException {
 	ContentAddressableStorage cas = cf.createMemoryCas();
-	Digest md1 = cas.store(prFromString("message 1"));
+	Identity md1 = cas.store(prFromString("message 1"));
 	assertTrue(cas.check(md1));
 	assertFalse(cas.check(new Digest(MessageDigest.getInstance("SHA-1"))));
     }
 
     @Test
-    public void testGet() throws UnsupportedEncodingException, CasException, IOException {
+    public void testGet() throws UnsupportedEncodingException, StoreException, IOException {
 	ContentAddressableStorage cas = cf.createMemoryCas();
-	Digest md1 = cas.store(prFromString("message 1"));
-	Digest md2 = cas.store(prFromString("message 2"));
+	Identity md1 = cas.store(prFromString("message 1"));
+	Identity md2 = cas.store(prFromString("message 2"));
 
 	assertEquals("message 1", prToString(cas.get(md1)));
 	assertEquals("message 2", prToString(cas.get(md2)));
     }
 
     @Test
-    public void testList() throws UnsupportedEncodingException, CasException, IOException {
+    public void testList() throws UnsupportedEncodingException, StoreException, IOException {
 	ContentAddressableStorage cas = cf.createMemoryCas();
-	Digest md[] = new Digest[10];
+	Identity md[] = new Digest[10];
 	for (int loop = 0; loop < 10; loop++) {
 	    md[loop] = cas.store(prFromString("message" + loop));
 	}
-	List<Digest> list = cas.list();
+	List<Identity> list = cas.list();
 	assertEquals(10, list.size());
 	// check they're in ascehnding order - and they exist
 	for (int loop = 0; loop < 10; loop++) {
@@ -70,14 +72,14 @@ public class MemoryCasTest {
     }
 
     @Test
-    public void testListAfterStart() throws UnsupportedEncodingException, CasException, IOException {
+    public void testListAfterStart() throws UnsupportedEncodingException, StoreException, IOException {
 	ContentAddressableStorage cas = cf.createMemoryCas();
-	List<Digest> createList = new LinkedList<Digest>();
+	List<Identity> createList = new LinkedList<>();
 	for (int loop = 0; loop < 10; loop++) {
 	    createList.add(cas.store(prFromString("message" + loop)));
 	}
 	Collections.sort(createList);
-	List<Digest> list = cas.list(createList.get(5));
+	List<Identity> list = cas.list(createList.get(5));
 	assertEquals(5, list.size());
 	// check they're in ascending order - and they exist
 	for (int loop = 0; loop < 5; loop++) {
@@ -89,28 +91,28 @@ public class MemoryCasTest {
     }
 
     @Test
-    public void testStoreWithDefaultSha1DigestMethod() throws CasException, IOException {
+    public void testStoreWithDefaultSha1DigestMethod() throws StoreException, IOException {
 	ContentAddressableStorage cas = cf.createMemoryCas();
-	Digest md = cas.store(prFromString("message 1"));
-	org.junit.Assert.assertEquals("488689298c2102300d595c5fce004ffc73565050", md.getDigestAsString());
+	Identity md = cas.store(prFromString("message 1"));
+	org.junit.Assert.assertEquals("9238IACC441303APBHFSS02FVHPLCK2G", md.getDigestAsString());
     }
 
     @Test
-    public void testStoreWithSha256DigestMethod() throws CasException, IOException {
+    public void testStoreWithSha256DigestMethod() throws StoreException, IOException {
 	ContentAddressableStorage cas = cf.createMemoryCas();
 	cas.getDigestFactory().setDefault(DigestMethod.SHA256);
-	Digest md1 = cas.store(prFromString("message 1"));
-	Digest md2 = cas.store(prFromString("message 2"));
+	Identity md1 = cas.store(prFromString("message 1"));
+	Identity md2 = cas.store(prFromString("message 2"));
 	org.junit.Assert.assertNotEquals(md1.getDigestAsString(), md2.getDigestAsString());
 	org.junit.Assert.assertNotEquals(md1.getDigestAsByte(), md2.getDigestAsByte());
-	org.junit.Assert.assertEquals("b526aef1a341cfe6e5c377ed4c222888eeb81f913a107110a867e009c1758f24", md1
+	org.junit.Assert.assertEquals("MKJATSD3877UDPE3EVMKO8H8H3NBG7SH78872458CVG0JGBLHSI0====", md1
 		.getDigestAsString());
-	org.junit.Assert.assertEquals("84768ddee659efeafdeb972b55143141bc23b6e333c70e8b68d29774ab09a548", md2
+	org.junit.Assert.assertEquals("GHR8RNN6B7NULVFBISLLA51H86U27DN36F3GT2R8QABN9AO9KL40====", md2
 		.getDigestAsString());
     }
 
     private PersistableResource prFromString(String string) throws UnsupportedEncodingException {
-	return new JsonPersistableResource(string);
+	return new GeneralPersistableResource(string);
     }
 
     private String prToString(PersistableResource pr) throws UnsupportedEncodingException, IOException {

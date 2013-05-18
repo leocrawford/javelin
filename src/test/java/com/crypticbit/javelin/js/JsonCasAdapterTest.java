@@ -8,10 +8,10 @@ import java.util.logging.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.crypticbit.javelin.store.cas.CasException;
+import com.crypticbit.javelin.store.StoreException;
+import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.cas.CasFactory;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
-import com.crypticbit.javelin.store.cas.Digest;
 import com.google.gson.JsonElement;
 
 public class JsonCasAdapterTest {
@@ -19,7 +19,7 @@ public class JsonCasAdapterTest {
     private static final String JSON_EXAMPLE = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]";
 
     @Test
-    public void test() throws  IOException, CasException {
+    public void test() throws  IOException, StoreException {
 	Logger LOG = Logger.getLogger("com.crypticbit");
 	ConsoleHandler handler = new ConsoleHandler();
 	handler.setLevel(Level.FINEST);
@@ -28,15 +28,15 @@ public class JsonCasAdapterTest {
 	
 	JsonCasAdapter jca = new JsonCasAdapter(JSON_EXAMPLE);
 	ContentAddressableStorage cas = new CasFactory().createMemoryCas();
-	Digest head = jca.write(cas);
+	Identity head = jca.write(cas);
 	JsonElement x = JsonCasAdapter.read(head, cas);
 	Assert.assertEquals(jca.getElement(),x);
 	
 	
     }
     
-    private void dump(ContentAddressableStorage cas) throws CasException {
-	for(Digest d : cas.list()) {
+    private void dump(ContentAddressableStorage cas) throws StoreException {
+	for(Identity d : cas.list()) {
 	    System.out.println(d+"->"+cas.get(d));
 	}
     }

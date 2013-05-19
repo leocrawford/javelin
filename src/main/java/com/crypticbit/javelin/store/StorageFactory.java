@@ -1,14 +1,15 @@
-package com.crypticbit.javelin.store.cas;
+package com.crypticbit.javelin.store;
 
+import com.crypticbit.javelin.store.cas.DigestFactory;
 import com.crypticbit.javelin.store.memory.MemoryCasKas;
 
 /* Create or access any of the standard CAS types (memory, disk, remote, etc) */
-public class CasFactory {
+public class StorageFactory {
 
-    public CasFactory() {
+    public StorageFactory() {
     }
 
-    public ContentAddressableStorage createMemoryCas() {
+    public CasKasStore createMemoryCas() {
 	return new MemoryCasKas(new DigestFactory());
     }
 

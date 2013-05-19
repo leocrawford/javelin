@@ -8,9 +8,10 @@ import java.util.logging.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.crypticbit.javelin.store.CasKasStore;
+import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.Identity;
-import com.crypticbit.javelin.store.cas.CasFactory;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.JsonElement;
 
@@ -26,11 +27,13 @@ public class JsonCasAdapterTest {
 	LOG.addHandler(handler);
 	LOG.setLevel(Level.FINEST);
 	
-	JsonCasAdapter jca = new JsonCasAdapter(JSON_EXAMPLE);
-	ContentAddressableStorage cas = new CasFactory().createMemoryCas();
-	Identity head = jca.write(cas);
-	JsonElement x = JsonCasAdapter.read(head, cas);
+	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
+	jca.setJson(JSON_EXAMPLE);
+	jca.write();
+	JsonElement x = jca.read();
 	Assert.assertEquals(jca.getElement(),x);
+	
+	System.out.println(jca.getElement());
 	
 	
     }

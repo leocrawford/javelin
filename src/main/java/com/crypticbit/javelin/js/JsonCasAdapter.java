@@ -7,11 +7,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.crypticbit.javelin.store.StoreException;
-import com.crypticbit.javelin.store.GeneralPersistableResource;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.*;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
-import com.crypticbit.javelin.store.cas.Digest;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -21,7 +18,10 @@ public class JsonCasAdapter {
     // private static final Type DIGEST_COLLECTION_TYPE = new TypeToken<Collection<Digest>>() {
     // }.getType();
 
+    private Identity id = new Digest();
     private JsonElement element;
+    private Identity lastReadDigest;
+    private CasKasStore store;
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(Digest.class, new TypeAdapter<Digest>() {
 
 	@Override
@@ -35,7 +35,11 @@ public class JsonCasAdapter {
 	}
     }).create();
 
-    public JsonCasAdapter(String string) {
+    public JsonCasAdapter(CasKasStore store) {
+	this.store = store; 
+    }
+    
+    public void setJson(String string) {
 	element = new JsonParser().parse(string);
     }
 
@@ -79,8 +83,16 @@ public class JsonCasAdapter {
 	    return in;
     }
 
-    public Identity write(ContentAddressableStorage cas) throws StoreException, IOException {
-	return write(element, cas);
+    public JsonElement read() throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
+	if (store.check(id)) {
+	    lastReadDigest = new Digest(store.get(id).getBytes());
+	    element = read(lastReadDigest, store);
+	}
+	return element;
+    }
+
+    public void write() throws StoreException, IOException {
+	store.store(id, lastReadDigest, write(element, store));
     }
 
     public JsonElement getElement() {

@@ -14,15 +14,13 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.store.StoreException;
-import com.crypticbit.javelin.store.GeneralPersistableResource;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.*;
 import com.crypticbit.javelin.store.cas.*;
 import com.crypticbit.javelin.store.cas.DigestFactory.DigestMethod;
 
 public class MemoryCasTest {
 
-    private CasFactory cf = new CasFactory();
+    private StorageFactory cf = new StorageFactory();
 
     @Test
     public void testChangeDigestBetweenOperations() throws UnsupportedEncodingException, StoreException, IOException {

@@ -1,22 +1,20 @@
 package com.crypticbit.javelin.store.kas;
 
 import java.io.IOException;
-import java.util.List;
 
 import com.crypticbit.javelin.store.AddressableStorage;
-import com.crypticbit.javelin.store.StoreException;
+import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
-import com.crypticbit.javelin.store.cas.PersistableResource;
+import com.crypticbit.javelin.store.StoreException;
 
 public interface KeyAddressableStorage extends AddressableStorage {
 
-
-
     /**
-     * Store the data against against its digest, and return that digest
+     * Store a reference (Digest) to a CAS element. Utilities optimistic locking by demanding that you know the latest
+     * "old" value. If you don't an exception is thrown
      * 
      * @throws IOException
      */
-    void store(Identity id, PersistableResource po) throws StoreException, IOException;
-    
+    void store(Identity id, Identity oldDigest, Identity newDigest) throws StoreException, IOException;
+
 }

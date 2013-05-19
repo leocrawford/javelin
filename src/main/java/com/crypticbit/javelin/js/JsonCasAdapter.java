@@ -36,9 +36,18 @@ public class JsonCasAdapter {
     }).create();
 
     public JsonCasAdapter(CasKasStore store) {
-	this.store = store; 
+	this.store = store;
     }
-    
+
+    public JsonCasAdapter(CasKasStore store, Identity id) {
+	this(store);
+	this.id = id;
+    }
+
+    public Identity getIdentity() {
+	return id;
+    }
+
     public void setJson(String string) {
 	element = new JsonParser().parse(string);
     }
@@ -92,7 +101,9 @@ public class JsonCasAdapter {
     }
 
     public void write() throws StoreException, IOException {
-	store.store(id, lastReadDigest, write(element, store));
+	Identity tempDigest = write(element, store);
+	store.store(id, lastReadDigest, tempDigest);
+	lastReadDigest = tempDigest; // only happens if no exception thrown
     }
 
     public JsonElement getElement() {

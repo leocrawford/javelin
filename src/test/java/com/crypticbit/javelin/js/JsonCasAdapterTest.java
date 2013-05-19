@@ -8,39 +8,67 @@ import java.util.logging.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.crypticbit.javelin.store.CasKasStore;
-import com.crypticbit.javelin.store.StorageFactory;
-import com.crypticbit.javelin.store.StoreException;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.*;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.JsonElement;
 
 public class JsonCasAdapterTest {
 
     private static final String JSON_EXAMPLE = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]";
-
-    @Test
-    public void test() throws  IOException, StoreException {
+    private static final String JSON_EXAMPLE_2 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,4]]";
+    private static final String JSON_EXAMPLE_3 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,5]]";
+    
+    private void enableLog() {
 	Logger LOG = Logger.getLogger("com.crypticbit");
 	ConsoleHandler handler = new ConsoleHandler();
 	handler.setLevel(Level.FINEST);
 	LOG.addHandler(handler);
 	LOG.setLevel(Level.FINEST);
-	
+    }
+
+    @Test
+    public void testBasicReadWrite() throws IOException, StoreException {
 	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
 	jca.setJson(JSON_EXAMPLE);
 	jca.write();
 	JsonElement x = jca.read();
-	Assert.assertEquals(jca.getElement(),x);
-	
-	System.out.println(jca.getElement());
-	
-	
+	Assert.assertEquals(jca.getElement(), x);
     }
-    
+
+    @Test
+    public void testReadWriteUsingTwoObjects() throws IOException, StoreException {
+	CasKasStore store = new StorageFactory().createMemoryCas();
+	JsonCasAdapter jca = new JsonCasAdapter(store);
+	jca.setJson(JSON_EXAMPLE);
+	jca.write();
+	byte[] id = jca.getIdentity().getDigestAsByte();
+
+	JsonCasAdapter jca2 = new JsonCasAdapter(store, new Digest(id));
+	JsonElement x = jca2.read();
+	Assert.assertEquals(jca.getElement(), x);
+    }
+
+    @Test
+    public void testConcurrentWriteUsingTwoObjects() throws IOException, StoreException {
+	CasKasStore store = new StorageFactory().createMemoryCas();
+	JsonCasAdapter jca = new JsonCasAdapter(store);
+	jca.setJson(JSON_EXAMPLE);
+	jca.write();
+	jca.setJson(JSON_EXAMPLE_2);
+
+	JsonCasAdapter jca2 = new JsonCasAdapter(store, jca.getIdentity());
+	JsonElement x = jca2.read();
+	jca2.setJson(JSON_EXAMPLE_3);
+	
+	jca2.write();
+	jca.write();
+	
+
+    }
+
     private void dump(ContentAddressableStorage cas) throws StoreException {
-	for(Identity d : cas.list()) {
-	    System.out.println(d+"->"+cas.get(d));
+	for (Identity d : cas.list()) {
+	    System.out.println(d + "->" + cas.get(d));
 	}
     }
 }

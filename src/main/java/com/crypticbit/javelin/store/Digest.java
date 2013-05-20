@@ -2,6 +2,7 @@ package com.crypticbit.javelin.store;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Random;
 
 import com.google.common.io.BaseEncoding;
@@ -19,7 +20,7 @@ public class Digest implements Identity {
     public Digest() {
 	digest = ByteBuffer.wrap(createRandomData(64));
     }
-    
+
     public Digest(MessageDigest messageDigest) {
 	digest = ByteBuffer.wrap(messageDigest.digest());
     }
@@ -34,9 +35,10 @@ public class Digest implements Identity {
 
     @Override
     public int compareTo(Identity o) {
-	if(o instanceof Digest)
-	return digest.compareTo(((Digest)o).digest);
-	else return this.getClass().getName().compareTo(o.getClass().getName());
+	if (o instanceof Digest)
+	    return digest.compareTo(((Digest) o).digest);
+	else
+	    return this.getClass().getName().compareTo(o.getClass().getName());
     }
 
     public byte[] getDigestAsByte() {
@@ -44,14 +46,13 @@ public class Digest implements Identity {
     }
 
     public String getDigestAsString() {
-	return  BaseEncoding.base32Hex().encode(getDigestAsByte());
+	return BaseEncoding.base32Hex().encode(getDigestAsByte());
     }
 
     @Override
     public String toString() {
-	return getDigestAsString().substring(0,6)+"...";
+	return getDigestAsString().substring(0, 6) + "...";
     }
-    
 
     private static byte[] createRandomData(int length) {
 	byte[] b = new byte[length];
@@ -59,5 +60,10 @@ public class Digest implements Identity {
 	return b;
     }
 
-
+    public boolean equals(Object digest) {
+	if (digest instanceof Digest)
+	    return Arrays.equals(getDigestAsByte(), ((Digest)digest).getDigestAsByte());
+	else
+	    return false;
+    }
 }

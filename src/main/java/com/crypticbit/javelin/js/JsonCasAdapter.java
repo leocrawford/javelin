@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.crypticbit.javelin.store.*;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
@@ -17,6 +19,8 @@ public class JsonCasAdapter {
 
     // private static final Type DIGEST_COLLECTION_TYPE = new TypeToken<Collection<Digest>>() {
     // }.getType();
+    
+    private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.js");
 
     private Identity id = new Digest();
     private JsonElement element;
@@ -71,7 +75,7 @@ public class JsonCasAdapter {
 	    return cas.store(new GeneralPersistableResource(gson.toJson(element)));
     }
 
-    public static JsonElement read(Identity digest, ContentAddressableStorage cas) throws JsonSyntaxException,
+    private static JsonElement read(Identity digest, ContentAddressableStorage cas) throws JsonSyntaxException,
 	    UnsupportedEncodingException, StoreException {
 	JsonElement in = new JsonParser().parse(cas.get(digest).getAsString());
 	if (in.isJsonArray()) {
@@ -104,6 +108,8 @@ public class JsonCasAdapter {
 	Identity tempDigest = write(element, store);
 	store.store(id, lastReadDigest, tempDigest);
 	lastReadDigest = tempDigest; // only happens if no exception thrown
+	if(LOG.isLoggable(Level.FINEST))
+	    LOG.log(Level.FINEST,"Updating id -> "+tempDigest);
     }
 
     public JsonElement getElement() {

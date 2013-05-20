@@ -71,7 +71,7 @@ public class MemoryCasKas implements CasKasStore {
 	if (!check(id) || new Digest(get(id).getBytes()).equals(oldDigest))
 	    casMap.put(id, newDigest.getDigestAsByte());
 	else
-	    throw new StoreException("Concurrent modification");
+	    throw new StoreException("Concurrent modification. Expected "+oldDigest+" but got "+new Digest(get(id).getBytes()));
     }
 
 }

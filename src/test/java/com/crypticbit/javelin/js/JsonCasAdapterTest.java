@@ -1,5 +1,7 @@
 package com.crypticbit.javelin.js;
 
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -17,7 +19,7 @@ public class JsonCasAdapterTest {
     private static final String JSON_EXAMPLE = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]";
     private static final String JSON_EXAMPLE_2 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,4]]";
     private static final String JSON_EXAMPLE_3 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,5]]";
-    
+
     private void enableLog() {
 	Logger LOG = Logger.getLogger("com.crypticbit");
 	ConsoleHandler handler = new ConsoleHandler();
@@ -57,12 +59,20 @@ public class JsonCasAdapterTest {
 	jca.setJson(JSON_EXAMPLE_2);
 
 	JsonCasAdapter jca2 = new JsonCasAdapter(store, jca.getIdentity());
-	JsonElement x = jca2.read();
+	jca2.read();
 	jca2.setJson(JSON_EXAMPLE_3);
-	
-	jca2.write();
+
 	jca.write();
-	
+	try {
+	    jca2.write();
+	    fail("Concurrent modification");
+	}
+	catch (StoreException e) {
+	    // expected to fail
+	}
+	jca2.read();
+	jca2.setJson(JSON_EXAMPLE_3);
+	jca2.write();
 
     }
 

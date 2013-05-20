@@ -43,7 +43,7 @@ public class JsonCasAdapterTest {
 	JsonCasAdapter jca = new JsonCasAdapter(store);
 	jca.setJson(JSON_EXAMPLE);
 	jca.write();
-	byte[] id = jca.getIdentity().getDigestAsByte();
+	byte[] id = jca.getAnchor().getDigestAsByte();
 
 	JsonCasAdapter jca2 = new JsonCasAdapter(store, new Digest(id));
 	JsonElement x = jca2.read();
@@ -58,7 +58,7 @@ public class JsonCasAdapterTest {
 	jca.write();
 	jca.setJson(JSON_EXAMPLE_2);
 
-	JsonCasAdapter jca2 = new JsonCasAdapter(store, jca.getIdentity());
+	JsonCasAdapter jca2 = new JsonCasAdapter(store, jca.getAnchor());
 	jca2.read();
 	jca2.setJson(JSON_EXAMPLE_3);
 

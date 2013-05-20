@@ -17,15 +17,22 @@ import com.google.gson.stream.JsonWriter;
 
 public class JsonCasAdapter {
 
-    // private static final Type DIGEST_COLLECTION_TYPE = new TypeToken<Collection<Digest>>() {
-    // }.getType();
-    
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.js");
 
-    private Identity id = new Digest();
+    /**
+     * The "anchor" of this element, which can either be set manually or a random one generated. After every write the
+     * anchor is updated with the reference to the head of the write. It's expected that one node will be hard-coded
+     * (set manually) which will represent the head or root node, and all others will be referenced from within that
+     * data structure.
+     */
+    private Identity anchor = new Digest();
+    /** The current head of the Json data structure */
     private JsonElement element;
-    private Identity lastReadDigest;
+    /** The last known head of the actual data structure, set after a read or write operation */
+    private Identity head;
+    /** The underlying data store */
     private CasKasStore store;
+    /** The internal gson object we use, which will write out Digest values properly */
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(Digest.class, new TypeAdapter<Digest>() {
 
 	@Override
@@ -39,17 +46,22 @@ public class JsonCasAdapter {
 	}
     }).create();
 
+    /** Create a new json data structure with a random anchor, which can be retrieved using <code>getAnchor</code> */
     public JsonCasAdapter(CasKasStore store) {
 	this.store = store;
     }
 
-    public JsonCasAdapter(CasKasStore store, Identity id) {
+    /**
+     * Create a new json data structure with a specified anchor./ this will usually only be used once to create the very
+     * head of a data structure.
+     */
+    public JsonCasAdapter(CasKasStore store, Identity anchor) {
 	this(store);
-	this.id = id;
+	this.anchor = anchor;
     }
 
-    public Identity getIdentity() {
-	return id;
+    public Identity getAnchor() {
+	return anchor;
     }
 
     public void setJson(String string) {
@@ -96,20 +108,20 @@ public class JsonCasAdapter {
 	    return in;
     }
 
-    public JsonElement read() throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
-	if (store.check(id)) {
-	    lastReadDigest = new Digest(store.get(id).getBytes());
-	    element = read(lastReadDigest, store);
+    public synchronized JsonElement read() throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
+	if (store.check(anchor)) {
+	    head = new Digest(store.get(anchor).getBytes());
+	    element = read(head, store);
 	}
 	return element;
     }
 
-    public void write() throws StoreException, IOException {
+    public synchronized void write() throws StoreException, IOException {
 	Identity tempDigest = write(element, store);
-	store.store(id, lastReadDigest, tempDigest);
-	lastReadDigest = tempDigest; // only happens if no exception thrown
-	if(LOG.isLoggable(Level.FINEST))
-	    LOG.log(Level.FINEST,"Updating id -> "+tempDigest);
+	store.store(anchor, head, tempDigest);
+	head = tempDigest; // only happens if no exception thrown
+	if (LOG.isLoggable(Level.FINEST))
+	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
     }
 
     public JsonElement getElement() {

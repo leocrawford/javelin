@@ -23,13 +23,14 @@ public class JsonCasAdapterTest {
     private void enableLog() {
 	Logger LOG = Logger.getLogger("com.crypticbit");
 	ConsoleHandler handler = new ConsoleHandler();
-	handler.setLevel(Level.FINEST);
+	handler.setLevel(Level.FINER);
 	LOG.addHandler(handler);
-	LOG.setLevel(Level.FINEST);
+	LOG.setLevel(Level.FINER);
     }
 
     @Test
     public void testBasicReadWrite() throws IOException, StoreException {
+	enableLog();
 	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
 	jca.setJson(JSON_EXAMPLE);
 	jca.write();
@@ -73,6 +74,27 @@ public class JsonCasAdapterTest {
 	jca2.read();
 	jca2.setJson(JSON_EXAMPLE_3);
 	jca2.write();
+
+    }
+
+    @Test
+    public void testCommitForMultipleReadWrite() throws IOException, StoreException {
+	enableLog();
+	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
+	jca.setJson(JSON_EXAMPLE);
+	jca.write();
+	Commit c1 = jca.getCommit();
+	jca.setJson(JSON_EXAMPLE_2);
+	jca.write();
+	Commit c2 = jca.getCommit();
+	jca.setJson(JSON_EXAMPLE_3);
+	jca.write();
+	Commit c3 = jca.getCommit();
+
+	// FIXME - be able to load history and element from commit
+	System.out.println(c1);
+	System.out.println(c2);
+	System.out.println(c3);
 
     }
 

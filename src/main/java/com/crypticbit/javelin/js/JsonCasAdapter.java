@@ -2,15 +2,14 @@ package com.crypticbit.javelin.js;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.crypticbit.javelin.store.*;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
+import com.crypticbit.javelin.store.cas.PersistableResource;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -29,7 +28,8 @@ public class JsonCasAdapter {
     /** The current head of the Json data structure */
     private JsonElement element;
     /** The last known head of the actual data structure, set after a read or write operation */
-    private Identity head;
+    private Commit commit;
+    private Identity commitId;
     /** The underlying data store */
     private CasKasStore store;
     /** The internal gson object we use, which will write out Digest values properly */
@@ -37,6 +37,7 @@ public class JsonCasAdapter {
 
 	@Override
 	public void write(JsonWriter out, Digest value) throws IOException {
+	    if(value != null)
 	    out.value(value.getDigestAsString());
 	}
 
@@ -110,22 +111,37 @@ public class JsonCasAdapter {
 
     public synchronized JsonElement read() throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
 	if (store.check(anchor)) {
-	    head = new Digest(store.get(anchor).getBytes());
-	    element = read(head, store);
+	    commitId = new Digest(store.get(anchor).getBytes());
+	    PersistableResource commitAsEncodedJson = store.get(commitId);
+	    commit = gson.fromJson(commitAsEncodedJson.getAsString(), Commit.class);
+	    if (LOG.isLoggable(Level.FINER))
+		LOG.log(Level.FINER, "Reading commit: " + commit);
+	    element = read(commit.getHead(), store);
 	}
 	return element;
     }
 
+    // FIXME - horrible use of GeneralPersistableResource
+    // FIXME - factor out to commit
+    // FIXME - cast Digest
     public synchronized void write() throws StoreException, IOException {
-	Identity tempDigest = write(element, store);
-	store.store(anchor, head, tempDigest);
-	head = tempDigest; // only happens if no exception thrown
+	Identity valueIdentity = write(element, store);
+	Commit tempCommit = new Commit((Digest) valueIdentity, new Date(), "temp",(Digest) commitId);
+	String commitAsJson = gson.toJson(tempCommit);
+	Identity tempDigest = store.store(new GeneralPersistableResource(commitAsJson));
+	store.store(anchor, commitId, tempDigest);
+	commitId = tempDigest; // only happens if no exception thrown
+	commit = tempCommit;
 	if (LOG.isLoggable(Level.FINEST))
 	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
     }
 
     public JsonElement getElement() {
 	return element;
+    }
+
+    public Commit getCommit() {
+	return commit;
     }
 
 }

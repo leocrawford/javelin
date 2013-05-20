@@ -36,8 +36,8 @@ public class MemoryCasKas implements CasKasStore {
     @Override
     public PersistableResource get(Identity digest) {
 	GeneralPersistableResource pr = new GeneralPersistableResource(casMap.get(digest));
-	if (LOG.isLoggable(Level.FINER))
-	    LOG.log(Level.FINER, "Read " + pr.getBytes().length + " bytes from " + digest + " using memory CAS");
+	if (LOG.isLoggable(Level.FINEST))
+	    LOG.log(Level.FINEST, "Read " + pr.getBytes().length + " bytes from " + digest + " using memory CAS");
 	return pr;
     }
 
@@ -59,8 +59,8 @@ public class MemoryCasKas implements CasKasStore {
     @Override
     public Identity store(PersistableResource pr) throws IOException {
 	Digest digest = digestFactory.getDefaultDigest(pr.getBytes());
-	if (LOG.isLoggable(Level.FINER))
-	    LOG.log(Level.FINER, "Adding " + pr.getBytes().length + " bytes to " + digest + " in memory CAS");
+	if (LOG.isLoggable(Level.FINEST))
+	    LOG.log(Level.FINEST, "Adding " + pr.getBytes().length + " bytes to " + digest + " in memory CAS");
 	casMap.put(digest, pr.getBytes());
 	return digest;
     }

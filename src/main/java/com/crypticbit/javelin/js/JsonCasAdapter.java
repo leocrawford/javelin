@@ -2,14 +2,14 @@ package com.crypticbit.javelin.js;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.crypticbit.javelin.store.*;
-import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
-import com.crypticbit.javelin.store.cas.PersistableResource;
+import com.crypticbit.javelin.store.CasKasStore;
+import com.crypticbit.javelin.store.Digest;
+import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -32,13 +32,14 @@ public class JsonCasAdapter {
     private Identity commitId;
     /** The underlying data store */
     private CasKasStore store;
+
     /** The internal gson object we use, which will write out Digest values properly */
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(Digest.class, new TypeAdapter<Digest>() {
 
 	@Override
 	public void write(JsonWriter out, Digest value) throws IOException {
-	    if(value != null)
-	    out.value(value.getDigestAsString());
+	    if (value != null)
+		out.value(value.getDigestAsString());
 	}
 
 	@Override
@@ -47,9 +48,15 @@ public class JsonCasAdapter {
 	}
     }).create();
 
+    private CommitFactory commitFactory;
+    private JsonFactory jsonFactory;
+
     /** Create a new json data structure with a random anchor, which can be retrieved using <code>getAnchor</code> */
     public JsonCasAdapter(CasKasStore store) {
 	this.store = store;
+
+	commitFactory = new CommitFactory(store, gson);
+	jsonFactory = new JsonFactory(store, gson);
     }
 
     /**
@@ -69,54 +76,13 @@ public class JsonCasAdapter {
 	element = new JsonParser().parse(string);
     }
 
-    public static Identity write(JsonElement element, ContentAddressableStorage cas) throws StoreException, IOException {
-	if (element.isJsonArray()) {
-	    LinkedList<Identity> array = new LinkedList<>();
-	    for (JsonElement e : element.getAsJsonArray()) {
-		array.add(write(e, cas));
-	    }
-	    return cas.store(new GeneralPersistableResource(gson.toJson(array)));
-	}
-	else if (element.isJsonObject()) {
-	    Map<String, Identity> map = new HashMap<>();
-	    for (Entry<String, JsonElement> e : element.getAsJsonObject().entrySet()) {
-		map.put(e.getKey(), write(e.getValue(), cas));
-	    }
-	    return cas.store(new GeneralPersistableResource(gson.toJson(map)));
-	}
-	else
-	    return cas.store(new GeneralPersistableResource(gson.toJson(element)));
-    }
-
-    private static JsonElement read(Identity digest, ContentAddressableStorage cas) throws JsonSyntaxException,
-	    UnsupportedEncodingException, StoreException {
-	JsonElement in = new JsonParser().parse(cas.get(digest).getAsString());
-	if (in.isJsonArray()) {
-	    JsonArray r = new JsonArray();
-	    for (JsonElement e : in.getAsJsonArray()) {
-		r.add(read(gson.fromJson(e, Digest.class), cas));
-	    }
-	    return r;
-	}
-	else if (in.isJsonObject()) {
-	    JsonObject o = new JsonObject();
-	    for (Entry<String, JsonElement> e : in.getAsJsonObject().entrySet()) {
-		o.add(e.getKey(), read(gson.fromJson(e.getValue(), Digest.class), cas));
-	    }
-	    return o;
-	}
-	else
-	    return in;
-    }
-
     public synchronized JsonElement read() throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
 	if (store.check(anchor)) {
 	    commitId = new Digest(store.get(anchor).getBytes());
-	    PersistableResource commitAsEncodedJson = store.get(commitId);
-	    commit = gson.fromJson(commitAsEncodedJson.getAsString(), Commit.class);
+	    commit = commitFactory.read(commitId);
 	    if (LOG.isLoggable(Level.FINER))
 		LOG.log(Level.FINER, "Reading commit: " + commit);
-	    element = read(commit.getHead(), store);
+	    element = jsonFactory.read(commit.getHead());
 	}
 	return element;
     }
@@ -125,10 +91,9 @@ public class JsonCasAdapter {
     // FIXME - factor out to commit
     // FIXME - cast Digest
     public synchronized void write() throws StoreException, IOException {
-	Identity valueIdentity = write(element, store);
-	Commit tempCommit = new Commit((Digest) valueIdentity, new Date(), "temp",(Digest) commitId);
-	String commitAsJson = gson.toJson(tempCommit);
-	Identity tempDigest = store.store(new GeneralPersistableResource(commitAsJson));
+	Identity valueIdentity = jsonFactory.write(element);
+	Commit tempCommit = new Commit((Digest) valueIdentity, new Date(), "temp", (Digest) commitId);
+	Identity tempDigest = commitFactory.write(tempCommit);
 	store.store(anchor, commitId, tempDigest);
 	commitId = tempDigest; // only happens if no exception thrown
 	commit = tempCommit;

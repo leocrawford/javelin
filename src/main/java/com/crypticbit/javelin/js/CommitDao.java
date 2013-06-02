@@ -7,7 +7,7 @@ import com.crypticbit.javelin.store.Digest;
 
 public class CommitDao {
 
-    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yy-MM-dd~mm:ss:SSS");
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yy-MM-dd~HH:mm:ss:SSS");
     /** Reference to head of value tree */
     private Digest head;
     private Date when;
@@ -15,7 +15,7 @@ public class CommitDao {
     private Digest parents[];
 
     public CommitDao(Digest head, Date when, String user, Digest parent) {
-	this(head, when, user, new Digest[] { parent });
+	this(head, when, user, (parent == null ? new Digest[] {} : new Digest[] { parent }));
     }
 
     public CommitDao(Digest head, Date when, String user, Digest[] parents) {

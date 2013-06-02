@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import com.crypticbit.javelin.store.*;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
-import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public class JsonCasAdapterTest {
 
@@ -44,13 +44,16 @@ public class JsonCasAdapterTest {
 	jca.commit();
 	Commit c3 = jca.getCommit();
 
-	// FIXME - be able to load history and element from commit
-	System.out.println(c1);
-	System.out.println(c2);
-	System.out.println(c3);
+	
+	Assert.assertEquals(1, c1.getShortestHistory().size());
+	Assert.assertEquals(3, c3.getShortestHistory().size());
+	
+	Assert.assertEquals(0, c1.getParents().size());
+	Assert.assertEquals(1, c2.getParents().size());
+	
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE), c3.getShortestHistory().get(2).getElement());
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_3), c3.getShortestHistory().get(0).getElement());
 
-	System.out.println(c3.getHistory());
-	System.out.println(c3.getHistory().get(1).getElement());
 
     }
 

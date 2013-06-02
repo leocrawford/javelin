@@ -34,27 +34,18 @@ public class JsonCasAdapterTest {
     public void testCommitForMultipleReadWrite() throws IOException, StoreException {
 	// enableLog();
 	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
-	jca.write(JSON_EXAMPLE);
-	jca.commit();
-	Commit c1 = jca.getCommit();
-	jca.write(JSON_EXAMPLE_2);
-	jca.commit();
-	Commit c2 = jca.getCommit();
-	jca.write(JSON_EXAMPLE_3);
-	jca.commit();
-	Commit c3 = jca.getCommit();
+	Commit c1 = jca.write(JSON_EXAMPLE).commit().getCommit();
+	Commit c2 = jca.write(JSON_EXAMPLE_2).commit().getCommit();
+	Commit c3 = jca.write(JSON_EXAMPLE_3).commit().getCommit();
 
-	
 	Assert.assertEquals(1, c1.getShortestHistory().size());
 	Assert.assertEquals(3, c3.getShortestHistory().size());
-	
+
 	Assert.assertEquals(0, c1.getParents().size());
 	Assert.assertEquals(1, c2.getParents().size());
-	
+
 	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE), c3.getShortestHistory().get(2).getElement());
 	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_3), c3.getShortestHistory().get(0).getElement());
-
-
     }
 
     @Test

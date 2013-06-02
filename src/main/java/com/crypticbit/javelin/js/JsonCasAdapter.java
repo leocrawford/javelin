@@ -79,11 +79,12 @@ public class JsonCasAdapter {
 	return element;
     }
     
-    public void write(String string) {
+    public JsonCasAdapter write(String string) {
 	element = new JsonParser().parse(string);
+	return this;
     }
 
-    public synchronized void checkout() throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
+    public synchronized JsonCasAdapter checkout() throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
 	if (store.check(anchor)) {
 	    commitId = new Digest(store.get(anchor).getBytes());
 	    commit = new Commit(commitFactory.read(commitId), jsonFactory, commitFactory);
@@ -92,11 +93,12 @@ public class JsonCasAdapter {
 		LOG.log(Level.FINER, "Reading commit: " + commit);
 	    }
 	}
+	return this;
     }
 
     // FIXME - horrible use of GeneralPersistableResource
     // FIXME - cast Digest
-    public synchronized void commit() throws StoreException, IOException {
+    public synchronized JsonCasAdapter commit() throws StoreException, IOException {
 	Identity valueIdentity = jsonFactory.write(element);
 	CommitDao tempCommit = new CommitDao((Digest) valueIdentity, new Date(), "temp", (Digest) commitId);
 	Identity tempDigest = commitFactory.write(tempCommit);
@@ -106,6 +108,7 @@ public class JsonCasAdapter {
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
 	}
+	return this;
     }
 
 }

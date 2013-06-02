@@ -24,24 +24,24 @@ public class JsonCasAdapterTest {
     public void testBasicReadWrite() throws IOException, StoreException {
 	enableLog();
 	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
-	jca.setJson(JSON_EXAMPLE);
-	jca.write();
-	JsonElement x = jca.read();
-	Assert.assertEquals(jca.getElement(), x);
+	jca.write(JSON_EXAMPLE);
+	jca.commit();
+	jca.checkout();
+	Assert.assertEquals(jca.read(), jca.read());
     }
 
     @Test
     public void testCommitForMultipleReadWrite() throws IOException, StoreException {
 	// enableLog();
 	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
-	jca.setJson(JSON_EXAMPLE);
-	jca.write();
+	jca.write(JSON_EXAMPLE);
+	jca.commit();
 	Commit c1 = jca.getCommit();
-	jca.setJson(JSON_EXAMPLE_2);
-	jca.write();
+	jca.write(JSON_EXAMPLE_2);
+	jca.commit();
 	Commit c2 = jca.getCommit();
-	jca.setJson(JSON_EXAMPLE_3);
-	jca.write();
+	jca.write(JSON_EXAMPLE_3);
+	jca.commit();
 	Commit c3 = jca.getCommit();
 
 	// FIXME - be able to load history and element from commit
@@ -58,25 +58,25 @@ public class JsonCasAdapterTest {
     public void testConcurrentWriteUsingTwoObjects() throws IOException, StoreException {
 	CasKasStore store = new StorageFactory().createMemoryCas();
 	JsonCasAdapter jca = new JsonCasAdapter(store);
-	jca.setJson(JSON_EXAMPLE);
-	jca.write();
-	jca.setJson(JSON_EXAMPLE_2);
+	jca.write(JSON_EXAMPLE);
+	jca.commit();
+	jca.write(JSON_EXAMPLE_2);
 
 	JsonCasAdapter jca2 = new JsonCasAdapter(store, jca.getAnchor());
-	jca2.read();
-	jca2.setJson(JSON_EXAMPLE_3);
+	jca2.checkout();
+	jca2.write(JSON_EXAMPLE_3);
 
-	jca.write();
+	jca.commit();
 	try {
-	    jca2.write();
+	    jca2.commit();
 	    fail("Concurrent modification");
 	}
 	catch (StoreException e) {
 	    // expected to fail
 	}
-	jca2.read();
-	jca2.setJson(JSON_EXAMPLE_3);
-	jca2.write();
+	jca2.checkout();
+	jca2.write(JSON_EXAMPLE_3);
+	jca2.commit();
 
     }
 
@@ -84,13 +84,13 @@ public class JsonCasAdapterTest {
     public void testReadWriteUsingTwoObjects() throws IOException, StoreException {
 	CasKasStore store = new StorageFactory().createMemoryCas();
 	JsonCasAdapter jca = new JsonCasAdapter(store);
-	jca.setJson(JSON_EXAMPLE);
-	jca.write();
+	jca.write(JSON_EXAMPLE);
+	jca.commit();
 	byte[] id = jca.getAnchor().getDigestAsByte();
 
 	JsonCasAdapter jca2 = new JsonCasAdapter(store, new Digest(id));
-	JsonElement x = jca2.read();
-	Assert.assertEquals(jca.getElement(), x);
+	jca2.checkout();
+	Assert.assertEquals(jca.read(), jca2.read());
     }
 
     private void dump(ContentAddressableStorage cas) throws StoreException {

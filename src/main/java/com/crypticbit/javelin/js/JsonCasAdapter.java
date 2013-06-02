@@ -28,10 +28,12 @@ public class JsonCasAdapter {
     /** The current head of the Json data structure */
     private JsonElement element;
     /** The last known head of the actual data structure, set after a read or write operation */
-    private CommitDao commit;
+    private Commit commit;
     private Identity commitId;
     /** The underlying data store */
     private CasKasStore store;
+    private CommitFactory commitFactory;
+    private JsonFactory jsonFactory;
 
     /** The internal gson object we use, which will write out Digest values properly */
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(Digest.class, new TypeAdapter<Digest>() {
@@ -48,9 +50,6 @@ public class JsonCasAdapter {
 	    }
 	}
     }).create();
-
-    private CommitFactory commitFactory;
-    private JsonFactory jsonFactory;
 
     /** Create a new json data structure with a random anchor, which can be retrieved using <code>getAnchor</code> */
     public JsonCasAdapter(CasKasStore store) {
@@ -73,38 +72,37 @@ public class JsonCasAdapter {
     }
 
     public Commit getCommit() {
-	return new Commit(commit, jsonFactory, commitFactory);
+	return commit;
     }
 
-    public JsonElement getElement() {
+    public JsonElement read() {
 	return element;
     }
+    
+    public void write(String string) {
+	element = new JsonParser().parse(string);
+    }
 
-    public synchronized JsonElement read() throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
+    public synchronized void checkout() throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
 	if (store.check(anchor)) {
 	    commitId = new Digest(store.get(anchor).getBytes());
-	    commit = commitFactory.read(commitId);
+	    commit = new Commit(commitFactory.read(commitId), jsonFactory, commitFactory);
+	    element = commit.getElement();
 	    if (LOG.isLoggable(Level.FINER)) {
 		LOG.log(Level.FINER, "Reading commit: " + commit);
 	    }
-	    element = jsonFactory.read(commit.getHead());
 	}
-	return element;
-    }
-
-    public void setJson(String string) {
-	element = new JsonParser().parse(string);
     }
 
     // FIXME - horrible use of GeneralPersistableResource
     // FIXME - cast Digest
-    public synchronized void write() throws StoreException, IOException {
+    public synchronized void commit() throws StoreException, IOException {
 	Identity valueIdentity = jsonFactory.write(element);
 	CommitDao tempCommit = new CommitDao((Digest) valueIdentity, new Date(), "temp", (Digest) commitId);
 	Identity tempDigest = commitFactory.write(tempCommit);
 	store.store(anchor, commitId, tempDigest);
 	commitId = tempDigest; // only happens if no exception thrown
-	commit = tempCommit;
+	commit = new Commit(tempCommit,jsonFactory,commitFactory);
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
 	}

@@ -6,7 +6,6 @@ import com.crypticbit.javelin.store.cas.PersistableResource;
 
 public interface AddressableStorage {
 
-    
     /** Check if digest exists, if not return <code>null</code> */
     public boolean check(Identity digest) throws StoreException;
 
@@ -18,5 +17,5 @@ public interface AddressableStorage {
 
     /** list every item with a digest >= start */
     public List<Identity> list(Identity id) throws StoreException;
-    
+
 }

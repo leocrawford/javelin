@@ -5,10 +5,10 @@ import java.io.UnsupportedEncodingException;
 
 public interface PersistableResource {
 
-    public InputStream getInputStream();
+    public String getAsString() throws UnsupportedEncodingException;
 
     public byte[] getBytes();
 
-    public String getAsString() throws UnsupportedEncodingException;
+    public InputStream getInputStream();
 
 }

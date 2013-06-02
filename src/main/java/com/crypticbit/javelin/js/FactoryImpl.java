@@ -7,9 +7,10 @@ public class FactoryImpl {
 
     protected ContentAddressableStorage cas;
     protected Gson gson;
+
     protected FactoryImpl(ContentAddressableStorage cas, Gson gson) {
 	this.cas = cas;
 	this.gson = gson;
     }
-    
+
 }

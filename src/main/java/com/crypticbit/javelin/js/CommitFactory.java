@@ -21,7 +21,7 @@ public class CommitFactory extends FactoryImpl {
 	PersistableResource commitAsEncodedJson = cas.get(commitId);
 	return gson.fromJson(commitAsEncodedJson.getAsString(), CommitDao.class);
     }
-    
+
     public Identity write(CommitDao commit) throws StoreException, IOException {
 	String commitAsJson = gson.toJson(commit);
 	return cas.store(new GeneralPersistableResource(commitAsJson));

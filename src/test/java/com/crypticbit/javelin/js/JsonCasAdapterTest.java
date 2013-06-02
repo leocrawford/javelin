@@ -20,14 +20,6 @@ public class JsonCasAdapterTest {
     private static final String JSON_EXAMPLE_2 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,4]]";
     private static final String JSON_EXAMPLE_3 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,5]]";
 
-    private void enableLog() {
-	Logger LOG = Logger.getLogger("com.crypticbit");
-	ConsoleHandler handler = new ConsoleHandler();
-	handler.setLevel(Level.FINER);
-	LOG.addHandler(handler);
-	LOG.setLevel(Level.FINER);
-    }
-
     @Test
     public void testBasicReadWrite() throws IOException, StoreException {
 	enableLog();
@@ -39,16 +31,27 @@ public class JsonCasAdapterTest {
     }
 
     @Test
-    public void testReadWriteUsingTwoObjects() throws IOException, StoreException {
-	CasKasStore store = new StorageFactory().createMemoryCas();
-	JsonCasAdapter jca = new JsonCasAdapter(store);
+    public void testCommitForMultipleReadWrite() throws IOException, StoreException {
+	// enableLog();
+	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
 	jca.setJson(JSON_EXAMPLE);
 	jca.write();
-	byte[] id = jca.getAnchor().getDigestAsByte();
+	Commit c1 = jca.getCommit();
+	jca.setJson(JSON_EXAMPLE_2);
+	jca.write();
+	Commit c2 = jca.getCommit();
+	jca.setJson(JSON_EXAMPLE_3);
+	jca.write();
+	Commit c3 = jca.getCommit();
 
-	JsonCasAdapter jca2 = new JsonCasAdapter(store, new Digest(id));
-	JsonElement x = jca2.read();
-	Assert.assertEquals(jca.getElement(), x);
+	// FIXME - be able to load history and element from commit
+	System.out.println(c1);
+	System.out.println(c2);
+	System.out.println(c3);
+
+	System.out.println(c3.getHistory());
+	System.out.println(c3.getHistory().get(1).getElement());
+
     }
 
     @Test
@@ -78,32 +81,29 @@ public class JsonCasAdapterTest {
     }
 
     @Test
-    public void testCommitForMultipleReadWrite() throws IOException, StoreException {
-	enableLog();
-	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
+    public void testReadWriteUsingTwoObjects() throws IOException, StoreException {
+	CasKasStore store = new StorageFactory().createMemoryCas();
+	JsonCasAdapter jca = new JsonCasAdapter(store);
 	jca.setJson(JSON_EXAMPLE);
 	jca.write();
-	Commit c1 = jca.getCommit();
-	jca.setJson(JSON_EXAMPLE_2);
-	jca.write();
-	Commit c2 = jca.getCommit();
-	jca.setJson(JSON_EXAMPLE_3);
-	jca.write();
-	Commit c3 = jca.getCommit();
+	byte[] id = jca.getAnchor().getDigestAsByte();
 
-	// FIXME - be able to load history and element from commit
-	System.out.println(c1);
-	System.out.println(c2);
-	System.out.println(c3);
-	
-	
-	System.out.println(c3.getHistory());
-
+	JsonCasAdapter jca2 = new JsonCasAdapter(store, new Digest(id));
+	JsonElement x = jca2.read();
+	Assert.assertEquals(jca.getElement(), x);
     }
 
     private void dump(ContentAddressableStorage cas) throws StoreException {
 	for (Identity d : cas.list()) {
 	    System.out.println(d + "->" + cas.get(d));
 	}
+    }
+
+    private void enableLog() {
+	Logger LOG = Logger.getLogger("com.crypticbit");
+	ConsoleHandler handler = new ConsoleHandler();
+	handler.setLevel(Level.FINER);
+	LOG.addHandler(handler);
+	LOG.setLevel(Level.FINER);
     }
 }

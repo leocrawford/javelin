@@ -37,14 +37,15 @@ public class JsonCasAdapter {
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(Digest.class, new TypeAdapter<Digest>() {
 
 	@Override
-	public void write(JsonWriter out, Digest value) throws IOException {
-	    if (value != null)
-		out.value(value.getDigestAsString());
+	public Digest read(JsonReader in) throws IOException {
+	    return new Digest(in.nextString());
 	}
 
 	@Override
-	public Digest read(JsonReader in) throws IOException {
-	    return new Digest(in.nextString());
+	public void write(JsonWriter out, Digest value) throws IOException {
+	    if (value != null) {
+		out.value(value.getDigestAsString());
+	    }
 	}
     }).create();
 
@@ -54,13 +55,12 @@ public class JsonCasAdapter {
     /** Create a new json data structure with a random anchor, which can be retrieved using <code>getAnchor</code> */
     public JsonCasAdapter(CasKasStore store) {
 	this.store = store;
-
 	commitFactory = new CommitFactory(store, gson);
 	jsonFactory = new JsonFactory(store, gson);
     }
 
     /**
-     * Create a new json data structure with a specified anchor./ this will usually only be used once to create the very
+     * Create a new json data structure with a specified anchor. This will usually only be used once to create the very
      * head of a data structure.
      */
     public JsonCasAdapter(CasKasStore store, Identity anchor) {
@@ -72,19 +72,28 @@ public class JsonCasAdapter {
 	return anchor;
     }
 
-    public void setJson(String string) {
-	element = new JsonParser().parse(string);
+    public Commit getCommit() {
+	return new Commit(commit, jsonFactory, commitFactory);
+    }
+
+    public JsonElement getElement() {
+	return element;
     }
 
     public synchronized JsonElement read() throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
 	if (store.check(anchor)) {
 	    commitId = new Digest(store.get(anchor).getBytes());
 	    commit = commitFactory.read(commitId);
-	    if (LOG.isLoggable(Level.FINER))
+	    if (LOG.isLoggable(Level.FINER)) {
 		LOG.log(Level.FINER, "Reading commit: " + commit);
+	    }
 	    element = jsonFactory.read(commit.getHead());
 	}
 	return element;
+    }
+
+    public void setJson(String string) {
+	element = new JsonParser().parse(string);
     }
 
     // FIXME - horrible use of GeneralPersistableResource
@@ -96,16 +105,9 @@ public class JsonCasAdapter {
 	store.store(anchor, commitId, tempDigest);
 	commitId = tempDigest; // only happens if no exception thrown
 	commit = tempCommit;
-	if (LOG.isLoggable(Level.FINEST))
+	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
-    }
-
-    public JsonElement getElement() {
-	return element;
-    }
-
-    public Commit getCommit() {
-	return new Commit(commit, jsonFactory, commitFactory);
+	}
     }
 
 }

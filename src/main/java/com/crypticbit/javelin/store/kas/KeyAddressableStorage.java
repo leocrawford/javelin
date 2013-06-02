@@ -3,7 +3,6 @@ package com.crypticbit.javelin.store.kas;
 import java.io.IOException;
 
 import com.crypticbit.javelin.store.AddressableStorage;
-import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 

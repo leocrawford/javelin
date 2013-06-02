@@ -29,26 +29,26 @@ public class CommitDao {
 	return head;
     }
 
-    public Date getWhen() {
-	return when;
+    public Digest[] getParents() {
+	return parents;
     }
 
     public String getUser() {
 	return user;
     }
 
-    public Digest[] getParents() {
-	return parents;
+    public Date getWhen() {
+	return when;
     }
 
-
+    @Override
     public String toString() {
 	return head
 		+ ":"
 		+ user
 		+ "@"
 		+ SIMPLE_DATE_FORMAT.format(when)
-		+ (parents == null || parents.length == 0 ? " ROOT" : (parents.length == 1 ? "" : " "+parents.length
+		+ (parents == null || parents.length == 0 ? " ROOT" : (parents.length == 1 ? "" : " " + parents.length
 			+ " parents"));
     }
 

@@ -58,8 +58,9 @@ public class JsonFactory extends FactoryImpl {
 	    }
 	    return o;
 	}
-	else
+	else {
 	    return in;
+	}
     }
 
 }

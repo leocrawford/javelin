@@ -23,7 +23,7 @@ public class MemoryCasKas implements CasKasStore {
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.cas");
 
     private final TreeMap<Identity, byte[]> casMap = new TreeMap<>();
-    
+
     public MemoryCasKas(DigestFactory digestFactory) {
 	this.digestFactory = digestFactory;
     }
@@ -36,8 +36,9 @@ public class MemoryCasKas implements CasKasStore {
     @Override
     public PersistableResource get(Identity digest) {
 	GeneralPersistableResource pr = new GeneralPersistableResource(casMap.get(digest));
-	if (LOG.isLoggable(Level.FINEST))
+	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Read " + pr.getBytes().length + " bytes from " + digest + " using memory CAS");
+	}
 	return pr;
     }
 
@@ -57,21 +58,25 @@ public class MemoryCasKas implements CasKasStore {
     }
 
     @Override
-    public Identity store(PersistableResource pr) throws IOException {
-	Digest digest = digestFactory.getDefaultDigest(pr.getBytes());
-	if (LOG.isLoggable(Level.FINEST))
-	    LOG.log(Level.FINEST, "Adding " + pr.getBytes().length + " bytes to " + digest + " in memory CAS");
-	casMap.put(digest, pr.getBytes());
-	return digest;
+    public synchronized void store(Identity id, Identity oldDigest, Identity newDigest) throws StoreException,
+	    IOException {
+	if (!check(id) || new Digest(get(id).getBytes()).equals(oldDigest)) {
+	    casMap.put(id, newDigest.getDigestAsByte());
+	}
+	else {
+	    throw new StoreException("Concurrent modification. Expected " + oldDigest + " but got "
+		    + new Digest(get(id).getBytes()));
+	}
     }
 
     @Override
-    public synchronized void store(Identity id, Identity oldDigest, Identity newDigest) throws StoreException,
-	    IOException {
-	if (!check(id) || new Digest(get(id).getBytes()).equals(oldDigest))
-	    casMap.put(id, newDigest.getDigestAsByte());
-	else
-	    throw new StoreException("Concurrent modification. Expected "+oldDigest+" but got "+new Digest(get(id).getBytes()));
+    public Identity store(PersistableResource pr) throws IOException {
+	Digest digest = digestFactory.getDefaultDigest(pr.getBytes());
+	if (LOG.isLoggable(Level.FINEST)) {
+	    LOG.log(Level.FINEST, "Adding " + pr.getBytes().length + " bytes to " + digest + " in memory CAS");
+	}
+	casMap.put(digest, pr.getBytes());
+	return digest;
     }
 
 }

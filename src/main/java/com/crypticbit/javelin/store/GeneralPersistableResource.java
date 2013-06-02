@@ -22,10 +22,10 @@ public class GeneralPersistableResource implements PersistableResource {
 	    throw new Error("UTF-8 is not supported on this platform");
 	}
     }
-    
+
     @Override
-    public InputStream getInputStream() {
-	return new ByteArrayInputStream(getBytes());
+    public String getAsString() throws UnsupportedEncodingException {
+	return new String(getBytes(), "UTF-8");
     }
 
     @Override
@@ -33,22 +33,25 @@ public class GeneralPersistableResource implements PersistableResource {
 	return data;
     }
 
+    @Override
+    public InputStream getInputStream() {
+	return new ByteArrayInputStream(getBytes());
+    }
+
+    @Override
     public String toString() {
 	try {
 	    String full = getAsString();
-	    if (full.length() > 60)
+	    if (full.length() > 60) {
 		return full.substring(0, 60) + "...";
-	    else
+	    }
+	    else {
 		return full;
+	    }
 	}
 	catch (UnsupportedEncodingException e) {
 	    throw new Error("UTF-8 is not supported on this platform");
 	}
-    }
-
-    @Override
-    public String getAsString() throws UnsupportedEncodingException {
-	return new String(getBytes(), "UTF-8");
     }
 
 }

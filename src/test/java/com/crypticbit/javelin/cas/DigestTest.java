@@ -1,9 +1,9 @@
 package com.crypticbit.javelin.cas;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -14,10 +14,6 @@ import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.cas.DigestFactory;
 
 public class DigestTest {
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-    }
 
     @Test
     public void test() {
@@ -31,19 +27,6 @@ public class DigestTest {
 	Digest recoveredDigestByString = new Digest(originalDigestAsString);
 	assertArrayEquals(originalDigestAsByte, recoveredDigestByString.getDigestAsByte());
 	assertEquals(originalDigestAsString, recoveredDigestByString.getDigestAsString());
-    }
-
-    @Test
-    public void testEquals() {
-	byte[] random = createRandomData();
-	Digest d1 = new Digest(random);
-	Digest d2 = new Digest(random);
-
-	assertEquals(d1, d2);
-
-	Digest d3 = new Digest(createRandomData());
-
-	assertNotEquals(d2, d3);
     }
 
     @Test
@@ -62,6 +45,23 @@ public class DigestTest {
 	assertTrue(d1.compareTo(d3) < 0);
 	assertTrue(d3.compareTo(d1) > 0);
 
+    }
+
+    @Test
+    public void testEquals() {
+	byte[] random = createRandomData();
+	Digest d1 = new Digest(random);
+	Digest d2 = new Digest(random);
+
+	assertEquals(d1, d2);
+
+	Digest d3 = new Digest(createRandomData());
+
+	assertNotEquals(d2, d3);
+    }
+
+    @BeforeClass
+    public static void setUpBeforeClass() throws Exception {
     }
 
     private static byte[] createRandomData() {

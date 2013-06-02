@@ -21,6 +21,10 @@ public class Digest implements Identity {
 	digest = ByteBuffer.wrap(createRandomData(64));
     }
 
+    public Digest(byte[] digestAsByte) {
+	this.digest = ByteBuffer.wrap(digestAsByte);
+    }
+
     public Digest(MessageDigest messageDigest) {
 	digest = ByteBuffer.wrap(messageDigest.digest());
     }
@@ -29,22 +33,32 @@ public class Digest implements Identity {
 	this.digest = ByteBuffer.wrap(BaseEncoding.base32Hex().decode(string));
     }
 
-    public Digest(byte[] digestAsByte) {
-	this.digest = ByteBuffer.wrap(digestAsByte);
+    @Override
+    public int compareTo(Identity o) {
+	if (o instanceof Digest) {
+	    return digest.compareTo(((Digest) o).digest);
+	}
+	else {
+	    return this.getClass().getName().compareTo(o.getClass().getName());
+	}
     }
 
     @Override
-    public int compareTo(Identity o) {
-	if (o instanceof Digest)
-	    return digest.compareTo(((Digest) o).digest);
-	else
-	    return this.getClass().getName().compareTo(o.getClass().getName());
+    public boolean equals(Object digest) {
+	if (digest instanceof Digest) {
+	    return Arrays.equals(getDigestAsByte(), ((Digest) digest).getDigestAsByte());
+	}
+	else {
+	    return false;
+	}
     }
 
+    @Override
     public byte[] getDigestAsByte() {
 	return digest.array();
     }
 
+    @Override
     public String getDigestAsString() {
 	return BaseEncoding.base32Hex().encode(getDigestAsByte());
     }
@@ -58,12 +72,5 @@ public class Digest implements Identity {
 	byte[] b = new byte[length];
 	new Random().nextBytes(b);
 	return b;
-    }
-
-    public boolean equals(Object digest) {
-	if (digest instanceof Digest)
-	    return Arrays.equals(getDigestAsByte(), ((Digest)digest).getDigestAsByte());
-	else
-	    return false;
     }
 }

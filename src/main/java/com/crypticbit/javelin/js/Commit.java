@@ -14,38 +14,38 @@ public class Commit {
     private CommitDao dao;
     private JsonFactory jsonFactory;
     private CommitFactory commitFactory;
-    
+
     Commit(CommitDao dao, JsonFactory jsonFactory, CommitFactory commitFactory) {
 	this.dao = dao;
 	this.jsonFactory = jsonFactory;
 	this.commitFactory = commitFactory;
-	
+
     }
 
     public JsonElement getElement() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
-	  return jsonFactory.read(dao.getHead());
+	return jsonFactory.read(dao.getHead());
     }
-    
-    public Date getWhen() {
-        return dao.getWhen();
+
+    public List<Commit> getHistory() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+	List<Commit> history = new LinkedList<>();
+	for (CommitDao parent = dao; parent != null; parent = parent.getParents().length > 0 ? commitFactory
+		.read(parent.getParents()[0]) : null) {
+	    history.add(new Commit(parent, jsonFactory, commitFactory));
+	}
+	return history;
     }
-    
+
     public String getUser() {
-        return dao.getUser();
+	return dao.getUser();
     }
-    
+
+    public Date getWhen() {
+	return dao.getWhen();
+    }
+
+    @Override
     public String toString() {
 	return dao.toString();
     }
-    
-    public List<Commit> getHistory() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
-	List<Commit> history = new LinkedList<>();
-	for(CommitDao parent = dao; parent != null; parent = parent.getParents().length > 0 ? commitFactory.read(parent.getParents()[0]):null)
-	    history.add(new Commit(parent,jsonFactory, commitFactory));
-	return history;
-    }
-    
-    
-    
 
 }

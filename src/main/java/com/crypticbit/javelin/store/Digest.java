@@ -51,7 +51,7 @@ public class Digest implements Identity {
 
     @Override
     public String toString() {
-	return getDigestAsString().substring(0, 6) + "...";
+	return getDigestAsString().substring(0, 6);
     }
 
     private static byte[] createRandomData(int length) {

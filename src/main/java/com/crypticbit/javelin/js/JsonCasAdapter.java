@@ -28,7 +28,7 @@ public class JsonCasAdapter {
     /** The current head of the Json data structure */
     private JsonElement element;
     /** The last known head of the actual data structure, set after a read or write operation */
-    private Commit commit;
+    private CommitDao commit;
     private Identity commitId;
     /** The underlying data store */
     private CasKasStore store;
@@ -88,11 +88,10 @@ public class JsonCasAdapter {
     }
 
     // FIXME - horrible use of GeneralPersistableResource
-    // FIXME - factor out to commit
     // FIXME - cast Digest
     public synchronized void write() throws StoreException, IOException {
 	Identity valueIdentity = jsonFactory.write(element);
-	Commit tempCommit = new Commit((Digest) valueIdentity, new Date(), "temp", (Digest) commitId);
+	CommitDao tempCommit = new CommitDao((Digest) valueIdentity, new Date(), "temp", (Digest) commitId);
 	Identity tempDigest = commitFactory.write(tempCommit);
 	store.store(anchor, commitId, tempDigest);
 	commitId = tempDigest; // only happens if no exception thrown
@@ -106,7 +105,7 @@ public class JsonCasAdapter {
     }
 
     public Commit getCommit() {
-	return commit;
+	return new Commit(commit, jsonFactory, commitFactory);
     }
 
 }

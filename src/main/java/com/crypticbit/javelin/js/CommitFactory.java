@@ -17,12 +17,12 @@ public class CommitFactory extends FactoryImpl {
 	super(cas, gson);
     }
 
-    public Commit read(Identity commitId) throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
+    public CommitDao read(Identity commitId) throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
 	PersistableResource commitAsEncodedJson = cas.get(commitId);
-	return gson.fromJson(commitAsEncodedJson.getAsString(), Commit.class);
+	return gson.fromJson(commitAsEncodedJson.getAsString(), CommitDao.class);
     }
     
-    public Identity write(Commit commit) throws StoreException, IOException {
+    public Identity write(CommitDao commit) throws StoreException, IOException {
 	String commitAsJson = gson.toJson(commit);
 	return cas.store(new GeneralPersistableResource(commitAsJson));
     }

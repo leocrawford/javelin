@@ -1,54 +1,51 @@
 package com.crypticbit.javelin.js;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
-import com.crypticbit.javelin.store.Digest;
+import com.crypticbit.javelin.store.StoreException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSyntaxException;
 
 public class Commit {
 
-    /** Reference to head of value tree */
-    private Digest head;
-    private Date when;
-    private String user;
-    private Digest parents[];
-
-    public Commit(Digest head, Date when, String user, Digest parent) {
-	this(head, when, user, new Digest[] { parent });
+    private CommitDao dao;
+    private JsonFactory jsonFactory;
+    private CommitFactory commitFactory;
+    
+    Commit(CommitDao dao, JsonFactory jsonFactory, CommitFactory commitFactory) {
+	this.dao = dao;
+	this.jsonFactory = jsonFactory;
+	this.commitFactory = commitFactory;
+	
     }
 
-    public Commit(Digest head, Date when, String user, Digest[] parents) {
-	this.head = head;
-	this.when = when;
-	this.user = user;
-	this.parents = parents;
+    public JsonElement getElement() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+	  return jsonFactory.read(dao.getHead());
     }
-
-    public Digest getHead() {
-	return head;
-    }
-
+    
     public Date getWhen() {
-	return when;
+        return dao.getWhen();
     }
-
+    
     public String getUser() {
-	return user;
+        return dao.getUser();
     }
-
-    public Digest[] getParents() {
-	return parents;
-    }
-
-
+    
     public String toString() {
-	return head
-		+ "@"
-		+ user
-		+ " ("
-		+ when
-		+ ")"
-		+ (parents == null || parents.length == 0 ? " ROOT" : (parents.length == 1 ? "" : " "+parents.length
-			+ " parents"));
+	return dao.toString();
     }
+    
+    public List<Commit> getHistory() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+	List<Commit> history = new LinkedList<>();
+	for(CommitDao parent = dao; parent != null; parent = parent.getParents().length > 0 ? commitFactory.read(parent.getParents()[0]):null)
+	    history.add(new Commit(parent,jsonFactory, commitFactory));
+	return history;
+    }
+    
+    
+    
 
 }

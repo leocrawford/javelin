@@ -14,9 +14,9 @@ import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.*;
 
-public class JsonFactory extends FactoryImpl {
+public class DereferencedDataAccessInterface extends DataAccessInterface<JsonElement> {
 
-    protected JsonFactory(ContentAddressableStorage cas, Gson gson) {
+    protected DereferencedDataAccessInterface(ContentAddressableStorage cas, Gson gson) {
 	super(cas, gson);
     }
 
@@ -42,7 +42,7 @@ public class JsonFactory extends FactoryImpl {
 
     }
 
-    JsonElement read(Identity digest) throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+    public JsonElement read(Identity digest) throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
 	JsonElement in = new JsonParser().parse(cas.get(digest).getAsString());
 	if (in.isJsonArray()) {
 	    JsonArray r = new JsonArray();

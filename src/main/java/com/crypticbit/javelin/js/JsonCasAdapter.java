@@ -32,8 +32,8 @@ public class JsonCasAdapter {
     private Identity commitId;
     /** The underlying data store */
     private CasKasStore store;
-    private CommitFactory commitFactory;
-    private JsonFactory jsonFactory;
+    private SimpleDataAccessInterface<CommitDao> commitFactory;
+    private DereferencedDataAccessInterface jsonFactory;
 
     /** The internal gson object we use, which will write out Digest values properly */
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(Digest.class, new TypeAdapter<Digest>() {
@@ -54,8 +54,8 @@ public class JsonCasAdapter {
     /** Create a new json data structure with a random anchor, which can be retrieved using <code>getAnchor</code> */
     public JsonCasAdapter(CasKasStore store) {
 	this.store = store;
-	commitFactory = new CommitFactory(store, gson);
-	jsonFactory = new JsonFactory(store, gson);
+	commitFactory = new SimpleDataAccessInterface<CommitDao>(store, gson, CommitDao.class);
+	jsonFactory = new DereferencedDataAccessInterface(store, gson);
     }
 
     /**

@@ -11,10 +11,10 @@ import com.google.gson.JsonSyntaxException;
 public class Commit implements Comparable<Commit> {
 
     private CommitDao dao;
-    private JsonFactory jsonFactory;
-    private CommitFactory commitFactory;
+    private DereferencedDataAccessInterface jsonFactory;
+    private SimpleDataAccessInterface<CommitDao> commitFactory;
 
-    Commit(CommitDao dao, JsonFactory jsonFactory, CommitFactory commitFactory) {
+    Commit(CommitDao dao, DereferencedDataAccessInterface jsonFactory, SimpleDataAccessInterface<CommitDao> commitFactory) {
 	this.dao = dao;
 	this.jsonFactory = jsonFactory;
 	this.commitFactory = commitFactory;

@@ -74,7 +74,7 @@ public class JsonCasAdapterTest {
 	jca.commit();
 	jca.write(JSON_EXAMPLE_2);
 
-	JsonCasAdapter jca2 = new JsonCasAdapter(store, jca.getAnchor());
+	JsonCasAdapter jca2 = new JsonCasAdapter(store, (Digest) jca.getAnchor());
 	jca2.checkout();
 	jca2.write(JSON_EXAMPLE_3);
 

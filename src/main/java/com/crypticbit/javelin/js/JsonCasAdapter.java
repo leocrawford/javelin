@@ -18,22 +18,15 @@ public class JsonCasAdapter {
 
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.js");
 
-    /**
-     * The "anchor" of this element, which can either be set manually or a random one generated. After every write the
-     * anchor is updated with the reference to the head of the write. It's expected that one node will be hard-coded
-     * (set manually) which will represent the head or root node, and all others will be referenced from within that
-     * data structure.
-     */
-    private Identity anchor = new Digest();
+    private Anchor anchor;
     /** The current head of the Json data structure */
     private JsonElement element;
     /** The last known head of the actual data structure, set after a read or write operation */
     private Commit commit;
-    private Identity commitId;
     /** The underlying data store */
     private CasKasStore store;
-    private SimpleDataAccessInterface<CommitDao> commitFactory;
-    private DereferencedDataAccessInterface jsonFactory;
+    private SimpleCasAccessInterface<CommitDao> commitFactory;
+    private DereferencedCasAccessInterface jsonFactory;
 
     /** The internal gson object we use, which will write out Digest values properly */
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(Digest.class, new TypeAdapter<Digest>() {
@@ -54,21 +47,27 @@ public class JsonCasAdapter {
     /** Create a new json data structure with a random anchor, which can be retrieved using <code>getAnchor</code> */
     public JsonCasAdapter(CasKasStore store) {
 	this.store = store;
-	commitFactory = new SimpleDataAccessInterface<CommitDao>(store, gson, CommitDao.class);
-	jsonFactory = new DereferencedDataAccessInterface(store, gson);
+	anchor = new Anchor(store);
+	commitFactory = new SimpleCasAccessInterface<CommitDao>(store, gson, CommitDao.class);
+	jsonFactory = new DereferencedCasAccessInterface(store, gson);
     }
 
     /**
      * Create a new json data structure with a specified anchor. This will usually only be used once to create the very
      * head of a data structure.
      */
-    public JsonCasAdapter(CasKasStore store, Identity anchor) {
+    private JsonCasAdapter(CasKasStore store, Anchor anchor) {
 	this(store);
 	this.anchor = anchor;
     }
+    
+    public JsonCasAdapter(CasKasStore store, Digest anchor) {
+	this(store);
+	this.anchor = new Anchor(store, anchor);
+    }
 
     public Identity getAnchor() {
-	return anchor;
+	return anchor.getDigest();
     }
 
     public Commit getCommit() {
@@ -78,20 +77,18 @@ public class JsonCasAdapter {
     public JsonElement read() {
 	return element;
     }
-    
+
     public JsonCasAdapter write(String string) {
 	element = new JsonParser().parse(string);
 	return this;
     }
 
-    public synchronized JsonCasAdapter checkout() throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
-	if (store.check(anchor)) {
-	    commitId = new Digest(store.get(anchor).getBytes());
-	    commit = new Commit(commitFactory.read(commitId), jsonFactory, commitFactory);
-	    element = commit.getElement();
-	    if (LOG.isLoggable(Level.FINER)) {
-		LOG.log(Level.FINER, "Reading commit: " + commit);
-	    }
+    public synchronized JsonCasAdapter checkout() throws StoreException, JsonSyntaxException,
+	    UnsupportedEncodingException {
+	commit = new Commit(commitFactory.read(anchor.read()), jsonFactory, commitFactory);
+	element = commit.getElement();
+	if (LOG.isLoggable(Level.FINER)) {
+	    LOG.log(Level.FINER, "Reading commit: " + commit);
 	}
 	return this;
     }
@@ -100,15 +97,17 @@ public class JsonCasAdapter {
     // FIXME - cast Digest
     public synchronized JsonCasAdapter commit() throws StoreException, IOException {
 	Identity valueIdentity = jsonFactory.write(element);
-	CommitDao tempCommit = new CommitDao((Digest) valueIdentity, new Date(), "temp", (Digest) commitId);
+	CommitDao tempCommit = new CommitDao((Digest) valueIdentity, new Date(), "temp", (Digest) anchor.get());
 	Identity tempDigest = commitFactory.write(tempCommit);
-	store.store(anchor, commitId, tempDigest);
-	commitId = tempDigest; // only happens if no exception thrown
-	commit = new Commit(tempCommit,jsonFactory,commitFactory);
+	anchor.write(tempDigest);
+	commit = new Commit(tempCommit, jsonFactory, commitFactory);
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
 	}
 	return this;
     }
 
+    public JsonCasAdapter branch() throws StoreException, IOException {
+	return new JsonCasAdapter(store, new Anchor(store, anchor));
+    }
 }

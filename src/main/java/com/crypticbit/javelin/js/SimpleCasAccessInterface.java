@@ -10,11 +10,11 @@ import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-public class SimpleDataAccessInterface<T>  extends DataAccessInterface<T>  {
+public class SimpleCasAccessInterface<T>  extends DataAccessInterface<T>  {
 
     private Class<T> clazz;
     
-    protected SimpleDataAccessInterface(ContentAddressableStorage cas, Gson gson, Class<T> clazz) {
+    protected SimpleCasAccessInterface(ContentAddressableStorage cas, Gson gson, Class<T> clazz) {
 	super(cas,gson);
 	this.clazz = clazz;
     }

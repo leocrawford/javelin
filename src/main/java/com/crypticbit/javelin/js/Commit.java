@@ -11,10 +11,10 @@ import com.google.gson.JsonSyntaxException;
 public class Commit implements Comparable<Commit> {
 
     private CommitDao dao;
-    private DereferencedDataAccessInterface jsonFactory;
-    private SimpleDataAccessInterface<CommitDao> commitFactory;
+    private DereferencedCasAccessInterface jsonFactory;
+    private SimpleCasAccessInterface<CommitDao> commitFactory;
 
-    Commit(CommitDao dao, DereferencedDataAccessInterface jsonFactory, SimpleDataAccessInterface<CommitDao> commitFactory) {
+    Commit(CommitDao dao, DereferencedCasAccessInterface jsonFactory, SimpleCasAccessInterface<CommitDao> commitFactory) {
 	this.dao = dao;
 	this.jsonFactory = jsonFactory;
 	this.commitFactory = commitFactory;
@@ -68,5 +68,6 @@ public class Commit implements Comparable<Commit> {
     public int compareTo(Commit o) {
 	return this.getDate().compareTo(o.getDate());
     }
+
 
 }

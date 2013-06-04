@@ -14,9 +14,9 @@ import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.*;
 
-public class DereferencedDataAccessInterface extends DataAccessInterface<JsonElement> {
+public class DereferencedCasAccessInterface extends DataAccessInterface<JsonElement> {
 
-    protected DereferencedDataAccessInterface(ContentAddressableStorage cas, Gson gson) {
+    protected DereferencedCasAccessInterface(ContentAddressableStorage cas, Gson gson) {
 	super(cas, gson);
     }
 

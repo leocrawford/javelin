@@ -105,6 +105,25 @@ public class JsonCasAdapterTest {
 	Assert.assertEquals(jca.read(), jca2.read());
     }
 
+
+    @Test
+    public void testBasicBranch() throws IOException, StoreException {
+	enableLog();
+	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
+	jca.write(JSON_EXAMPLE).commit();
+	JsonCasAdapter jca2 = jca.branch();
+	
+	jca.write(JSON_EXAMPLE_2).commit();
+	jca2.write(JSON_EXAMPLE_3).commit();
+	
+	System.out.println(jca.read());
+	System.out.println(jca.getCommit().getShortestHistory());
+	
+	System.out.println(jca2.read());
+	System.out.println(jca2.getCommit().getShortestHistory());
+	
+    }
+    
     private void dump(ContentAddressableStorage cas) throws StoreException {
 	for (Identity d : cas.list()) {
 	    System.out.println(d + "->" + cas.get(d));

@@ -2,7 +2,6 @@ package com.crypticbit.javelin.js;
 
 import java.io.IOException;
 
-import com.crypticbit.javelin.store.CasKasStore;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
@@ -20,6 +19,12 @@ public class Anchor {
     private KeyAddressableStorage kas;
     private Identity reference;
 
+    public Anchor(KeyAddressableStorage kas, Digest anchor) {
+	this.kas = kas;
+	this.anchor = anchor;
+
+    }
+
     Anchor(KeyAddressableStorage kas) {
 	anchor = new Digest();
 	this.kas = kas;
@@ -31,27 +36,6 @@ public class Anchor {
 	write(clone.read());
     }
 
-    public Anchor(KeyAddressableStorage kas, Digest anchor) {
-	this.kas = kas;
-	this.anchor = anchor;
-	
-    }
-
-    public Identity read() throws StoreException {
-	if (kas.check(anchor)) {
-	    reference = new Digest(kas.get(anchor).getBytes());
-	    return reference;
-	}
-	else
-	    // FIXME
-	    throw new Error("Id not found: "+anchor);
-    }
-
-    public void write(Identity newReference) throws StoreException, IOException {
-	kas.store(anchor, reference, newReference);
-	reference = newReference;
-    }
-
     /** Same as read() but returns cached/last value */
     public Identity get() {
 	return reference;
@@ -59,6 +43,22 @@ public class Anchor {
 
     public Identity getDigest() {
 	return anchor;
+    }
+
+    public Identity read() throws StoreException {
+	if (kas.check(anchor)) {
+	    reference = new Digest(kas.get(anchor).getBytes());
+	    return reference;
+	}
+	else {
+	    // FIXME
+	    throw new Error("Id not found: " + anchor);
+	}
+    }
+
+    public void write(Identity newReference) throws StoreException, IOException {
+	kas.store(anchor, reference, newReference);
+	reference = newReference;
     }
 
 }

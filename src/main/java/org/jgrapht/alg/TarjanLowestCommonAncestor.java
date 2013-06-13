@@ -77,8 +77,9 @@ public class TarjanLowestCommonAncestor<V, E> {
 		    V v = g.getEdgeTarget(vEdge);
 		    V result = calculate(v);
 		    // fraction horrible because of the recursion
-		    if (result != null)
+		    if (result != null) {
 			return result;
+		    }
 		    uf.union(u, v);
 		    ancestors.put(uf.find(u), u);
 		}

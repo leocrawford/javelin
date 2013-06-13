@@ -3,7 +3,6 @@ package com.crypticbit.javelin.js;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,8 +14,6 @@ import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import difflib.Delta;
-import difflib.DiffUtils;
 import difflib.Patch;
 
 // what is immutable? commit? element? anchors?
@@ -59,6 +56,11 @@ public class JsonCasAdapter {
 	jsonFactory = new DereferencedCasAccessInterface(store, gson);
     }
 
+    public JsonCasAdapter(CasKasStore store, Digest anchor) {
+	this(store);
+	this.anchor = new Anchor(store, anchor);
+    }
+
     /**
      * Create a new json data structure with a specified anchor. This will usually only be used once to create the very
      * head of a data structure.
@@ -67,31 +69,9 @@ public class JsonCasAdapter {
 	this(store);
 	this.anchor = anchor;
     }
-    
-    public JsonCasAdapter(CasKasStore store, Digest anchor) {
-	this(store);
-	this.anchor = new Anchor(store, anchor);
-    }
 
-    public Identity getAnchor() {
-	return anchor.getDigest();
-    }
-
-    public Commit getCommit() {
-	return commit;
-    }
-
-    public JsonElement read() {
-	return element;
-    }
-    
-    public Object lazyRead() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
-	return commit.getObject();
-    }
-
-    public JsonCasAdapter write(String string) {
-	element = new JsonParser().parse(string);
-	return this;
+    public JsonCasAdapter branch() throws StoreException, IOException {
+	return new JsonCasAdapter(store, new Anchor(store, anchor));
     }
 
     public synchronized JsonCasAdapter checkout() throws StoreException, JsonSyntaxException,
@@ -118,17 +98,34 @@ public class JsonCasAdapter {
 	return this;
     }
 
-    public JsonCasAdapter branch() throws StoreException, IOException {
-	return new JsonCasAdapter(store, new Anchor(store, anchor));
+    public Identity getAnchor() {
+	return anchor.getDigest();
     }
-    
-    public JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+
+    public Commit getCommit() {
+	return commit;
+    }
+
+    public Object lazyRead() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+	return commit.getObject();
+    }
+
+    public JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, UnsupportedEncodingException,
+	    StoreException {
 	// FIXME - check no checkin needed
 	Patch patch = commit.createChangeSet(other.commit);
 	// FIXME apply changes
 	System.out.println(patch);
-	
 
+	return this;
+    }
+
+    public JsonElement read() {
+	return element;
+    }
+
+    public JsonCasAdapter write(String string) {
+	element = new JsonParser().parse(string);
 	return this;
     }
 }

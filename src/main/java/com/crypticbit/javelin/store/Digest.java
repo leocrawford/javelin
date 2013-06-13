@@ -53,11 +53,6 @@ public class Digest implements Identity {
     }
 
     @Override
-    public int hashCode() {
-	return digest.hashCode();
-    }
-
-    @Override
     public byte[] getDigestAsByte() {
 	return digest.array();
     }
@@ -65,6 +60,11 @@ public class Digest implements Identity {
     @Override
     public String getDigestAsString() {
 	return BaseEncoding.base32Hex().encode(getDigestAsByte());
+    }
+
+    @Override
+    public int hashCode() {
+	return digest.hashCode();
     }
 
     @Override

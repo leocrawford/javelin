@@ -23,20 +23,20 @@ public class LazyJsonMap extends AbstractMap<String, Object> {
 
 	    @Override
 	    public Iterator<Entry<String, Object>> iterator() {
-		final Iterator<Map.Entry<String,Digest>> i = backingMap.entrySet().iterator();
+		final Iterator<Map.Entry<String, Digest>> i = backingMap.entrySet().iterator();
 		return new Iterator<Map.Entry<String, Object>>() {
 
 		    @Override
-		    public void remove() {
-			// FIXME
-			throw new Error("Not implemented");
-
+		    public boolean hasNext() {
+			// TODO Auto-generated method stub
+			return false;
 		    }
 
 		    @Override
 		    public Entry<String, Object> next() {
 			return new Map.Entry<String, Object>() {
 			    java.util.Map.Entry<String, Digest> e = i.next();
+
 			    @Override
 			    public String getKey() {
 				return e.getKey();
@@ -58,14 +58,15 @@ public class LazyJsonMap extends AbstractMap<String, Object> {
 				// FIXME
 				throw new Error("Not implemented");
 			    }
-			    
+
 			};
 		    }
 
 		    @Override
-		    public boolean hasNext() {
-			// TODO Auto-generated method stub
-			return false;
+		    public void remove() {
+			// FIXME
+			throw new Error("Not implemented");
+
 		    }
 		};
 	    }

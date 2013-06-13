@@ -18,28 +18,7 @@ public class DereferencedCasAccessInterface extends DataAccessInterface<JsonElem
 	super(cas, gson);
     }
 
-    public Identity write(JsonElement element) throws StoreException, IOException {
-
-	if (element.isJsonArray()) {
-	    LinkedList<Identity> array = new LinkedList<>();
-	    for (JsonElement e : element.getAsJsonArray()) {
-		array.add(write(e));
-	    }
-	    return cas.store(new GeneralPersistableResource(gson.toJson(array)));
-	}
-	else if (element.isJsonObject()) {
-	    Map<String, Identity> map = new HashMap<>();
-	    for (Entry<String, JsonElement> e : element.getAsJsonObject().entrySet()) {
-		map.put(e.getKey(), write(e.getValue()));
-	    }
-	    return cas.store(new GeneralPersistableResource(gson.toJson(map)));
-	}
-	else {
-	    return cas.store(new GeneralPersistableResource(gson.toJson(element)));
-	}
-
-    }
-
+    @Override
     public JsonElement read(Identity digest) throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
 	JsonElement in = new JsonParser().parse(cas.get(digest).getAsString());
 	if (in.isJsonArray()) {
@@ -80,18 +59,46 @@ public class DereferencedCasAccessInterface extends DataAccessInterface<JsonElem
 	}
 	else if (in.isJsonPrimitive()) {
 	    JsonPrimitive primative = in.getAsJsonPrimitive();
-	    if (primative.isBoolean())
+	    if (primative.isBoolean()) {
 		return primative.getAsBoolean();
-	    if (primative.isNumber())
+	    }
+	    if (primative.isNumber()) {
 		return primative.getAsNumber();
-	    if (primative.isString())
+	    }
+	    if (primative.isString()) {
 		return primative.getAsString();
+	    }
 	    throw new Error("Unknown Json Type: " + in);
 	}
-	else if (in.isJsonNull())
+	else if (in.isJsonNull()) {
 	    return null;
-	else
+	}
+	else {
 	    throw new Error("Unknown Json Type: " + in);
+	}
+
+    }
+
+    @Override
+    public Identity write(JsonElement element) throws StoreException, IOException {
+
+	if (element.isJsonArray()) {
+	    LinkedList<Identity> array = new LinkedList<>();
+	    for (JsonElement e : element.getAsJsonArray()) {
+		array.add(write(e));
+	    }
+	    return cas.store(new GeneralPersistableResource(gson.toJson(array)));
+	}
+	else if (element.isJsonObject()) {
+	    Map<String, Identity> map = new HashMap<>();
+	    for (Entry<String, JsonElement> e : element.getAsJsonObject().entrySet()) {
+		map.put(e.getKey(), write(e.getValue()));
+	    }
+	    return cas.store(new GeneralPersistableResource(gson.toJson(map)));
+	}
+	else {
+	    return cas.store(new GeneralPersistableResource(gson.toJson(element)));
+	}
 
     }
 

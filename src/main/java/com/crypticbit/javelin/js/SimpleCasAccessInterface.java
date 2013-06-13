@@ -10,22 +10,23 @@ import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-public class SimpleCasAccessInterface<T>  extends DataAccessInterface<T>  {
+public class SimpleCasAccessInterface<T> extends DataAccessInterface<T> {
 
     private Class<T> clazz;
-    
+
     protected SimpleCasAccessInterface(ContentAddressableStorage cas, Gson gson, Class<T> clazz) {
-	super(cas,gson);
+	super(cas, gson);
 	this.clazz = clazz;
     }
 
+    @Override
     public T read(Identity commitId) throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
 	return gson.fromJson(cas.get(commitId).getAsString(), clazz);
     }
 
+    @Override
     public Identity write(T commit) throws StoreException, IOException {
 	return cas.store(new GeneralPersistableResource(gson.toJson(commit)));
     }
-
 
 }

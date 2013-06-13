@@ -11,7 +11,6 @@ import java.util.Map;
 import javax.swing.JFrame;
 
 import org.jgraph.JGraph;
-import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.junit.Test;
@@ -49,11 +48,8 @@ public class CommitTest {
     }
 
     @Test
-    public void testGetAsGraph() throws StoreException, IOException {
-	assertEquals(3,jca1.getCommit().getAsGraphToRoot().vertexSet().size());
-	assertEquals(3,jca2.getCommit().getAsGraphToRoot().vertexSet().size());
-	assertEquals(4,jca3.getCommit().getAsGraphToRoot().vertexSet().size());
-	assertEquals(4,jca4.getCommit().getAsGraphToRoot().vertexSet().size());
+    public void testCreateChangeSet() {
+	// fail("Not yet implemented");
     }
 
     @Test
@@ -62,12 +58,15 @@ public class CommitTest {
     }
 
     @Test
-    public void testGetShortestHistory() {
-	// fail("Not yet implemented");
+    public void testGetAsGraph() throws StoreException, IOException {
+	assertEquals(3, jca1.getCommit().getAsGraphToRoot().vertexSet().size());
+	assertEquals(3, jca2.getCommit().getAsGraphToRoot().vertexSet().size());
+	assertEquals(4, jca3.getCommit().getAsGraphToRoot().vertexSet().size());
+	assertEquals(4, jca4.getCommit().getAsGraphToRoot().vertexSet().size());
     }
 
     @Test
-    public void testCreateChangeSet() {
+    public void testGetShortestHistory() {
 	// fail("Not yet implemented");
     }
 
@@ -78,7 +77,7 @@ public class CommitTest {
 	final JGraphHierarchicalLayout hir = new JGraphHierarchicalLayout();
 	final JGraphFacade graphFacade = new JGraphFacade(jgraph);
 	hir.run(graphFacade);
-	final Map<?,?> nestedMap = graphFacade.createNestedMap(true, true); //
+	final Map<?, ?> nestedMap = graphFacade.createNestedMap(true, true); //
 	jgraph.getGraphLayoutCache().edit(nestedMap);
 	JFrame frame = new JFrame("FrameDemo"); // 2. Optional: What happens when the frame closes?
 						// frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // 3. Create

@@ -3,6 +3,7 @@ package com.crypticbit.javelin.js;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +15,12 @@ import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
+import difflib.Delta;
+import difflib.DiffUtils;
+import difflib.Patch;
+
+// what is immutable? commit? element? anchors?
+// multiple anchors?
 public class JsonCasAdapter {
 
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.js");
@@ -77,6 +84,10 @@ public class JsonCasAdapter {
     public JsonElement read() {
 	return element;
     }
+    
+    public Object lazyRead() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+	return commit.getObject();
+    }
 
     public JsonCasAdapter write(String string) {
 	element = new JsonParser().parse(string);
@@ -109,5 +120,15 @@ public class JsonCasAdapter {
 
     public JsonCasAdapter branch() throws StoreException, IOException {
 	return new JsonCasAdapter(store, new Anchor(store, anchor));
+    }
+    
+    public JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+	// FIXME - check no checkin needed
+	Patch patch = commit.createChangeSet(other.commit);
+	// FIXME apply changes
+	System.out.println(patch);
+	
+
+	return this;
     }
 }

@@ -2,9 +2,7 @@ package com.crypticbit.javelin.js;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import com.crypticbit.javelin.store.Digest;
@@ -61,6 +59,40 @@ public class DereferencedCasAccessInterface extends DataAccessInterface<JsonElem
 	else {
 	    return in;
 	}
+    }
+
+    public Object readAsObjects(Identity digest) throws JsonSyntaxException, UnsupportedEncodingException,
+	    StoreException {
+	JsonElement in = new JsonParser().parse(cas.get(digest).getAsString());
+	if (in.isJsonArray()) {
+	    List<Digest> r = new LinkedList<>();
+	    for (JsonElement e : in.getAsJsonArray()) {
+		r.add(gson.fromJson(e, Digest.class));
+	    }
+	    return new LazyJsonArray(this, r);
+	}
+	else if (in.isJsonObject()) {
+	    Map<String, Digest> o = new HashMap<>();
+	    for (Entry<String, JsonElement> e : in.getAsJsonObject().entrySet()) {
+		o.put(e.getKey(), gson.fromJson(e.getValue(), Digest.class));
+	    }
+	    return new LazyJsonMap(this, o);
+	}
+	else if (in.isJsonPrimitive()) {
+	    JsonPrimitive primative = in.getAsJsonPrimitive();
+	    if (primative.isBoolean())
+		return primative.getAsBoolean();
+	    if (primative.isNumber())
+		return primative.getAsNumber();
+	    if (primative.isString())
+		return primative.getAsString();
+	    throw new Error("Unknown Json Type: " + in);
+	}
+	else if (in.isJsonNull())
+	    return null;
+	else
+	    throw new Error("Unknown Json Type: " + in);
+
     }
 
 }

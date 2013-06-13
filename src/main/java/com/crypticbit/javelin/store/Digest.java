@@ -2,7 +2,6 @@ package com.crypticbit.javelin.store;
 
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
-import java.util.Arrays;
 import java.util.Random;
 
 import com.google.common.io.BaseEncoding;
@@ -44,13 +43,18 @@ public class Digest implements Identity {
     }
 
     @Override
-    public boolean equals(Object digest) {
-	if (digest instanceof Digest) {
-	    return Arrays.equals(getDigestAsByte(), ((Digest) digest).getDigestAsByte());
+    public boolean equals(Object compare) {
+	if (compare instanceof Digest) {
+	    return digest.equals(((Digest) compare).digest);
 	}
 	else {
 	    return false;
 	}
+    }
+
+    @Override
+    public int hashCode() {
+	return digest.hashCode();
     }
 
     @Override

@@ -9,10 +9,10 @@ public class CommitDao {
 
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yy-MM-dd~HH:mm:ss:SSS");
     /** Reference to head of value tree */
-    private Digest head;
-    private Date when;
-    private String user;
-    private Digest parents[];
+    private final Digest head;
+    private final Date when;
+    private final String user;
+    private final Digest parents[];
 
     public CommitDao(Digest head, Date when, String user, Digest parent) {
 	this(head, when, user, (parent == null ? new Digest[] {} : new Digest[] { parent }));
@@ -43,6 +43,7 @@ public class CommitDao {
 
     @Override
     public String toString() {
+	// FIXME - It's the commit we want to id, not the head. Two commits could point at same id.
 	return head
 		+ ":"
 		+ user
@@ -50,6 +51,17 @@ public class CommitDao {
 		+ SIMPLE_DATE_FORMAT.format(when)
 		+ (parents == null || parents.length == 0 ? " ROOT" : (parents.length == 1 ? "" : " " + parents.length
 			+ " parents"));
+    }
+
+    @Override
+    public int hashCode() {
+	return head.hashCode();
+    }
+
+    @Override
+    // FIXME
+    public boolean equals(Object obj) {
+	return head.equals(((CommitDao) obj).head);
     }
 
 }

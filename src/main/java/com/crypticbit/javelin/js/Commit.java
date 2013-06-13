@@ -157,4 +157,27 @@ public class Commit implements Comparable<Commit> {
 	return wrap(lca);
 
     }
+
+    @Override
+    public int hashCode() {
+	return dao.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+	if (this == obj)
+	    return true;
+	if (obj == null)
+	    return false;
+	if (getClass() != obj.getClass())
+	    return false;
+	Commit other = (Commit) obj;
+	if (dao == null) {
+	    if (other.dao != null)
+		return false;
+	}
+	else if (!dao.equals(other.dao))
+	    return false;
+	return true;
+    }
 }

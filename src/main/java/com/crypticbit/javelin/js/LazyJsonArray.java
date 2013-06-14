@@ -5,6 +5,9 @@ import java.util.List;
 
 import com.crypticbit.javelin.store.Digest;
 
+import difflib.DiffUtils;
+import difflib.Patch;
+
 public class LazyJsonArray extends AbstractList<Object> {
 
     private List<Digest> backingList;
@@ -29,6 +32,10 @@ public class LazyJsonArray extends AbstractList<Object> {
     @Override
     public int size() {
 	return backingList.size();
+    }
+
+    public Patch diff(LazyJsonArray them) {
+	 return DiffUtils.diff(backingList, them.backingList);
     }
 
 }

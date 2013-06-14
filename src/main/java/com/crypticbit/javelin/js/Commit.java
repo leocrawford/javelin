@@ -5,6 +5,8 @@ import java.util.*;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.TarjanLowestCommonAncestor;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.GraphUnion;
@@ -15,6 +17,7 @@ import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 
+import difflib.Delta;
 import difflib.Patch;
 
 public class Commit implements Comparable<Commit> {
@@ -39,14 +42,46 @@ public class Commit implements Comparable<Commit> {
 
     public Patch createChangeSet(Commit other) throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
 
-	Commit lca = findLca(other);
+	Graph<CommitDao, DefaultEdge> x = getAsGraphToRoots(new Commit[] { this, other });
+	CommitDao lca = new TarjanLowestCommonAncestor<CommitDao, DefaultEdge>(x).calculate(findRoot().dao, this.dao,
+		other.dao);
+	GraphPath<CommitDao, DefaultEdge> p1, p2;
+	p1 = getShortestPath(x, lca, this.dao);
+	p2 = getShortestPath(x, lca, other.dao);
 
-	// Patch patch = DiffUtils.diff((List) lazyRead(), (List) other.lazyRead());
+	printDelta(x, p1);
+	printDelta(x, p2);
 
-	// for (Delta delta : patch.getDeltas()) {
-	// System.out.println(delta);
-	// }
 	return null;
+    }
+
+    private void printDelta(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1)
+	    throws UnsupportedEncodingException, StoreException {
+	for (DefaultEdge e : p1.getEdgeList()) {
+	    Patch patch = wrap(x.getEdgeSource(e)).createChangeSetFromParent(wrap(x.getEdgeTarget(e)));
+	    System.out.println("The difference between " + x.getEdgeSource(e) + " and " + x.getEdgeTarget(e));
+	    for (Delta delta : patch.getDeltas()) {
+		List<Digest> lines = (List<Digest>) delta.getRevised().getLines();
+		for (Digest next : lines)
+		    System.out.println(delta + "," + jsonFactory.read( next));
+	    }
+	}
+    }
+
+    private Patch createChangeSetFromParent(Commit wrap) throws JsonSyntaxException, UnsupportedEncodingException,
+	    StoreException {
+	Object me = getObject();
+	Object them = wrap.getObject();
+
+	if (me instanceof LazyJsonArray && them instanceof LazyJsonArray)
+	    return ((LazyJsonArray) me).diff((LazyJsonArray) them);
+	else
+	    return null;
+    }
+
+    public GraphPath<CommitDao, DefaultEdge> getShortestPath(Graph<CommitDao, DefaultEdge> graph, CommitDao start,
+	    CommitDao end) {
+	return new DijkstraShortestPath<CommitDao, DefaultEdge>(graph, start, end).getPath();
     }
 
     @Override
@@ -70,17 +105,6 @@ public class Commit implements Comparable<Commit> {
 	    return false;
 	}
 	return true;
-    }
-
-    /*
-     * FIXME - should we not be public FIXME - handle not found
-     */
-    public Commit findLca(Commit other) throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
-	Graph<CommitDao, DefaultEdge> x = getAsGraphToRoots(new Commit[] { this, other });
-	CommitDao lca = new TarjanLowestCommonAncestor<CommitDao, DefaultEdge>(x).calculate(findRoot().dao, this.dao,
-		other.dao);
-	return wrap(lca);
-
     }
 
     /**

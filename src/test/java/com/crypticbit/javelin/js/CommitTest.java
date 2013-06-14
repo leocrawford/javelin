@@ -48,14 +48,14 @@ public class CommitTest {
     }
 
     @Test
-    public void testCreateChangeSet() {
-	// fail("Not yet implemented");
+    public void testCreateChangeSet() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+	jca1.getCommit().createChangeSet(jca4.getCommit());
     }
 
-    @Test
-    public void testfindLca() throws StoreException, IOException {
-	assertEquals(jca2.getCommit(), jca4.getCommit().findLca(jca3.getCommit()));
-    }
+//    @Test
+//    public void testfindLca() throws StoreException, IOException {
+//	assertEquals(jca2.getCommit(), jca4.getCommit().findLca(jca3.getCommit()));
+//    }
 
     @Test
     public void testGetAsGraph() throws StoreException, IOException {
@@ -65,10 +65,6 @@ public class CommitTest {
 	assertEquals(4, jca4.getCommit().getAsGraphToRoot().vertexSet().size());
     }
 
-    @Test
-    public void testGetShortestHistory() {
-	// fail("Not yet implemented");
-    }
 
     private void show() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
 	JGraph jgraph = new JGraph(new JGraphModelAdapter<CommitDao, DefaultEdge>(Commit

@@ -68,7 +68,7 @@ public class CommitTest {
 
     private void show() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
 	JGraph jgraph = new JGraph(new JGraphModelAdapter<CommitDao, DefaultEdge>(Commit
-		.getAsGraphToRoots(new Commit[] { jca4.getCommit(), jca3.getCommit() })));
+		.getAsGraphToRoots(new Commit[] { jca4.getCommit(), jca1.getCommit() })));
 	jgraph.setPreferredSize(new Dimension(400, 400));
 	final JGraphHierarchicalLayout hir = new JGraphHierarchicalLayout();
 	final JGraphFacade graphFacade = new JGraphFacade(jgraph);

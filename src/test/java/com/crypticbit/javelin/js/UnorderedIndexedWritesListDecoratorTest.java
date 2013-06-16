@@ -21,11 +21,11 @@ public class UnorderedIndexedWritesListDecoratorTest {
 		t.addAll(2, Arrays.asList(new String[]{"u"}));
 		t.addAll(1, Arrays.asList(new String[]{}));
 		t.addAll(1, Arrays.asList(new String[]{"s","t"}));
-		t.addAll(2, Arrays.asList(new String[]{"u"}));
+		t.addAll(2, Arrays.asList(new String[]{"v"}));
 
 		System.out.println(t);
 		
-		Assert.assertArrayEquals(new String[]{"u","v","a","w","x","z","b","y","c","d"},t.toArray());
+		Assert.assertArrayEquals(new String[]{"x","y","z","a","s","t","b","u","v","c","d"},t.toArray());
 		
 	}
 

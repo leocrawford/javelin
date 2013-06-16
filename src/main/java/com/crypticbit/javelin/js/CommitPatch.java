@@ -12,6 +12,7 @@ public class CommitPatch {
 
 	private Commit lca;
 	private Patch result;
+	
 
 	public CommitPatch(Commit lca, Patch result) {
 		this.lca = lca;

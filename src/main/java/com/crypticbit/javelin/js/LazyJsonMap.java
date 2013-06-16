@@ -80,7 +80,7 @@ public class LazyJsonMap extends AbstractMap<String, Object> {
 	};
     }
 
-	public void patch(Patch result) {
+	public void patch(List<ExtendedPatch> patches) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -1,13 +1,7 @@
 package com.crypticbit.javelin.js;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
@@ -28,228 +22,208 @@ import difflib.Patch;
 
 public class Commit implements Comparable<Commit> {
 
-	private CommitDao dao;
-	private DereferencedCasAccessInterface jsonFactory;
-	private SimpleCasAccessInterface<CommitDao> commitFactory;
+    private CommitDao dao;
+    private DereferencedCasAccessInterface jsonFactory;
+    private SimpleCasAccessInterface<CommitDao> commitFactory;
 
-	Commit(CommitDao dao, DereferencedCasAccessInterface jsonFactory,
-			SimpleCasAccessInterface<CommitDao> commitFactory) {
-		assert (dao != null);
+    Commit(CommitDao dao, DereferencedCasAccessInterface jsonFactory, SimpleCasAccessInterface<CommitDao> commitFactory) {
+	assert (dao != null);
 
-		this.dao = dao;
-		this.jsonFactory = jsonFactory;
-		this.commitFactory = commitFactory;
+	this.dao = dao;
+	this.jsonFactory = jsonFactory;
+	this.commitFactory = commitFactory;
 
+    }
+
+    @Override
+    public int compareTo(Commit o) {
+	return this.getDate().compareTo(o.getDate());
+    }
+
+    public CommitPatch createChangeSet(Commit other) throws JsonSyntaxException, UnsupportedEncodingException,
+	    StoreException {
+
+	Graph<CommitDao, DefaultEdge> x = getAsGraphToRoots(new Commit[] { this, other });
+	CommitDao lca = new TarjanLowestCommonAncestor<CommitDao, DefaultEdge>(x).calculate(findRoot().dao, this.dao,
+		other.dao);
+	GraphPath<CommitDao, DefaultEdge> p1, p2;
+	p1 = getShortestPath(x, lca, this.dao);
+	p2 = getShortestPath(x, lca, other.dao);
+
+	Map<Date, ExtendedPatch> treemap = new TreeMap<>();
+	addCommitToTreeMap(x, p1, treemap);
+	addCommitToTreeMap(x, p2, treemap);
+	CommitPatch result = new CommitPatch(wrap(lca));
+	for (ExtendedPatch p : treemap.values()) {
+	    result.add(p);
 	}
+	return result;
+    }
 
-	@Override
-	public int compareTo(Commit o) {
-		return this.getDate().compareTo(o.getDate());
+    private void addCommitToTreeMap(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1,
+	    Map<Date, ExtendedPatch> treemap) throws UnsupportedEncodingException, StoreException {
+	for (DefaultEdge e : p1.getEdgeList()) {
+	    Commit end = wrap(x.getEdgeTarget(e));
+	    Patch patch = wrap(x.getEdgeSource(e)).createChangeSetFromParent(end);
+	    treemap.put(end.getDate(), new ExtendedPatch(patch, p1));
 	}
+    }
 
-	public CommitPatch createChangeSet(Commit other) throws JsonSyntaxException,
-			UnsupportedEncodingException, StoreException {
-
-		Graph<CommitDao, DefaultEdge> x = getAsGraphToRoots(new Commit[] {
-				this, other });
-		CommitDao lca = new TarjanLowestCommonAncestor<CommitDao, DefaultEdge>(
-				x).calculate(findRoot().dao, this.dao, other.dao);
-		GraphPath<CommitDao, DefaultEdge> p1, p2;
-		p1 = getShortestPath(x, lca, this.dao);
-		p2 = getShortestPath(x, lca, other.dao);
-
-		Map<Date, Patch> treemap = new TreeMap<>();
-		addCommitToTreeMap(x, p1, treemap);
-		addCommitToTreeMap(x, p2, treemap);
-		Patch result = new Patch();
-		for (Patch p : treemap.values()) {
-			for(Delta d : p.getDeltas())
-				result.addDelta(d);
-		}
-		for(Delta d : result.getDeltas())
-			System.out.println(d);
-
-		return new CommitPatch(wrap(lca),result);
+    private void printDelta(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1)
+	    throws UnsupportedEncodingException, StoreException {
+	for (DefaultEdge e : p1.getEdgeList()) {
+	    Patch patch = wrap(x.getEdgeSource(e)).createChangeSetFromParent(wrap(x.getEdgeTarget(e)));
+	    System.out.println("The difference between " + x.getEdgeSource(e) + " and " + x.getEdgeTarget(e));
+	    for (Delta delta : patch.getDeltas()) {
+		List<Digest> lines = (List<Digest>) delta.getRevised().getLines();
+		for (Digest next : lines)
+		    System.out.println(delta + "," + jsonFactory.read(next));
+	    }
 	}
-	
-	private void addCommitToTreeMap(Graph<CommitDao, DefaultEdge> x,
-			GraphPath<CommitDao, DefaultEdge> p1, Map<Date, Patch> treemap)
-			throws UnsupportedEncodingException, StoreException {
-		for (DefaultEdge e : p1.getEdgeList()) {
-			Commit end = wrap(x.getEdgeTarget(e));
-			Patch patch = wrap(x.getEdgeSource(e)).createChangeSetFromParent(
-					end);
-			treemap.put(end.getDate(), patch);
-		}
+    }
+
+    private Patch createChangeSetFromParent(Commit wrap) throws JsonSyntaxException, UnsupportedEncodingException,
+	    StoreException {
+	Object me = getObject();
+	Object them = wrap.getObject();
+
+	if (me instanceof LazyJsonArray && them instanceof LazyJsonArray)
+	    return ((LazyJsonArray) me).diff((LazyJsonArray) them);
+	else
+	    return null;
+    }
+
+    public GraphPath<CommitDao, DefaultEdge> getShortestPath(Graph<CommitDao, DefaultEdge> graph, CommitDao start,
+	    CommitDao end) {
+	return new DijkstraShortestPath<CommitDao, DefaultEdge>(graph, start, end).getPath();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+	if (this == obj) {
+	    return true;
 	}
-
-	private void printDelta(Graph<CommitDao, DefaultEdge> x,
-			GraphPath<CommitDao, DefaultEdge> p1)
-			throws UnsupportedEncodingException, StoreException {
-		for (DefaultEdge e : p1.getEdgeList()) {
-			Patch patch = wrap(x.getEdgeSource(e)).createChangeSetFromParent(
-					wrap(x.getEdgeTarget(e)));
-			System.out.println("The difference between " + x.getEdgeSource(e)
-					+ " and " + x.getEdgeTarget(e));
-			for (Delta delta : patch.getDeltas()) {
-				List<Digest> lines = (List<Digest>) delta.getRevised()
-						.getLines();
-				for (Digest next : lines)
-					System.out.println(delta + "," + jsonFactory.read(next));
-			}
-		}
+	if (obj == null) {
+	    return false;
 	}
-
-	private Patch createChangeSetFromParent(Commit wrap)
-			throws JsonSyntaxException, UnsupportedEncodingException,
-			StoreException {
-		Object me = getObject();
-		Object them = wrap.getObject();
-
-		if (me instanceof LazyJsonArray && them instanceof LazyJsonArray)
-			return ((LazyJsonArray) me).diff((LazyJsonArray) them);
-		else
-			return null;
+	if (getClass() != obj.getClass()) {
+	    return false;
 	}
-
-	public GraphPath<CommitDao, DefaultEdge> getShortestPath(
-			Graph<CommitDao, DefaultEdge> graph, CommitDao start, CommitDao end) {
-		return new DijkstraShortestPath<CommitDao, DefaultEdge>(graph, start,
-				end).getPath();
+	Commit other = (Commit) obj;
+	if (dao == null) {
+	    if (other.dao != null) {
+		return false;
+	    }
 	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		Commit other = (Commit) obj;
-		if (dao == null) {
-			if (other.dao != null) {
-				return false;
-			}
-		} else if (!dao.equals(other.dao)) {
-			return false;
-		}
-		return true;
+	else if (!dao.equals(other.dao)) {
+	    return false;
 	}
+	return true;
+    }
 
-	/**
-	 * Generate a graph from this node to root. This allows us to treat the
-	 * commit tree like a graph, and use standard graph operations rather than
-	 * coding our own
-	 */
-	public Graph<CommitDao, DefaultEdge> getAsGraphToRoot()
-			throws JsonSyntaxException, UnsupportedEncodingException,
-			StoreException {
-		// FIXME - we should consider caching results
+    /**
+     * Generate a graph from this node to root. This allows us to treat the commit tree like a graph, and use standard
+     * graph operations rather than coding our own
+     */
+    public Graph<CommitDao, DefaultEdge> getAsGraphToRoot() throws JsonSyntaxException, UnsupportedEncodingException,
+	    StoreException {
+	// FIXME - we should consider caching results
 
-		DirectedGraph<CommitDao, DefaultEdge> thisAndParentsAsGraph = new SimpleDirectedGraph<CommitDao, DefaultEdge>(
-				DefaultEdge.class);
-		thisAndParentsAsGraph.addVertex(dao);
-		for (Commit c : getParents()) {
-			thisAndParentsAsGraph.addVertex(c.dao);
-			// FIXME - which way are we directing our graph
-			thisAndParentsAsGraph.addEdge(c.dao, this.dao);
-		}
-		Graph<CommitDao, DefaultEdge> thisAndParentsTreeAsGraph = thisAndParentsAsGraph;
-		for (Commit c : getParents()) {
-			thisAndParentsTreeAsGraph = new GraphUnion<CommitDao, DefaultEdge, Graph<CommitDao, DefaultEdge>>(
-					thisAndParentsTreeAsGraph, c.getAsGraphToRoot());
-		}
-		return thisAndParentsTreeAsGraph;
+	DirectedGraph<CommitDao, DefaultEdge> thisAndParentsAsGraph = new SimpleDirectedGraph<CommitDao, DefaultEdge>(
+		DefaultEdge.class);
+	thisAndParentsAsGraph.addVertex(dao);
+	for (Commit c : getParents()) {
+	    thisAndParentsAsGraph.addVertex(c.dao);
+	    // FIXME - which way are we directing our graph
+	    thisAndParentsAsGraph.addEdge(c.dao, this.dao);
 	}
-
-	public Date getDate() {
-		return dao.getWhen();
+	Graph<CommitDao, DefaultEdge> thisAndParentsTreeAsGraph = thisAndParentsAsGraph;
+	for (Commit c : getParents()) {
+	    thisAndParentsTreeAsGraph = new GraphUnion<CommitDao, DefaultEdge, Graph<CommitDao, DefaultEdge>>(
+		    thisAndParentsTreeAsGraph, c.getAsGraphToRoot());
 	}
+	return thisAndParentsTreeAsGraph;
+    }
 
-	public JsonElement getElement() throws JsonSyntaxException,
-			UnsupportedEncodingException, StoreException {
-		return jsonFactory.read(dao.getHead());
+    public Date getDate() {
+	return dao.getWhen();
+    }
+
+    public JsonElement getElement() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+	return jsonFactory.read(dao.getHead());
+    }
+
+    public Object getObject() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+	return jsonFactory.readAsObjects(dao.getHead());
+    }
+
+    public Set<Commit> getParents() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+	Set<Commit> parents = new TreeSet<>();
+	for (Digest parent : dao.getParents()) {
+	    parents.add(wrap(commitFactory.read(parent)));
 	}
+	return parents;
+    }
 
-	public Object getObject() throws JsonSyntaxException,
-			UnsupportedEncodingException, StoreException {
-		return jsonFactory.readAsObjects(dao.getHead());
+    public List<Commit> getShortestHistory() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+
+	List<Commit> shortest = null;
+	for (Commit c : getParents()) {
+	    List<Commit> consider = c.getShortestHistory();
+	    if (shortest == null || shortest.size() > consider.size()) {
+		shortest = consider;
+	    }
 	}
-
-	public Set<Commit> getParents() throws JsonSyntaxException,
-			UnsupportedEncodingException, StoreException {
-		Set<Commit> parents = new TreeSet<>();
-		for (Digest parent : dao.getParents()) {
-			parents.add(wrap(commitFactory.read(parent)));
-		}
-		return parents;
+	if (shortest == null) {
+	    shortest = new LinkedList<>();
 	}
+	shortest.add(0, this);
+	return shortest;
+    }
 
-	public List<Commit> getShortestHistory() throws JsonSyntaxException,
-			UnsupportedEncodingException, StoreException {
+    public String getUser() {
+	return dao.getUser();
+    }
 
-		List<Commit> shortest = null;
-		for (Commit c : getParents()) {
-			List<Commit> consider = c.getShortestHistory();
-			if (shortest == null || shortest.size() > consider.size()) {
-				shortest = consider;
-			}
-		}
-		if (shortest == null) {
-			shortest = new LinkedList<>();
-		}
-		shortest.add(0, this);
-		return shortest;
+    @Override
+    public int hashCode() {
+	return dao.hashCode();
+    }
+
+    @Override
+    public String toString() {
+	return dao.toString();
+    }
+
+    /**
+     * Find very first commit in tree
+     * 
+     * @throws StoreException
+     * @throws UnsupportedEncodingException
+     * @throws JsonSyntaxException
+     */
+    protected Commit findRoot() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+	List<Commit> shortestHistory = getShortestHistory();
+	return shortestHistory.get(shortestHistory.size() - 1);
+    }
+
+    // FIXME - should we try and find an existing instance?
+    private Commit wrap(CommitDao dao) {
+	return new Commit(dao, jsonFactory, commitFactory);
+    }
+
+    public static Graph<CommitDao, DefaultEdge> getAsGraphToRoots(Commit[] commits) throws JsonSyntaxException,
+	    UnsupportedEncodingException, StoreException {
+	Graph<CommitDao, DefaultEdge> result = null;
+	for (Commit c : commits) {
+	    if (result == null) {
+		result = c.getAsGraphToRoot();
+	    }
+	    else {
+		result = new GraphUnion<CommitDao, DefaultEdge, Graph<CommitDao, DefaultEdge>>(result, c
+			.getAsGraphToRoot());
+	    }
 	}
-
-	public String getUser() {
-		return dao.getUser();
-	}
-
-	@Override
-	public int hashCode() {
-		return dao.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return dao.toString();
-	}
-
-	/**
-	 * Find very first commit in tree
-	 * 
-	 * @throws StoreException
-	 * @throws UnsupportedEncodingException
-	 * @throws JsonSyntaxException
-	 */
-	protected Commit findRoot() throws JsonSyntaxException,
-			UnsupportedEncodingException, StoreException {
-		List<Commit> shortestHistory = getShortestHistory();
-		return shortestHistory.get(shortestHistory.size() - 1);
-	}
-
-	// FIXME - should we try and find an existing instance?
-	private Commit wrap(CommitDao dao) {
-		return new Commit(dao, jsonFactory, commitFactory);
-	}
-
-	public static Graph<CommitDao, DefaultEdge> getAsGraphToRoots(
-			Commit[] commits) throws JsonSyntaxException,
-			UnsupportedEncodingException, StoreException {
-		Graph<CommitDao, DefaultEdge> result = null;
-		for (Commit c : commits) {
-			if (result == null) {
-				result = c.getAsGraphToRoot();
-			} else {
-				result = new GraphUnion<CommitDao, DefaultEdge, Graph<CommitDao, DefaultEdge>>(
-						result, c.getAsGraphToRoot());
-			}
-		}
-		return result;
-	}
+	return result;
+    }
 }

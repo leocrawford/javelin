@@ -47,7 +47,7 @@ public class Commit implements Comparable<Commit> {
 		return this.getDate().compareTo(o.getDate());
 	}
 
-	public Patch createChangeSet(Commit other) throws JsonSyntaxException,
+	public CommitPatch createChangeSet(Commit other) throws JsonSyntaxException,
 			UnsupportedEncodingException, StoreException {
 
 		Graph<CommitDao, DefaultEdge> x = getAsGraphToRoots(new Commit[] {
@@ -69,20 +69,9 @@ public class Commit implements Comparable<Commit> {
 		for(Delta d : result.getDeltas())
 			System.out.println(d);
 
-		//
-		// for (Delta delta : result.getDeltas()) {
-		// List<Digest> lines = (List<Digest>) delta.getRevised()
-		// .getLines();
-		// for (Digest next : lines)
-		// System.out.println(delta + "," + jsonFactory.read(next));
-		// }
-
-		printDelta(x, p1);
-		printDelta(x, p2);
-
-		return null;
+		return new CommitPatch(wrap(lca),result);
 	}
-
+	
 	private void addCommitToTreeMap(Graph<CommitDao, DefaultEdge> x,
 			GraphPath<CommitDao, DefaultEdge> p1, Map<Date, Patch> treemap)
 			throws UnsupportedEncodingException, StoreException {

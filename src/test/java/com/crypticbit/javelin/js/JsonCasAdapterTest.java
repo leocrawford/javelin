@@ -13,6 +13,9 @@ import org.junit.Test;
 import com.crypticbit.javelin.store.*;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+
+import difflib.PatchFailedException;
 
 public class JsonCasAdapterTest {
 
@@ -21,7 +24,7 @@ public class JsonCasAdapterTest {
     private static final String JSON_EXAMPLE_3 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,5]]";
 
     @Test
-    public void testBasicBranch() throws IOException, StoreException {
+    public void testBasicBranch() throws IOException, StoreException, JsonSyntaxException, PatchFailedException {
 	String JSON_EXAMPLEa = "[\"foo\",100]";
 	String JSON_EXAMPLE_2a = "[\"a\",\"b\",\"c\",\"a\",\"b\",\"b\",\"a\"]";
 	String JSON_EXAMPLE_3a = "[\"x\",\"c\",\"b\",\"a\",\"b\",\"a\",\"c\"]";

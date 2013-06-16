@@ -7,6 +7,8 @@ import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 
+import difflib.Patch;
+
 public class LazyJsonMap extends AbstractMap<String, Object> {
 
     private Map<String, Digest> backingMap;
@@ -77,5 +79,10 @@ public class LazyJsonMap extends AbstractMap<String, Object> {
 	    }
 	};
     }
+
+	public void patch(Patch result) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

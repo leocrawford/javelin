@@ -15,6 +15,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import difflib.Patch;
+import difflib.PatchFailedException;
 
 // what is immutable? commit? element? anchors?
 // multiple anchors?
@@ -111,9 +112,10 @@ public class JsonCasAdapter {
     }
 
     public JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, UnsupportedEncodingException,
-	    StoreException {
+	    StoreException, PatchFailedException {
 	// FIXME - check no checkin needed
-	Patch patch = commit.createChangeSet(other.commit);
+	CommitPatch patch = commit.createChangeSet(other.commit);
+	patch.apply();
 	// FIXME apply changes
 	System.out.println(patch);
 

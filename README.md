@@ -33,20 +33,22 @@ The benefits of a distributed, versioned database include:
 
 It allows you to write things like the following (the API is changing, so this is more psuedo-code)
 
-    Repository repo = new DiskRepoistory(directory);
-    Anchor a = new Anchor("ROOT");
-    a.write("[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]");
-    System.out.println(a.navigate("[2].a")); // 1000.21
-    Anchor b = a.branch()
-    b.navigate("[2].c").write("hello");
-    System.out.println(b.navigate("[2]")); // {a:1000.21,b:6,c:hello}
-	System.out.println(a.navigate("[2]")); // {a:1000.21,b:6}
-	a.navigate("[2].d").write("bye");
-    Patch p = a.createPatchTo(b); // in case we wanted to ship it off somewhere
-    a.mergeIn(b);
-    System.out.println(a.navigate("[2]")); // {a:1000.21,b:6,c:hello},d:bye   
-    System.out.println(a.getHistory()); // a timestamped set of commits with parents
-    a.getObjects(); // return the set of object in branch a (so they can be shipped off elsewhere)
+ ```java
+Repository repo = new DiskRepoistory(directory);
+Anchor a = new Anchor("ROOT");
+a.write("[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]");
+System.out.println(a.navigate("[2].a")); // 1000.21
+Anchor b = a.branch()
+b.navigate("[2].c").write("hello");
+System.out.println(b.navigate("[2]")); // {a:1000.21,b:6,c:hello}
+System.out.println(a.navigate("[2]")); // {a:1000.21,b:6}
+a.navigate("[2].d").write("bye");
+Patch p = a.createPatchTo(b); // in case we wanted to ship it off somewhere
+a.mergeIn(b);
+System.out.println(a.navigate("[2]")); // {a:1000.21,b:6,c:hello},d:bye   
+System.out.println(a.getHistory()); // a timestamped set of commits with parents
+a.getObjects(); // return the set of object in branch a (so they can be shipped off elsewhere)
+ ```
     
 ##Inspiration
 

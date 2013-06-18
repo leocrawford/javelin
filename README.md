@@ -71,8 +71,11 @@ In terms of technology, the things that shaped my thinking are:
 
 Done:
 
-* [ ] JSON parsing and generation
-* [x] Access to JSON tree via lazily instantiated objects
+- [ ] JSON parsing and generation
+- [x] Access to JSON tree via lazily instantiated objects
+
+
+* x
  * Lazy Json objects to allow write [todo]
  * Navigate through data structure without reading the whole tree, and allow navigation to non existant nodes [todo]
 * Storage to pluggable content addressable storage

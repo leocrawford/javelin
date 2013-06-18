@@ -1,8 +1,6 @@
-Javelin
-=======
+#Javelin
 
-Vision
-------
+##Vision
 
 Imagine a world where it's possible to quickly create a local database with whatever schema you choose, and then sync 
 whichever bits you want to as many, or as few, other stores as you want.
@@ -20,8 +18,7 @@ database working first is essential.
 Therefore I'm working on this project (Javelin) which is a database for managing structured data in the form of JSON 
 in a fully versioned, eventually consistent way.
 
-Benefits
---------
+##Benefits
 
 The benefits of a distributed, versioned database include:
 
@@ -32,8 +29,7 @@ The benefits of a distributed, versioned database include:
 * The branches can be synced over any transport mechanism
 * The cost of hosting a database becomes trivial. You don't need a server, or high up-time
 
-Usage
-------
+##Usage
 
 It allows you to write things like the following (the API is changing, so this is more psuedo-code)
 
@@ -52,8 +48,7 @@ It allows you to write things like the following (the API is changing, so this i
     System.out.println(a.getHistory()); // a timestamped set of commits with parents
     a.getObjects(); // return the set of object in branch a (so they can be shipped off elsewhere)
     
-Inspiration
------------
+##Inspiration
 
 There are a number of interesting projects looking at a very similar problem. These include:
 
@@ -66,35 +61,33 @@ In terms of technology, the things that shaped my thinking are:
 * darcs
 
 
-Resources
----------
+##Resources
 
 * http://en.wikibooks.org/wiki/Understanding_Darcs/Patch_theory
     
-Features
---------
+##Features
 
 Done:
 
 * JSON parsing and generation
 * Access to JSON tree via lazily instantiated objects
-** Lazy Json objects to allow write [todo]
-** Navigate through data structure without reading the whole tree, and allow navigation to non existant nodes [todo]
+ * Lazy Json objects to allow write [todo]
+ * Navigate through data structure without reading the whole tree, and allow navigation to non existant nodes [todo]
 * Storage to pluggable content addressable storage
-** memory 
-** disk [todo]
+ * memory 
+ * disk [todo]
 * branching
-** create branches
-** merge branches [todo]
+ * create branches
+ * merge branches [todo]
 * patching
-** create patch
-** apply patch
-** revert patch [todo]
-** pluggable conflict resolution
+ * create patch
+ * apply patch
+ * revert patch [todo]
+ * pluggable conflict resolution
 * export
-** patch [todo]
-** branch [todo]
-** objects [todo]
+ * patch [todo]
+ * branch [todo]
+ * objects [todo]
 
 
 It isn't
@@ -121,5 +114,5 @@ Versioning:
 * History
 * Commit
 * Patching
-** Diff
-** 3 way diff
+ * Diff
+ * 3 way diff

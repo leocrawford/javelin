@@ -51,9 +51,13 @@ public class CommitTest {
 
 	@Test
 	public void testCreateChangeSet() throws JsonSyntaxException,
-			UnsupportedEncodingException, StoreException, PatchFailedException {
+			StoreException, PatchFailedException, IOException {
 		CommitPatch patch = jca1.getCommit().createChangeSet(jca4.getCommit());
 		System.out.println(patch.apply());
+		jca1.merge(jca4);
+		// FIXME - should be unecessary
+		jca1.checkout();
+		System.out.println(jca1.read());
 	}
 
 	// @Test

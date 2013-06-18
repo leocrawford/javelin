@@ -40,6 +40,28 @@ public class DereferencedCasAccessInterface extends DataAccessInterface<JsonElem
 	}
     }
 
+    // FIXME if already exists
+    public Identity writeAsObjects(Object object) throws StoreException, IOException {
+	System.out.println("Writing " + object);
+	if (object instanceof LazyJsonArray) {
+	    List<Digest> r = new LinkedList<>();
+	    for (Object o : (LazyJsonArray) object) {
+		r.add((Digest) writeAsObjects(o));
+	    }
+	    return cas.store(new GeneralPersistableResource(gson.toJson(r)));
+	}
+	else if (object instanceof LazyJsonMap) {
+	    Map<String, Digest> r = new HashMap<>();
+	    for (Map.Entry<String, Object> o : ((LazyJsonMap) object).entrySet()) {
+		r.put(o.getKey(), (Digest) writeAsObjects(o.getValue()));
+	    }
+	    return cas.store(new GeneralPersistableResource(gson.toJson(r)));
+	}
+	else {
+	    return cas.store(new GeneralPersistableResource(gson.toJson(object)));
+	}
+    }
+
     public Object readAsObjects(Identity digest) throws JsonSyntaxException, UnsupportedEncodingException,
 	    StoreException {
 	JsonElement in = new JsonParser().parse(cas.get(digest).getAsString());

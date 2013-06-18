@@ -111,14 +111,19 @@ public class JsonCasAdapter {
 	return commit.getObject();
     }
 
-    public JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, UnsupportedEncodingException,
-	    StoreException, PatchFailedException {
+    public JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, StoreException, PatchFailedException, IOException {
 	// FIXME - check no checkin needed
 	CommitPatch patch = commit.createChangeSet(other.commit);
-	patch.apply();
-	// FIXME apply changes
-	System.out.println(patch);
-
+	
+	// COPY and paste from commit - horrible
+	Identity valueIdentity = jsonFactory.writeAsObjects(patch.apply());
+	CommitDao tempCommit = new CommitDao((Digest) valueIdentity, new Date(), "temp", (Digest) anchor.get());
+	Identity tempDigest = commitFactory.write(tempCommit);
+	anchor.write(tempDigest);
+	commit = new Commit(tempCommit, jsonFactory, commitFactory);
+	if (LOG.isLoggable(Level.FINEST)) {
+	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
+	}
 	return this;
     }
 

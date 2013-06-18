@@ -32,11 +32,11 @@ public class CommitTest {
 	public CommitTest() throws StoreException, IOException {
 		String c1 = "[\"a\"]";
 		String c2 = "[\"a\",\"b\"]";
-		String c3 = "[\"a\",\"b\",\"c\"]";
-		String c4 = "[\"a\",\"b\",\"c\",\"d\"]";
-		String c5 = "[\"a\",\"b\",\"c\",\"d\",\"e\"]";
-		String c6 = "[\"a\",\"b\",\"c\",\"d\",\"e\",\"f\"]";
-		String c7 = "[\"a\",\"b\",\"c\",\"d\",\"e\",\"f\",\"g\"]";
+		String c3 = "[\"a\",\"b\",\"c1\"]";
+		String c4 = "[\"a\",\"b\",\"c2\",\"d\"]";
+		String c5 = "[\"a\",\"b\",\"c2\",\"d\",\"e\"]";
+		String c6 = "[\"a\",\"b\",\"c2\",\"d\",\"e\",\"f\"]";
+		String c7 = "[\"a\",\"b\",\"c2\",\"d\",\"f\",\"g\"]";
 
 		jca1 = new JsonCasAdapter(new StorageFactory().createMemoryCas());
 		jca1.write(c1).commit().write(c2).commit();

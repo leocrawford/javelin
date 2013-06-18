@@ -36,13 +36,13 @@ It allows you to write things like the following (the API is changing, so this i
 ```java
 Repository repo = new DiskRepoistory(directory);
 Anchor a = new Anchor("ROOT");
-a.write("[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]");
+a.write("[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]").commit();
 System.out.println(a.navigate("[2].a")); // 1000.21
 Anchor b = a.branch()
-b.navigate("[2].c").write("hello");
+b.navigate("[2].c").write("hello").commit();
 System.out.println(b.navigate("[2]")); // {a:1000.21,b:6,c:hello}
 System.out.println(a.navigate("[2]")); // {a:1000.21,b:6}
-a.navigate("[2].d").write("bye");
+a.navigate("[2].d").write("bye").commit();
 Patch p = a.createPatchTo(b); // in case we wanted to ship it off somewhere
 a.mergeIn(b);
 System.out.println(a.navigate("[2]")); // {a:1000.21,b:6,c:hello},d:bye   

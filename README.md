@@ -33,7 +33,7 @@ The benefits of a distributed, versioned database include:
 
 It allows you to write things like the following (the API is changing, so this is more psuedo-code)
 
- ```java
+```java
 Repository repo = new DiskRepoistory(directory);
 Anchor a = new Anchor("ROOT");
 a.write("[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]");
@@ -48,7 +48,7 @@ a.mergeIn(b);
 System.out.println(a.navigate("[2]")); // {a:1000.21,b:6,c:hello},d:bye   
 System.out.println(a.getHistory()); // a timestamped set of commits with parents
 a.getObjects(); // return the set of object in branch a (so they can be shipped off elsewhere)
- ```
+```
     
 ##Inspiration
 
@@ -71,8 +71,8 @@ In terms of technology, the things that shaped my thinking are:
 
 Done:
 
-* JSON parsing and generation
-* Access to JSON tree via lazily instantiated objects
+* [ ] JSON parsing and generation
+* [x] Access to JSON tree via lazily instantiated objects
  * Lazy Json objects to allow write [todo]
  * Navigate through data structure without reading the whole tree, and allow navigation to non existant nodes [todo]
 * Storage to pluggable content addressable storage

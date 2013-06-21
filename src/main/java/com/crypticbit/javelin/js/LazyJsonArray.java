@@ -1,10 +1,11 @@
 package com.crypticbit.javelin.js;
 
-import java.util.*;
+import java.util.AbstractList;
+import java.util.List;
 
+import com.crypticbit.javelin.diff.SpecialPatch;
 import com.crypticbit.javelin.store.Digest;
 
-import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
 import difflib.PatchFailedException;
@@ -39,24 +40,9 @@ public class LazyJsonArray extends AbstractList<Object> {
 	return DiffUtils.diff(backingList, them.backingList);
     }
 
-    public void patch(List<ExtendedPatch> patches) throws PatchFailedException {
-	Set<Object> branches = new HashSet<>();
-	for (ExtendedPatch ep : patches) {
-	    branches.add(ep.getBranch());
-	}
-	UnorderedIndexedWritesListDecorator<Object> list = new UnorderedIndexedWritesListDecorator<Object>(
-		new LinkedList<Object>(backingList), branches);
-	for (ExtendedPatch ep : patches) {
-	    list.chooseMode(ep.getBranch());
-	    for (Delta d : ep.getPatch().getDeltas())
-		d.applyTo(list);
-	}
-
+    public void patch(SpecialPatch patch) throws PatchFailedException {
 	System.out.println("Old: " + backingList);
-	backingList.clear();
-	for (Object o : list) {
-	    backingList.add((Digest) o);
-	}
+	patch.apply(backingList);
 	System.out.println("New: " + backingList);
     }
 

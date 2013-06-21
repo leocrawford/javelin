@@ -22,18 +22,23 @@ public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
     private Map<Object, Map<Integer, Integer>> indexShifts = new HashMap<>();
     private Map<Integer, Integer> indexShift;
 
-    public UnorderedIndexedWritesListDecorator(List<T> backingList, Set<Object> modes) {
+    public UnorderedIndexedWritesListDecorator(List<T> backingList) {
 	this.backingList = backingList;
-	for (Object mode : modes) {
-	    indexShifts.put(mode, new TreeMap<Integer, Integer>());
-	}
     }
 
-    public void chooseMode(Object mode) {
+    public void addMode(Object mode) {
+	if (indexShift != null)
+	    throw new IllegalStateException("You can't add modes after you start using the class");
+	if (!indexShifts.containsKey(mode))
+	    indexShifts.put(mode, new TreeMap<Integer, Integer>());
+    }
+
+    public UnorderedIndexedWritesListDecorator chooseMode(Object mode) {
 	if (indexShifts.containsKey(mode))
 	    indexShift = indexShifts.get(mode);
 	else
 	    throw new IllegalArgumentException("Not a valid mode. Choose from: " + indexShifts);
+	return this; // allow chaining
     }
 
     private int transformIndex(final int index) {

@@ -12,13 +12,11 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.GraphUnion;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
+import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
-
-import difflib.Delta;
-import difflib.Patch;
 
 public class Commit implements Comparable<Commit> {
 
@@ -50,48 +48,32 @@ public class Commit implements Comparable<Commit> {
 	p1 = getShortestPath(x, lca, this.dao);
 	p2 = getShortestPath(x, lca, other.dao);
 
-	Map<Date, ExtendedPatch> treemap = new TreeMap<>();
-	addCommitToTreeMap(x, p1, treemap);
-	addCommitToTreeMap(x, p2, treemap);
-	CommitPatch result = new CommitPatch(wrap(lca));
-	for (ExtendedPatch p : treemap.values()) {
-	    result.add(p);
-	}
-	return result;
+	ThreeWayDiff twd = new ThreeWayDiff(wrap(lca).getObject());
+	addCommitToTreeMap(x, p1, twd);
+	addCommitToTreeMap(x, p2, twd);
+	return new CommitPatch(wrap(lca).getObject(),twd.getPatch());
     }
 
     private void addCommitToTreeMap(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1,
-	    Map<Date, ExtendedPatch> treemap) throws UnsupportedEncodingException, StoreException {
+	    ThreeWayDiff twd) throws UnsupportedEncodingException, StoreException {
 	for (DefaultEdge e : p1.getEdgeList()) {
 	    Commit end = wrap(x.getEdgeTarget(e));
-	    Patch patch = wrap(x.getEdgeSource(e)).createChangeSetFromParent(end);
-	    treemap.put(end.getDate(), new ExtendedPatch(patch, p1));
+	    twd.addBranchSnapshot(end.getDate(), end.getObject(), p1);
 	}
     }
 
-    private void printDelta(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1)
-	    throws UnsupportedEncodingException, StoreException {
-	for (DefaultEdge e : p1.getEdgeList()) {
-	    Patch patch = wrap(x.getEdgeSource(e)).createChangeSetFromParent(wrap(x.getEdgeTarget(e)));
-	    System.out.println("The difference between " + x.getEdgeSource(e) + " and " + x.getEdgeTarget(e));
-	    for (Delta delta : patch.getDeltas()) {
-		List<Digest> lines = (List<Digest>) delta.getRevised().getLines();
-		for (Digest next : lines)
-		    System.out.println(delta + "," + jsonFactory.read(next));
-	    }
-	}
-    }
-
-    private Patch createChangeSetFromParent(Commit wrap) throws JsonSyntaxException, UnsupportedEncodingException,
-	    StoreException {
-	Object me = getObject();
-	Object them = wrap.getObject();
-
-	if (me instanceof LazyJsonArray && them instanceof LazyJsonArray)
-	    return ((LazyJsonArray) me).diff((LazyJsonArray) them);
-	else
-	    return null;
-    }
+//    private void printDelta(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1)
+//	    throws UnsupportedEncodingException, StoreException {
+//	for (DefaultEdge e : p1.getEdgeList()) {
+//	    Patch patch = wrap(x.getEdgeSource(e)).createChangeSetFromParent(wrap(x.getEdgeTarget(e)));
+//	    System.out.println("The difference between " + x.getEdgeSource(e) + " and " + x.getEdgeTarget(e));
+//	    for (Delta delta : patch.getDeltas()) {
+//		List<Digest> lines = (List<Digest>) delta.getRevised().getLines();
+//		for (Digest next : lines)
+//		    System.out.println(delta + "," + jsonFactory.read(next));
+//	    }
+//	}
+//    }
 
     public GraphPath<CommitDao, DefaultEdge> getShortestPath(Graph<CommitDao, DefaultEdge> graph, CommitDao start,
 	    CommitDao end) {

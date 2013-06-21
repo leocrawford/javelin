@@ -3,6 +3,7 @@ package com.crypticbit.javelin.js;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
+import com.crypticbit.javelin.diff.ExtendedPatch;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;

@@ -1,41 +1,35 @@
 package com.crypticbit.javelin.js;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
+import com.crypticbit.javelin.diff.ExtendedPatch;
+import com.crypticbit.javelin.diff.SpecialPatch;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 
-import difflib.Patch;
 import difflib.PatchFailedException;
 
 public class CommitPatch {
 
-    private Commit lca;
-    private List<ExtendedPatch> patches = new LinkedList<>();
+    private Object lca;
+    private SpecialPatch patch;
 
-    public CommitPatch(Commit lca) {
+    public CommitPatch(Object lca, SpecialPatch patch) {
 	this.lca = lca;
+	this.patch = patch;
     }
 
     public Object apply() throws JsonSyntaxException, UnsupportedEncodingException, StoreException,
 	    PatchFailedException {
-	Object element = lca.getObject();
-	if (element instanceof LazyJsonArray)
-	    ((LazyJsonArray) element).patch(patches);
-	else if (element instanceof LazyJsonMap)
-	    ((LazyJsonMap) element).patch(patches);
+	if (lca instanceof LazyJsonArray)
+	    ((LazyJsonArray) lca).patch(patch);
+	else if (lca instanceof LazyJsonMap)
+	    ; // ((LazyJsonMap) element).patch(patch);
 	else
 	    // FIXME - do nothing
 	    ;
-	return element;
+	return lca;
     }
 
-    public void add(ExtendedPatch p) {
-	patches.add(p);
-    }
 
 }

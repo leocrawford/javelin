@@ -35,8 +35,8 @@ public class CommitTest {
 		String c3 = "[\"a\",\"b\",\"c1\"]";
 		String c4 = "[\"a\",\"b\",\"c2\",\"d\"]";
 		String c5 = "[\"a\",\"b\",\"c2\",\"d\",\"e\"]";
-		String c6 = "[\"a\",\"b\",\"c2\",\"d\",\"e\",\"f\"]";
-		String c7 = "[\"a\",\"b\",\"c2\",\"d\",\"f\",\"g\"]";
+		String c6 = "[\"a\",\"b\",\"c2\",\"d\",[\"f\"],\"f\"]";
+		String c7 = "[\"a\",\"b1\",\"c2\",\"d\",[\"f\"],\"g\"]";
 
 		jca1 = new JsonCasAdapter(new StorageFactory().createMemoryCas());
 		jca1.write(c1).commit().write(c2).commit();
@@ -55,9 +55,10 @@ public class CommitTest {
 		CommitPatch patch = jca1.getCommit().createChangeSet(jca4.getCommit());
 		System.out.println(patch.apply());
 		jca1.merge(jca4);
-		// FIXME - should be unecessary
+		// FIXME - should be unnecessary
 		jca1.checkout();
 		System.out.println(jca1.read());
+		System.out.println(jca1.read().getAsJsonArray().get(5).getAsJsonArray().get(0));
 	}
 
 	// @Test

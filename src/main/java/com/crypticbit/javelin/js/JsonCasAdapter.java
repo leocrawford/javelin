@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.crypticbit.javelin.diff.SpecialPatch;
 import com.crypticbit.javelin.store.CasKasStore;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
@@ -14,7 +15,6 @@ import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-import difflib.Patch;
 import difflib.PatchFailedException;
 
 // what is immutable? commit? element? anchors?
@@ -114,9 +114,11 @@ public class JsonCasAdapter {
     public JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, StoreException, PatchFailedException, IOException {
 	// FIXME - check no checkin needed
 	CommitPatch patch = commit.createChangeSet(other.commit);
-	
+	Object result = patch.apply();
+	System.out.println("-->"+result);
 	// COPY and paste from commit - horrible
-	Identity valueIdentity = jsonFactory.writeAsObjects(patch.apply());
+	Identity valueIdentity = jsonFactory.writeAsObjects(result);
+	
 	CommitDao tempCommit = new CommitDao((Digest) valueIdentity, new Date(), "temp", (Digest) anchor.get());
 	Identity tempDigest = commitFactory.write(tempCommit);
 	anchor.write(tempDigest);

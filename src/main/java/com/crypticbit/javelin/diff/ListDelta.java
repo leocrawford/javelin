@@ -2,7 +2,6 @@ package com.crypticbit.javelin.diff;
 
 import java.util.List;
 
-import com.crypticbit.javelin.js.UnorderedIndexedWritesListDecorator;
 
 import difflib.Delta;
 import difflib.Patch;
@@ -38,4 +37,12 @@ public class ListDelta {
 	}
     }
 
+
+    public String toString() {
+	StringBuffer p = new StringBuffer();
+	for (Delta d : patch.getDeltas())
+	    p.append(d);
+	return branch+":"+p;
+    }
+    
 }

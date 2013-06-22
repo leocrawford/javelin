@@ -1,28 +1,49 @@
 package com.crypticbit.javelin.diff;
 
-import java.util.Date;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 public class SpecialPatch {
 
-    SortedMap<Date,ListDelta> deltas = new TreeMap<>();
-    
+    private SortedMap<Date, ListDelta> deltasWithDate = new TreeMap<>();
+    private List<ListDelta> deltasWithoutDate = new LinkedList<>();
+    private Boolean useDates = null;
+
     public void add(Date date, ListDelta delta) {
-	deltas.put(date, delta);
+	if (date == null) {
+	    if (useDates != null && useDates)
+		throw new IllegalStateException("Can't mix date and non date patches");
+	    else
+		deltasWithoutDate.add(delta);
+	    useDates = false;
+	}
+	else {
+	    if (useDates != null && !useDates)
+		throw new IllegalStateException("Can't mix date and non date patches");
+	    else
+		deltasWithDate.put(date, delta);
+	    useDates = true;
+
+	}
     }
-    
+
     public void apply(List list) {
 	List working = null;
-	for(ListDelta d : deltas.values()) {
-	    if(working == null)
+	for (ListDelta d : getListOfDeltaInOrder()) {
+	    if (working == null)
 		working = d.wrap(list);
 	    d.preprocess(working);
 	}
-	for(ListDelta d : deltas.values()) {
+	for (ListDelta d : getListOfDeltaInOrder()) {
 	    d.apply(working);
 	}
+    }
+
+    private Collection<ListDelta> getListOfDeltaInOrder() {
+	return useDates == null || useDates ? deltasWithDate.values() : deltasWithoutDate;
+    }
+
+    public String toString() {
+	return deltasWithDate.toString();
     }
 
 }

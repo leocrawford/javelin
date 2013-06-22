@@ -4,6 +4,10 @@ import java.util.*;
 
 import com.crypticbit.javelin.js.LazyJsonArray;
 
+import difflib.DiffUtils;
+import difflib.Patch;
+import difflib.PatchFailedException;
+
 public class ThreeWayDiff {
 
     private Object commonAncestor;
@@ -37,11 +41,20 @@ public class ThreeWayDiff {
 	return result;
     }
 
+    // FIXME - maybe an interface that stuff can provide their own implementation
     private ListDelta createDelta(Object parent, Object child, Object branch) {
-	if (parent instanceof LazyJsonArray && child instanceof LazyJsonArray)
-	    return new ListDelta(((LazyJsonArray) parent).diff((LazyJsonArray) child),branch);
+	if (parent instanceof List && child instanceof List)
+//	    return new ListDelta(((List) parent).diff((List) child),branch);
+		return new ListDelta(DiffUtils.diff((List)parent, (List)child),branch);	
 	else
 	    return null;
     }
 
+/*    public void patch(SpecialPatch patch) throws PatchFailedException {
+	System.out.println("Old: " + backingList);
+	patch.apply(backingList);
+	System.out.println("New: " + backingList);
+    } */
+
+    
 }

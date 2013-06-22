@@ -19,10 +19,11 @@ public class CommitPatch {
 	this.patch = patch;
     }
 
+    // FIXME - crap code
     public Object apply() throws JsonSyntaxException, UnsupportedEncodingException, StoreException,
 	    PatchFailedException {
 	if (lca instanceof LazyJsonArray)
-	    ((LazyJsonArray) lca).patch(patch);
+	    patch.apply(((LazyJsonArray) lca)) ; // .patch(patch);
 	else if (lca instanceof LazyJsonMap)
 	    ; // ((LazyJsonMap) element).patch(patch);
 	else

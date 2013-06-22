@@ -36,14 +36,6 @@ public class LazyJsonArray extends AbstractList<Object> {
 	return backingList.size();
     }
 
-    public Patch diff(LazyJsonArray them) {
-	return DiffUtils.diff(backingList, them.backingList);
-    }
 
-    public void patch(SpecialPatch patch) throws PatchFailedException {
-	System.out.println("Old: " + backingList);
-	patch.apply(backingList);
-	System.out.println("New: " + backingList);
-    }
 
 }

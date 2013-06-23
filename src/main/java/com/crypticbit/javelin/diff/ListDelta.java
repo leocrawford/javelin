@@ -1,9 +1,7 @@
 package com.crypticbit.javelin.diff;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import difflib.Delta;
 import difflib.Patch;
@@ -12,7 +10,7 @@ import difflib.PatchFailedException;
 public class ListDelta {
 
     private Patch patch;
-    private Object branch;
+    Object branch;
 
     public ListDelta(Patch patch, Object branch) {
 	this.patch = patch;
@@ -26,23 +24,9 @@ public class ListDelta {
      * @param deltas
      * @return
      */
-    public Applicator getApplicator(final List<ListDelta> deltas) {
-	return new Applicator() {
-	    public void apply(List list) {
-		UnorderedIndexedWritesListDecorator workingList = new UnorderedIndexedWritesListDecorator(list);
-		for (ListDelta d : deltas) {
-		    workingList.addMode(d.branch);
-		}
-		Map<Integer, ThreeWayDiff> recursiveDiffs = new HashMap<>();
-		for (ListDelta ld : deltas) {
-		    ld.apply(workingList, recursiveDiffs);
-		}
-		for(Entry<Integer, ThreeWayDiff> twds : recursiveDiffs.entrySet()) {
-		    workingList.set(twds.getKey(), twds.getValue().getPatch().apply((List)workingList.get(twds.getKey())));
-		}
-	    }
-
-	};
+    public static Applicator<List> getApplicator() {
+	// FIXME should on create in one way
+	return new ListApplicator();
     }
 
     public void apply(List list, Map<Integer, ThreeWayDiff> recursiveDiffs) {

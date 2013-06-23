@@ -30,8 +30,8 @@ public class SpecialPatch {
 	List<ListDelta> l = getListOfDeltaInOrder();
 	if(l.size() > 0)
 	{
-	    Applicator applicator = l.iterator().next().getApplicator(l);
-	    applicator.apply(list);
+	    Applicator applicator = l.iterator().next().getApplicator();
+	    applicator.apply(list,l);
 	}
 	return list;
     }

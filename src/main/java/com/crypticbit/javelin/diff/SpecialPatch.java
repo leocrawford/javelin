@@ -26,20 +26,18 @@ public class SpecialPatch {
 	}
     }
 
-    public void apply(List list) {
-	List working = null;
-	for (ListDelta d : getListOfDeltaInOrder()) {
-	    if (working == null)
-		working = d.wrap(list);
-	    d.preprocess(working);
+    public List apply(List list) {
+	List<ListDelta> l = getListOfDeltaInOrder();
+	if(l.size() > 0)
+	{
+	    Applicator applicator = l.iterator().next().getApplicator(l);
+	    applicator.apply(list);
 	}
-	for (ListDelta d : getListOfDeltaInOrder()) {
-	    d.apply(working);
-	}
+	return list;
     }
 
-    private Collection<ListDelta> getListOfDeltaInOrder() {
-	return useDates == null || useDates ? deltasWithDate.values() : deltasWithoutDate;
+    private List<ListDelta> getListOfDeltaInOrder() {
+	return useDates == null || useDates ? new LinkedList<>(deltasWithDate.values()) : deltasWithoutDate;
     }
 
     public String toString() {

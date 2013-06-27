@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.crypticbit.javelin.diff.list.ListDiffer;
 import com.crypticbit.javelin.diff.list.ListDelta;
+import com.crypticbit.javelin.diff.map.MapDiffer;
 
 public class DifferFactory {
 
@@ -12,6 +13,7 @@ public class DifferFactory {
    
     static {
 	applicators.add(new ListDiffer());
+	applicators.add(new MapDiffer());
     }
 
     

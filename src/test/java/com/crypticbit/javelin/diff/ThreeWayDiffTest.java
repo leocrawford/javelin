@@ -17,6 +17,7 @@ public class ThreeWayDiffTest {
 	twd.addBranchSnapshot(new Date(10000L), Arrays.asList(new String[] { "a", "b", "x", "c" }), "Branch 1");
 	twd.addBranchSnapshot(new Date(10001L), Arrays.asList(new String[] { "a", "b", "y", "c" }), "Branch 2");
 	twd.getPatch().apply(lca);
+	System.out.println(Arrays.toString(lca.toArray()));
 	Assert.assertArrayEquals(new String[] { "a", "b", "x", "y", "c" }, lca.toArray());
     }
 

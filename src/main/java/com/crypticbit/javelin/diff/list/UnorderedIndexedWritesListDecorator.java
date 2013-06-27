@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.diff;
+package com.crypticbit.javelin.diff.list;
 
 import java.util.*;
 import java.util.Map.Entry;

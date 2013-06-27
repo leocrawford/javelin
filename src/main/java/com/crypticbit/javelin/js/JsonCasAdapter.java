@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.crypticbit.javelin.diff.SpecialPatch;
 import com.crypticbit.javelin.store.CasKasStore;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;

@@ -1,13 +1,16 @@
-package com.crypticbit.javelin.diff;
+package com.crypticbit.javelin.diff.list;
 
 import java.util.List;
 import java.util.Map;
+
+import com.crypticbit.javelin.diff.ItemDelta;
+import com.crypticbit.javelin.diff.ThreeWayDiff;
 
 import difflib.Delta;
 import difflib.Patch;
 import difflib.PatchFailedException;
 
-public class ListDelta {
+public class ListDelta implements ItemDelta {
 
     private Patch patch;
     Object branch;
@@ -17,17 +20,6 @@ public class ListDelta {
 	this.branch = branch;
     }
 
-    /**
-     * It's not a simple matter of applying diffs. There is pre and post processing, which can be done here in a type
-     * independant way
-     * 
-     * @param deltas
-     * @return
-     */
-    public static Applicator<List> getApplicator() {
-	// FIXME should on create in one way
-	return new ListApplicator();
-    }
 
     public void apply(List list, Map<Integer, ThreeWayDiff> recursiveDiffs) {
 	try {
@@ -62,6 +54,11 @@ public class ListDelta {
 	for (Delta d : patch.getDeltas())
 	    p.append(d);
 	return branch + ":" + p;
+    }
+
+
+    public Object getBranch() {
+	return branch;
     }
 
 }

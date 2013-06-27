@@ -2,17 +2,20 @@ package com.crypticbit.javelin.diff;
 
 import java.util.*;
 
+/** Performa three way diff for a range of inbuilt types, which can be extended by adding them to the DifferFactory */
 public class ThreeWayDiff {
 
     private Object commonAncestor;
     private List<Snapshot> list = new LinkedList<>();
-    private static final List<Applicator> applicators = new LinkedList<>();
-    static {
-	applicators.add(new ListApplicator());
+    private DifferFactory applicatorFactory;
+
+    public ThreeWayDiff(Object commonAncestor, DifferFactory applicatorFactory) {
+	this.commonAncestor = commonAncestor;
+	this.applicatorFactory = applicatorFactory;
     }
 
     public ThreeWayDiff(Object commonAncestor) {
-	this.commonAncestor = commonAncestor;
+	this(commonAncestor, new DifferFactory());
     }
 
     /** Add a snapshot with a specified date - can be out of order */
@@ -25,30 +28,19 @@ public class ThreeWayDiff {
 	list.add(new Snapshot(null, object, branch));
     }
 
-    public SpecialPatch getPatch() {
+    public CollectionDiffer getPatch() {
 	List<Snapshot> workingList = list;
-	SpecialPatch result = new SpecialPatch();
+	CollectionDiffer result = applicatorFactory.createApplicator(commonAncestor);
 	Map<Object, Object> parents = new HashMap<>();
 	for (Snapshot snapshot : workingList) {
 	    Object parent = parents.get(snapshot.getBranch());
-	    if (parent == null)
+	    if (parent == null) {
 		parent = commonAncestor;
-	    result.add(snapshot.getDate(), createDelta(parent, snapshot.getObject(), snapshot.getBranch()));
+	    }
+	    result.add(snapshot.getDate(), parent, snapshot.getObject(), snapshot.getBranch());
 	    parents.put(snapshot.getBranch(), snapshot.getObject());
 	}
 	return result;
     }
-
-    private ListDelta createDelta(Object parent, Object child, Object branch) {
-	for (Applicator a : applicators)
-	    if (a.supports(parent, child))
-		return a.getDelta(parent, child, branch);
-	return null;
-    }
-
-    /*
-     * public void patch(SpecialPatch patch) throws PatchFailedException { System.out.println("Old: " + backingList);
-     * patch.apply(backingList); System.out.println("New: " + backingList); }
-     */
 
 }

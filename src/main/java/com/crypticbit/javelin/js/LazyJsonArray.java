@@ -3,12 +3,7 @@ package com.crypticbit.javelin.js;
 import java.util.AbstractList;
 import java.util.List;
 
-import com.crypticbit.javelin.diff.SpecialPatch;
 import com.crypticbit.javelin.store.Digest;
-
-import difflib.DiffUtils;
-import difflib.Patch;
-import difflib.PatchFailedException;
 
 public class LazyJsonArray extends AbstractList<Object> {
 

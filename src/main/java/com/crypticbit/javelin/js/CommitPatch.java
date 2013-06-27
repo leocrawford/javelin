@@ -2,8 +2,7 @@ package com.crypticbit.javelin.js;
 
 import java.io.UnsupportedEncodingException;
 
-import com.crypticbit.javelin.diff.ExtendedPatch;
-import com.crypticbit.javelin.diff.SpecialPatch;
+import com.crypticbit.javelin.diff.CollectionDiffer;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 
@@ -12,9 +11,9 @@ import difflib.PatchFailedException;
 public class CommitPatch {
 
     private Object lca;
-    private SpecialPatch patch;
+    private CollectionDiffer patch;
 
-    public CommitPatch(Object lca, SpecialPatch patch) {
+    public CommitPatch(Object lca, CollectionDiffer patch) {
 	this.lca = lca;
 	this.patch = patch;
     }

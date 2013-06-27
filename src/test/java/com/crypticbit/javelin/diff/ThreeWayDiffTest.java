@@ -47,14 +47,25 @@ public class ThreeWayDiffTest {
     }
     
     @Test
-    public void testMapAdd() {
+    public void testMapAddAndDelete() {
 	Map<String,String> lca = GSON.fromJson("{A:a,B:b,C:c}",Map.class);
 	ThreeWayDiff<Map<String,String>> twd = new ThreeWayDiff<>(lca);
-	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b1,C:c,D:d}",Map.class), "Branch 1");
-	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b2,D:e}",Map.class), "Branch 2");
+	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b,C:c,D:d}",Map.class), "Branch 1");
+	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b}",Map.class), "Branch 2");
 	twd.getPatch().apply(lca);
 	System.out.println(lca);
-	Assert.assertEquals(GSON.fromJson("{A=a, D=e, B=b2}", Map.class),lca);
+	Assert.assertEquals(GSON.fromJson("{A:a, B:b, D:d}", Map.class),lca);
+    }
+    
+    @Test
+    public void testMapChange() {
+	Map<String,String> lca = GSON.fromJson("{A:a,B:b,C:{X:x}}",Map.class);
+	ThreeWayDiff<Map<String,String>> twd = new ThreeWayDiff<>(lca);
+	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b,C:{X:x,Y:y}}",Map.class), "Branch 1");
+	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b,C:{Z:z}}",Map.class), "Branch 2");
+	twd.getPatch().apply(lca);
+	System.out.println(lca);
+	Assert.assertEquals(GSON.fromJson("{A:a, B:b,C:{Y:y,Z:z}}", Map.class),lca);
     }
     
 }

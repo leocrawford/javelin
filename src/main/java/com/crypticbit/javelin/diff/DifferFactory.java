@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.crypticbit.javelin.diff.list.ListDiffer;
-import com.crypticbit.javelin.diff.list.ListDelta;
 import com.crypticbit.javelin.diff.map.MapDiffer;
 
 public class DifferFactory {
@@ -25,7 +24,7 @@ public class DifferFactory {
 	for (DifferFactoryElement a : applicators)
 	    if (a.supports(object))
 		return a.createApplicator();
-	return null;
+	throw new java.lang.IllegalArgumentException(object.getClass()+" is not supported");
     }
 
 }

@@ -24,7 +24,6 @@ public class ListDelta implements ItemDelta {
     public void apply(List list, Map<Integer, ThreeWayDiff> recursiveDiffs) {
 	try {
 	    for (Delta d : patch.getDeltas()) {
-		System.out.println("Patch "+d.getType()+", " + d.getOriginal().getPosition());
 		if (d.getType() != Delta.TYPE.CHANGE)
 		    d.applyTo(((UnorderedIndexedWritesListDecorator) list).chooseMode(branch));
 		else {

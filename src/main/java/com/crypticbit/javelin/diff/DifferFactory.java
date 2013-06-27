@@ -3,7 +3,7 @@ package com.crypticbit.javelin.diff;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.crypticbit.javelin.diff.list.ListApplicator;
+import com.crypticbit.javelin.diff.list.ListDiffer;
 import com.crypticbit.javelin.diff.list.ListDelta;
 
 public class DifferFactory {
@@ -11,7 +11,7 @@ public class DifferFactory {
     private static final List<DifferFactoryElement> applicators = new LinkedList<>();
    
     static {
-	applicators.add(new ListApplicator());
+	applicators.add(new ListDiffer());
     }
 
     

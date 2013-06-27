@@ -11,19 +11,19 @@ import com.crypticbit.javelin.diff.ThreeWayDiff;
 
 import difflib.DiffUtils;
 
-public final class ListApplicator implements DifferFactoryElement {
+public final class ListDiffer<T> implements DifferFactoryElement {
 
     @Override
     public boolean supports(Object object) {
 	return object instanceof List;
     }
 
-    public CollectionDiffer createApplicator() {
-	return new CollectionDiffer<List,ListDelta>() {
+    public CollectionDiffer<List<T>,ListDelta> createApplicator() {
+	return new CollectionDiffer<List<T>,ListDelta>() {
 
-	    public List apply(List list) {
+	    public List<T> apply(List<T> list) {
 
-		UnorderedIndexedWritesListDecorator workingList = new UnorderedIndexedWritesListDecorator(list);
+		UnorderedIndexedWritesListDecorator<T> workingList = new UnorderedIndexedWritesListDecorator<T>(list);
 		for (ListDelta d :  getListOfDeltaInOrder()) {
 		    workingList.addMode(d.getBranch());
 		}
@@ -32,14 +32,14 @@ public final class ListApplicator implements DifferFactoryElement {
 		    ld.apply(workingList, recursiveDiffs);
 		}
 		for (Entry<Integer, ThreeWayDiff> twds : recursiveDiffs.entrySet()) {
-		    workingList.set(twds.getKey(), twds.getValue().getPatch().apply(
-			    (List) workingList.get(twds.getKey())));
+		    workingList.set(twds.getKey(), ((CollectionDiffer<T,ListDelta>)twds.getValue().getPatch()).apply(
+			    (T) workingList.get(twds.getKey())));
 		}
 		return list;
 	    }
 
 	    protected ListDelta createDelta(Object parent, Object child, Object branch) {
-		return new ListDelta(DiffUtils.diff((List) parent, (List) child), branch);
+		return new ListDelta(DiffUtils.diff((List<?>) parent, (List<?>) child), branch);
 	    }
 	};
     }

@@ -33,7 +33,7 @@ public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
 	    indexShifts.put(mode, new TreeMap<Integer, Integer>());
     }
 
-    public UnorderedIndexedWritesListDecorator chooseMode(Object mode) {
+    public UnorderedIndexedWritesListDecorator<T> chooseMode(Object mode) {
 	if (indexShifts.containsKey(mode))
 	    indexShift = indexShifts.get(mode);
 	else

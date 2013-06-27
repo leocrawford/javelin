@@ -35,15 +35,13 @@ public class ThreeWayDiffTest {
     @Test
     public void testListWithinListAddWithoutDate() {
 	
-	List<String> lca2 = new ArrayList<String>(Arrays.asList(new String[] { "c" }));
-	List<Object> lca = new ArrayList<>(Arrays
-		.asList(new Object[] { "a", "b", lca2 }));
+	List<Object> lca = GSON.fromJson("[a, b,[c]]",List.class);
 	ThreeWayDiff<List<Object>> twd = new ThreeWayDiff<List<Object>>(lca);
-	twd.addBranchSnapshot(Arrays.asList(new Object[] { "a","b", Arrays.asList(new String[] { "c","d" }) }), "Branch 1");
-	twd.addBranchSnapshot(Arrays.asList(new Object[] { "a", "b", Arrays.asList(new String[] { "c","e" }) }), "Branch 2");
+	twd.addBranchSnapshot(GSON.fromJson("[a, b,[c,d]]",List.class), "Branch 1");
+	twd.addBranchSnapshot(GSON.fromJson("[a, b,[c,e]]",List.class), "Branch 2");
 	twd.getPatch().apply(lca);
 	System.out.println(lca);
-//	Assert.assertArrayEquals(new String[] { "a", "b", "x", "y", "c" }, lca.toArray());
+	Assert.assertArrayEquals(GSON.fromJson("[a, b,[c,d,e]]",List.class).toArray(), lca.toArray());
     }
     
     @Test

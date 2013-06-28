@@ -3,7 +3,7 @@ package com.crypticbit.javelin.diff.map;
 import java.util.*;
 import java.util.Map.Entry;
 
-import com.crypticbit.javelin.diff.CollectionDiffer;
+import com.crypticbit.javelin.diff.SequenceDiff;
 import com.crypticbit.javelin.diff.DifferFactoryElement;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 
@@ -15,8 +15,8 @@ public class MapDiffer<T> implements DifferFactoryElement {
     }
 
     @Override
-    public CollectionDiffer<Map<String, T>, MapDelta> createApplicator() {
-	return new CollectionDiffer<Map<String, T>, MapDelta>() {
+    public SequenceDiff<Map<String, T>, MapDelta> createApplicator() {
+	return new SequenceDiff<Map<String, T>, MapDelta>() {
 
 	    @Override
 	    public Map<String, T> apply(Map<String, T> value) {
@@ -29,7 +29,7 @@ public class MapDiffer<T> implements DifferFactoryElement {
 
 		// now catch up with the set of recursive diffs
 		for (Entry<String, ThreeWayDiff> twds : recursiveDiffs.entrySet()) {
-		    value.put(twds.getKey(), ((CollectionDiffer<T, MapDelta>) twds.getValue().getPatch())
+		    value.put(twds.getKey(), ((SequenceDiff<T, MapDelta>) twds.getValue().getPatch())
 			    .apply((T) value.get(twds.getKey())));
 		}
 

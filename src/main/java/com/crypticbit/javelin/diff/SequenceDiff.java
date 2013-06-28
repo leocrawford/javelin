@@ -3,12 +3,12 @@ package com.crypticbit.javelin.diff;
 import java.util.*;
 
 /**
- * An abstract class that provides default capability for a Differ that handles collections, e.g. Lists and Maps.
+ * An abstract class that allows implementations to supports an ordered set of deltas
  * 
  * @author leo
  * @param <T>
  */
-public abstract class CollectionDiffer<T, I extends ItemDelta> {
+public abstract class SequenceDiff<T, I extends ItemDelta> {
 
     /**
      * The set of changes if explicitly ordered by passing a date

@@ -21,7 +21,7 @@ public class ListDelta implements ItemDelta {
     }
 
 
-    public void apply(List list, Map<Integer, ThreeWayDiff> recursiveDiffs) {
+    public <T> void apply(List list, Map<Integer, ThreeWayDiff> recursiveDiffs) {
 	try {
 	    for (Delta d : patch.getDeltas()) {
 		if (d.getType() != Delta.TYPE.CHANGE)

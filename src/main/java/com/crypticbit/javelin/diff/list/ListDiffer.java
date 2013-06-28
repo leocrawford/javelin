@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.crypticbit.javelin.diff.CollectionDiffer;
+import com.crypticbit.javelin.diff.SequenceDiff;
 import com.crypticbit.javelin.diff.DifferFactoryElement;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 
@@ -18,8 +18,8 @@ public final class ListDiffer<T> implements DifferFactoryElement {
 	return object instanceof List;
     }
 
-    public CollectionDiffer<List<T>, ListDelta> createApplicator() {
-	return new CollectionDiffer<List<T>, ListDelta>() {
+    public SequenceDiff<List<T>, ListDelta> createApplicator() {
+	return new SequenceDiff<List<T>, ListDelta>() {
 
 	    public List<T> apply(List<T> list) {
 		// well access the list through a clever adapter than allows each write to use indexes that assume
@@ -40,7 +40,7 @@ public final class ListDiffer<T> implements DifferFactoryElement {
 		
 		// now catch up with the set of recursive diffs
 		for (Entry<Integer, ThreeWayDiff> twds : recursiveDiffs.entrySet()) {
-		    workingList.set(twds.getKey(), ((CollectionDiffer<T, ListDelta>) twds.getValue().getPatch())
+		    workingList.set(twds.getKey(), ((SequenceDiff<T, ListDelta>) twds.getValue().getPatch())
 			    .apply((T) workingList.get(twds.getKey())));
 		}
 		return list;

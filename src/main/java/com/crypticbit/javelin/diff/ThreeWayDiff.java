@@ -28,9 +28,9 @@ public class ThreeWayDiff<T> {
 	list.add(new Snapshot(null, object, branch));
     }
 
-    public CollectionDiffer<T,?> getPatch() {
+    public SequenceDiff<T,?> getPatch() {
 	List<Snapshot<T>> workingList = list;
-	CollectionDiffer<T,?> result = applicatorFactory.createApplicator(commonAncestor);
+	SequenceDiff<T,?> result = applicatorFactory.createApplicator(commonAncestor);
 	Map<Object, Object> parents = new HashMap<>();
 	for (Snapshot<T> snapshot : workingList) {
 	    Object parent = parents.get(snapshot.getBranch());

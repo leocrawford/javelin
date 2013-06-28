@@ -31,6 +31,32 @@ public class ThreeWayDiffTest {
 	twd.getPatch().apply(lca);
 	Assert.assertArrayEquals(new String[] { "a", "b", "x", "y", "c" }, lca.toArray());
     }
+    
+    @Test
+    public void testListMultipleStepAddAndDelete() {
+	List<String> lca = new ArrayList<>(Arrays.asList(new String[] { "a", "b", "c" }));
+	ThreeWayDiff<List<String>> twd = new ThreeWayDiff<List<String>>(lca);
+	twd.addBranchSnapshot(Arrays.asList(new String[] { "a", "b", "x", "c" }), "Branch 1");
+	twd.addBranchSnapshot(Arrays.asList(new String[] { "a", "x", "c" }), "Branch 1");
+	twd.addBranchSnapshot(Arrays.asList(new String[] { "a", "b", "y", "c" }), "Branch 2");
+	twd.addBranchSnapshot(Arrays.asList(new String[] { "a", "x", "c","d" }), "Branch 1");
+	twd.getPatch().apply(lca);
+	Assert.assertArrayEquals(new String[] { "a", "x", "y", "c","d" }, lca.toArray());
+    }
+    
+    @Test
+    public void testListMultipleStepChange() {
+	List<String> lca = new ArrayList<>(Arrays.asList(new String[] { "a", "b", "c" }));
+	ThreeWayDiff<List<String>> twd = new ThreeWayDiff<List<String>>(lca);
+	twd.addBranchSnapshot(Arrays.asList(new String[] {         "i", "a", "b", "c" }), "Branch 1");
+	twd.addBranchSnapshot(Arrays.asList(new String[] {  "j","k","l","a", "b", "c" }), "Branch 2");
+	twd.addBranchSnapshot(Arrays.asList(new String[] {         "i", "a", "x", "c" }), "Branch 1");
+	twd.addBranchSnapshot(Arrays.asList(new String[] {  "j","k","l","y", "b", "c" }), "Branch 2");
+	System.out.println(twd.getPatch());
+	twd.getPatch().apply(lca);
+	System.out.println(lca);
+	Assert.assertArrayEquals(new String[] { "i", "j","k","l","y", "y", "x", "c" }, lca.toArray());
+    }
 
     @Test
     public void testListWithinListAddWithoutDate() {

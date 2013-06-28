@@ -13,6 +13,7 @@ public class DifferFactory {
     static {
 	applicators.add(new ListDiffer());
 	applicators.add(new MapDiffer());
+	applicators.add(new DefaultDiffer());
     }
 
     
@@ -20,7 +21,7 @@ public class DifferFactory {
 	applicators.add(0, applicator);
     }
 
-    public CollectionDiffer createApplicator(Object object) {
+    public SequenceDiff createApplicator(Object object) {
 	for (DifferFactoryElement a : applicators)
 	    if (a.supports(object))
 		return a.createApplicator();

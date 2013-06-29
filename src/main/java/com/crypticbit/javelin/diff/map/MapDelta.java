@@ -4,30 +4,50 @@ import java.util.Map;
 
 import com.crypticbit.javelin.diff.ItemDelta;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
+import com.google.common.base.Function;
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.MapDifference.ValueDifference;
+import com.google.common.collect.Maps;
 
 public class MapDelta<T> implements ItemDelta {
 
-    private Map<String, T> removed, added, changed;
+    private MapDifference<String, T> diff;
     private Object branch;
 
-    public MapDelta(Map<String, T> removed, Map<String, T> added, Map<String, T> changed, Object branch) {
-	this.removed = removed;
-	this.added = added;
-	this.changed = changed;
+    public MapDelta(MapDifference<String, T> diff, Object branch) {
+	this.diff = diff;
 	this.branch = branch;
     }
 
     public String toString() {
-	return "-" + removed + " +" + added + " ~" + changed + " [" + branch + "]";
+	return diff + " [" + branch + "]";
+    }
+
+    public Map<String, T> getRemoved() {
+	return diff.entriesOnlyOnLeft();
+    }
+
+    public Map<String, T> getAdded() {
+	return diff.entriesOnlyOnRight();
     }
 
     public void apply(Map<String, T> object, Map<String, ThreeWayDiff> recursiveDiffs) {
-	for (String key : removed.keySet())
+	for (String key : getRemoved().keySet())
 	    object.remove(key);
-	for (String key : added.keySet())
-	    putWithrecursive(key, object, added, recursiveDiffs);
-	for (String key : changed.keySet()) {
-	    putWithrecursive(key, object, changed, recursiveDiffs);
+	for (String key : getAdded().keySet())
+	    putWithrecursive(key, object, getAdded(), recursiveDiffs);
+	for (String key : diff.entriesDiffering().keySet()) {
+	    putWithrecursive(key, object, Maps.transformValues(diff.entriesDiffering(),
+		    new Function<ValueDifference<T>, T>() {
+			public T apply(ValueDifference<T> input) {
+			    return input.rightValue();
+			}
+
+			public boolean equals(Object object) {
+			    throw new Error();
+			}
+
+		    }), recursiveDiffs);
 	}
     }
 

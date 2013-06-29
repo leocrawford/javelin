@@ -12,6 +12,9 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.GraphUnion;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
+import com.crypticbit.javelin.diff.DifferFactory;
+import com.crypticbit.javelin.diff.DifferFactoryElement;
+import com.crypticbit.javelin.diff.SequenceDiff;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.StoreException;

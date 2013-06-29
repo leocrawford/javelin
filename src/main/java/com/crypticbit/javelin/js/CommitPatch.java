@@ -21,15 +21,8 @@ public class CommitPatch {
     // FIXME - crap code
     public Object apply() throws JsonSyntaxException, UnsupportedEncodingException, StoreException,
 	    PatchFailedException {
-	if (lca instanceof LazyJsonArray)
-	    patch.apply(((LazyJsonArray) lca)) ; // .patch(patch);
-	else if (lca instanceof LazyJsonMap)
-	    ; // ((LazyJsonMap) element).patch(patch);
-	else
-	    // FIXME - do nothing
-	    ;
+	patch.apply(lca);
 	return lca;
     }
-
 
 }

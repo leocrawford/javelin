@@ -5,6 +5,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.crypticbit.javelin.js.lazy.DigestReference;
+import com.crypticbit.javelin.js.lazy.LazyJsonArray;
+import com.crypticbit.javelin.js.lazy.LazyJsonMap;
+import com.crypticbit.javelin.js.lazy.Reference;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.GeneralPersistableResource;
 import com.crypticbit.javelin.store.Identity;
@@ -66,18 +70,18 @@ public class DereferencedCasAccessInterface extends DataAccessInterface<JsonElem
 	    StoreException {
 	JsonElement in = new JsonParser().parse(cas.get(digest).getAsString());
 	if (in.isJsonArray()) {
-	    List<Digest> r = new LinkedList<>();
+	    List<Reference> r = new LinkedList<>();
 	    for (JsonElement e : in.getAsJsonArray()) {
-		r.add(gson.fromJson(e, Digest.class));
+		r.add(new DigestReference(this,gson.fromJson(e, Digest.class)));
 	    }
-	    return new LazyJsonArray(this, r);
+	    return new LazyJsonArray(r);
 	}
 	else if (in.isJsonObject()) {
-	    Map<String, Digest> o = new HashMap<>();
+	    Map<String, Reference> o = new HashMap<>();
 	    for (Entry<String, JsonElement> e : in.getAsJsonObject().entrySet()) {
-		o.put(e.getKey(), gson.fromJson(e.getValue(), Digest.class));
+		o.put(e.getKey(),new DigestReference(this, gson.fromJson(e.getValue(), Digest.class)));
 	    }
-	    return new LazyJsonMap(this, o);
+	    return new LazyJsonMap(o);
 	}
 	else if (in.isJsonPrimitive()) {
 	    JsonPrimitive primative = in.getAsJsonPrimitive();

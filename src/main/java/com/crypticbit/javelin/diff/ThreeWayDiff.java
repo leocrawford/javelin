@@ -5,16 +5,16 @@ import java.util.*;
 /** Performa three way diff for a range of inbuilt types, which can be extended by adding them to the DifferFactory */
 public class ThreeWayDiff<T> {
 
-    private Object commonAncestor;
+    private T commonAncestor;
     private List<Snapshot<T>> list = new LinkedList<>();
     private DifferFactory applicatorFactory;
 
-    public ThreeWayDiff(Object commonAncestor, DifferFactory applicatorFactory) {
+    public ThreeWayDiff(T commonAncestor, DifferFactory applicatorFactory) {
 	this.commonAncestor = commonAncestor;
 	this.applicatorFactory = applicatorFactory;
     }
 
-    public ThreeWayDiff(Object commonAncestor) {
+    public ThreeWayDiff(T commonAncestor) {
 	this(commonAncestor, new DifferFactory());
     }
 
@@ -41,6 +41,10 @@ public class ThreeWayDiff<T> {
 	    parents.put(snapshot.getBranch(), snapshot.getObject());
 	}
 	return result;
+    }
+     
+    public T apply() {
+	return getPatch().apply(commonAncestor);
     }
 
 }

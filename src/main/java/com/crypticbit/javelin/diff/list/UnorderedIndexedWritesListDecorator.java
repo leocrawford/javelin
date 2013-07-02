@@ -10,7 +10,7 @@ import java.util.Map.Entry;
  * <p>
  * This class isn't semantically strong (I'm sure it's easy to break the intended behaviour). What it will do is for any
  * <code>add</code> or <code>remove</code> operation that has an index, it will remember the change such that subsequent
- * <code>add</code> and <code>remove</code> operations with an index apply to the old index pattern. All otehr
+ * <code>add</code> and <code>remove</code> operations with an index apply to the old index pattern. All other
  * operations are unaffected.
  * 
  * @author Leo
@@ -41,7 +41,7 @@ public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
 	return this; // allow chaining
     }
 
-    private int transformIndex(final int index) {
+    public int transformIndex(final int index) {
 	int result = index;
 	for (Entry<Integer, Integer> x : indexShift.entrySet()) {
 	    if (x.getKey() <= index)

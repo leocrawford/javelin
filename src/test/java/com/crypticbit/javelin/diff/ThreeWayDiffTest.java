@@ -55,7 +55,7 @@ public class ThreeWayDiffTest {
 	System.out.println(twd.getPatch());
 	twd.getPatch().apply(lca);
 	System.out.println(lca);
-	Assert.assertArrayEquals(new String[] { "i", "j","k","l","y", "y", "x", "c" }, lca.toArray());
+	Assert.assertArrayEquals(new String[] { "i", "j","k","l","y", "x", "c" }, lca.toArray());
     }
 
     @Test
@@ -95,8 +95,8 @@ public class ThreeWayDiffTest {
     
     @Test
     public void testMapAndArrayChange() {
-	List<?> lca = GSON.fromJson("[a,b,{X:x}]",List.class);
-	ThreeWayDiff<List<?>> twd = new ThreeWayDiff<>(lca);
+	List<String> lca = GSON.fromJson("[a,b,{X:x}]",List.class);
+	ThreeWayDiff<List<String>> twd = new ThreeWayDiff<>(lca);
 	twd.addBranchSnapshot(GSON.fromJson("[a,b,{X:x,Y:y}]",List.class), "Branch 1");
 	twd.addBranchSnapshot(GSON.fromJson("[a,b,{Z:z}]",List.class), "Branch 2");
 	twd.getPatch().apply(lca);

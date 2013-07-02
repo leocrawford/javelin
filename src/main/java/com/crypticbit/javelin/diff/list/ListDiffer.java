@@ -1,12 +1,12 @@
 package com.crypticbit.javelin.diff.list;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import com.crypticbit.javelin.diff.SequenceDiff;
 import com.crypticbit.javelin.diff.DifferFactoryElement;
+import com.crypticbit.javelin.diff.SequenceDiff;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 
 import difflib.DiffUtils;
@@ -31,18 +31,21 @@ public final class ListDiffer<T> implements DifferFactoryElement {
 		    workingList.addMode(d.getBranch());
 		}
 		// if there is a change we're going to need to apply a recursive diff 
-		Map<Integer, ThreeWayDiff> recursiveDiffs = new HashMap<>();
+		Set<ThreeWayDiff> recursiveDiffs = new HashSet<>();
 		
 		// call the apply method
 		for (ListDelta ld : getListOfDeltaInOrder()) {
 		    ld.apply(workingList, recursiveDiffs);
 		}
 		
-		// now catch up with the set of recursive diffs
-		for (Entry<Integer, ThreeWayDiff> twds : recursiveDiffs.entrySet()) {
-		    workingList.set(twds.getKey(), ((SequenceDiff<T, ListDelta>) twds.getValue().getPatch())
-			    .apply((T) workingList.get(twds.getKey())));
+		for(int loop= 0; loop<workingList.size(); loop++) {
+		    if(recursiveDiffs.contains(workingList.get(loop))) {
+			    ThreeWayDiff<T> threeWayDiff = (ThreeWayDiff<T>) workingList.get(loop);
+			    T processedRecursiveDiff = threeWayDiff.apply();
+			    workingList.set(loop, processedRecursiveDiff);
+		    }
 		}
+
 		return list;
 	    }
 

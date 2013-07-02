@@ -1,7 +1,7 @@
 package com.crypticbit.javelin.diff.list;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import com.crypticbit.javelin.diff.ItemDelta;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
@@ -20,22 +20,36 @@ public class ListDelta implements ItemDelta {
 	this.branch = branch;
     }
 
-
-    public <T> void apply(List list, Map<Integer, ThreeWayDiff> recursiveDiffs) {
+    public <T> void apply(List list, Set<ThreeWayDiff> recursiveDiffs) {
+	UnorderedIndexedWritesListDecorator unorderedIndexedWriter = (UnorderedIndexedWritesListDecorator) list;
 	try {
 	    for (Delta d : patch.getDeltas()) {
-		if (d.getType() != Delta.TYPE.CHANGE)
-		    d.applyTo(((UnorderedIndexedWritesListDecorator) list).chooseMode(branch));
+		if (d.getType() != Delta.TYPE.CHANGE) {
+		    d.applyTo(unorderedIndexedWriter.chooseMode(branch));
+		}
 		else {
-		     // FIXME - add deal with change
+		    System.out.println("1>"+unorderedIndexedWriter);
+		    unorderedIndexedWriter.chooseMode(branch);
+		    // FIXME - add deal with change
 		    // FIXME assumes both change are of same length
 		    for (int loop = 0; loop < d.getOriginal().size(); loop++) {
 			int key = d.getOriginal().getPosition() + loop;
-			if (!recursiveDiffs.containsKey(key)) {
+			System.out.println("Action " + d + " on " + key + " transformed to "
+				+ unorderedIndexedWriter.transformIndex(key) + " on branch " + branch);
+			System.out.println("Found "
+				+ unorderedIndexedWriter.get(unorderedIndexedWriter.transformIndex(key)));
+			Object o = unorderedIndexedWriter.get(unorderedIndexedWriter.transformIndex(key));
+			// we use the set rather than <code>instanceof</code> because it is legal to add any type of
+			// object, including ThreeWayDiff.
+			if (!recursiveDiffs.contains(o)) {
 			    // FIXME copy state into new three way diff if required
-			    recursiveDiffs.put(key, new ThreeWayDiff(d.getOriginal().getLines().get(loop)));
+			    ThreeWayDiff twd = new ThreeWayDiff(d.getOriginal().getLines().get(loop));
+			    unorderedIndexedWriter.set(unorderedIndexedWriter.transformIndex(key), twd);
+			    recursiveDiffs.add(twd);
+			    o = twd;
 			}
-			recursiveDiffs.get(key).addBranchSnapshot(d.getRevised().getLines().get(loop), branch);
+			System.out.println("2>"+unorderedIndexedWriter);
+			((ThreeWayDiff)o).addBranchSnapshot(d.getRevised().getLines().get(loop), branch);
 
 		    }
 		}
@@ -54,7 +68,6 @@ public class ListDelta implements ItemDelta {
 	    p.append(d);
 	return branch + ":" + p;
     }
-
 
     public Object getBranch() {
 	return branch;

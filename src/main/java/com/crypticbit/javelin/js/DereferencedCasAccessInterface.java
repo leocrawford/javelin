@@ -46,7 +46,6 @@ public class DereferencedCasAccessInterface extends DataAccessInterface<JsonElem
 
     // FIXME if already exists
     public Identity writeAsObjects(Object object) throws StoreException, IOException {
-	System.out.println("Writing " + object);
 	if (object instanceof LazyJsonArray) {
 	    List<Digest> r = new LinkedList<>();
 	    for (Object o : (LazyJsonArray) object) {

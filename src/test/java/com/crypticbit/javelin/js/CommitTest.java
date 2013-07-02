@@ -15,6 +15,7 @@ import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.junit.Test;
 
+import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -52,7 +53,7 @@ public class CommitTest {
 	@Test
 	public void testCreateChangeSet() throws JsonSyntaxException,
 			StoreException, PatchFailedException, IOException {
-		CommitPatch patch = jca1.getCommit().createChangeSet(jca4.getCommit());
+		ThreeWayDiff patch = jca1.getCommit().createChangeSet(jca4.getCommit());
 		System.out.println(patch.apply());
 		jca1.merge(jca4);
 		// FIXME - should be unnecessary

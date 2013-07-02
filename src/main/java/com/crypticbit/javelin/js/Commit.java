@@ -41,7 +41,7 @@ public class Commit implements Comparable<Commit> {
 	return this.getDate().compareTo(o.getDate());
     }
 
-    public CommitPatch createChangeSet(Commit other) throws JsonSyntaxException, UnsupportedEncodingException,
+    public ThreeWayDiff createChangeSet(Commit other) throws JsonSyntaxException, UnsupportedEncodingException,
 	    StoreException {
 
 	Graph<CommitDao, DefaultEdge> x = getAsGraphToRoots(new Commit[] { this, other });
@@ -54,7 +54,7 @@ public class Commit implements Comparable<Commit> {
 	ThreeWayDiff twd = new ThreeWayDiff(wrap(lca).getObject());
 	addCommitToTreeMap(x, p1, twd);
 	addCommitToTreeMap(x, p2, twd);
-	return new CommitPatch(wrap(lca).getObject(),twd.getPatch());
+	return twd;
     }
 
     private void addCommitToTreeMap(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1,

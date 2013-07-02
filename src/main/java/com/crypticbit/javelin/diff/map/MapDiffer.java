@@ -24,16 +24,15 @@ public class MapDiffer<T> implements DifferFactoryElement {
 	    @Override
 	    public Map<String, T> apply(Map<String, T> value) {
 		// if there is a change we're going to need to apply a recursive diff
-		Map<String, ThreeWayDiff> recursiveDiffs = new HashMap<>();
+		Map<String, ThreeWayDiff<T>> recursiveDiffs = new HashMap<>();
 
 		for (MapDelta d : getListOfDeltaInOrder()) {
 		    d.apply(value, recursiveDiffs);
 		}
 
 		// now catch up with the set of recursive diffs
-		for (Entry<String, ThreeWayDiff> twds : recursiveDiffs.entrySet()) {
-		    value.put(twds.getKey(), ((SequenceDiff<T, MapDelta>) twds.getValue().getPatch())
-			    .apply((T) value.get(twds.getKey())));
+		for (Entry<String, ThreeWayDiff<T>> twds : recursiveDiffs.entrySet()) {
+		    value.put(twds.getKey(),  twds.getValue().apply());
 		}
 
 		return value;

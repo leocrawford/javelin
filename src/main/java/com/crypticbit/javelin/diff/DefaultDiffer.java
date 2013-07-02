@@ -16,7 +16,6 @@ public class DefaultDiffer implements DifferFactoryElement {
 	    @Override
 	    public Object apply(Object value) {
 		List<DefaultItemDelta> l = this.getListOfDeltaInOrder();
-		System.out.println("Changed "+value+" to "+l.get(l.size() - 1).object);
 		return l.get(l.size() - 1).object;
 	    }
 

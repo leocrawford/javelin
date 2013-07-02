@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.store.CasKasStore;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
@@ -112,9 +113,8 @@ public class JsonCasAdapter {
 
     public JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, StoreException, PatchFailedException, IOException {
 	// FIXME - check no checkin needed
-	CommitPatch patch = commit.createChangeSet(other.commit);
+	ThreeWayDiff patch = commit.createChangeSet(other.commit);
 	Object result = patch.apply();
-	System.out.println("-->"+result);
 	// COPY and paste from commit - horrible
 	Identity valueIdentity = jsonFactory.writeAsObjects(result);
 	

@@ -28,16 +28,10 @@ public class ListDelta implements ItemDelta {
 		    d.applyTo(unorderedIndexedWriter.chooseMode(branch));
 		}
 		else {
-		    System.out.println("1>"+unorderedIndexedWriter);
 		    unorderedIndexedWriter.chooseMode(branch);
-		    // FIXME - add deal with change
 		    // FIXME assumes both change are of same length
 		    for (int loop = 0; loop < d.getOriginal().size(); loop++) {
 			int key = d.getOriginal().getPosition() + loop;
-			System.out.println("Action " + d + " on " + key + " transformed to "
-				+ unorderedIndexedWriter.transformIndex(key) + " on branch " + branch);
-			System.out.println("Found "
-				+ unorderedIndexedWriter.get(unorderedIndexedWriter.transformIndex(key)));
 			Object o = unorderedIndexedWriter.get(unorderedIndexedWriter.transformIndex(key));
 			// we use the set rather than <code>instanceof</code> because it is legal to add any type of
 			// object, including ThreeWayDiff.
@@ -48,7 +42,6 @@ public class ListDelta implements ItemDelta {
 			    recursiveDiffs.add(twd);
 			    o = twd;
 			}
-			System.out.println("2>"+unorderedIndexedWriter);
 			((ThreeWayDiff)o).addBranchSnapshot(d.getRevised().getLines().get(loop), branch);
 
 		    }

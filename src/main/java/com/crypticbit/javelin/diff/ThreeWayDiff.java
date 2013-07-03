@@ -31,9 +31,9 @@ public class ThreeWayDiff<T> {
     private SequenceDiff<T,?> getPatch() {
 	List<Snapshot<T>> workingList = list;
 	SequenceDiff<T,?> result = applicatorFactory.createApplicator(commonAncestor);
-	Map<Object, Object> parents = new HashMap<>();
+	Map<Object, T> parents = new HashMap<>();
 	for (Snapshot<T> snapshot : workingList) {
-	    Object parent = parents.get(snapshot.getBranch());
+	    T parent = parents.get(snapshot.getBranch());
 	    if (parent == null) {
 		parent = commonAncestor;
 	    }
@@ -45,6 +45,10 @@ public class ThreeWayDiff<T> {
      
     public T apply() {
 	return getPatch().apply(commonAncestor);
+    }
+    
+    public String toString() {
+	return list.toString()+"->"+apply().toString();
     }
 
 }

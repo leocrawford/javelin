@@ -42,7 +42,7 @@ public abstract class SequenceDiff<T, I extends ItemDelta> {
 	}
     }
     
-    public void add(Date date, Object parent, Object child, Object branch) {
+    public void add(Date date, T parent, T child, Object branch) {
 	add(date, createDelta(parent, child, branch));
     }
 
@@ -58,5 +58,5 @@ public abstract class SequenceDiff<T, I extends ItemDelta> {
     /** Apply the combined diff to the provided value */
     public abstract T apply(T value);
 
-    protected abstract I createDelta(Object parent, Object child, Object branch);
+    protected abstract I createDelta(T parent, T child, Object branch);
 }

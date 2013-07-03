@@ -2,6 +2,8 @@ package com.crypticbit.javelin.diff.list;
 
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.crypticbit.javelin.diff.ItemDelta;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
@@ -13,7 +15,9 @@ import difflib.PatchFailedException;
 public class ListDelta implements ItemDelta {
 
     private Patch patch;
-    Object branch;
+    private Object branch;
+    
+    private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.diff");
 
     public ListDelta(Patch patch, Object branch) {
 	this.patch = patch;
@@ -24,6 +28,8 @@ public class ListDelta implements ItemDelta {
 	UnorderedIndexedWritesListDecorator unorderedIndexedWriter = (UnorderedIndexedWritesListDecorator) list;
 	try {
 	    for (Delta d : patch.getDeltas()) {
+		if(LOG.isLoggable(Level.FINEST))
+		    LOG.log(Level.FINEST, "Merge List @ "+d.getOriginal().getPosition()+" = "+d.getType());
 		if (d.getType() != Delta.TYPE.CHANGE) {
 		    d.applyTo(unorderedIndexedWriter.chooseMode(branch));
 		}

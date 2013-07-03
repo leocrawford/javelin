@@ -31,4 +31,8 @@ public class Snapshot<T> {
 	return object;
     }
 
+    public String toString() {
+	return getBranch()+": "+object.toString();
+    }
+    
 }

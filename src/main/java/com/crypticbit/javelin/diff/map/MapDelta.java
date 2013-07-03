@@ -1,6 +1,8 @@
 package com.crypticbit.javelin.diff.map;
 
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.crypticbit.javelin.diff.ItemDelta;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
@@ -13,6 +15,8 @@ public class MapDelta<T> implements ItemDelta {
 
     private MapDifference<String, T> diff;
     private Object branch;
+    
+    private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.diff");
 
     public MapDelta(MapDifference<String, T> diff, Object branch) {
 	this.diff = diff;
@@ -32,6 +36,10 @@ public class MapDelta<T> implements ItemDelta {
     }
 
     public void apply(Map<String, T> object, Map<String, ThreeWayDiff> recursiveDiffs) {
+	
+	if(LOG.isLoggable(Level.FINEST))
+	    LOG.log(Level.FINEST, "Merge Map = "+diff);
+	
 	for (String key : getRemoved().keySet())
 	    object.remove(key);
 	for (String key : getAdded().keySet())

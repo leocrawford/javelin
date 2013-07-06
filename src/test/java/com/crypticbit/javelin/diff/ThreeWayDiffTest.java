@@ -115,6 +115,18 @@ public class ThreeWayDiffTest {
     }
 
     @Test
+    public void testArrayMultipleChangesOfDifferentLengths() {
+	List<Object> lca = GSON.fromJson("[a, b, c]", List.class);
+	ThreeWayDiff<List<Object>> twd = new ThreeWayDiff<List<Object>>(lca);
+	twd.addBranchSnapshot(GSON.fromJson("[d,e]", List.class), "Branch 1");
+	twd.addBranchSnapshot(GSON.fromJson("[f,g,h,i]", List.class), "Branch 2");
+	twd.apply();
+	System.out.println(lca);
+	Assert.assertArrayEquals(GSON.fromJson("[a, b,[c,d,e]]", List.class).toArray(), lca.toArray());
+
+    }
+
+    @Test
     public void testRealExample() {
 	ThreeWayDiff<Map<String, ?>> twd = new ThreeWayDiff<Map<String, ?>>(GSON.fromJson(
 		"{name:\"Bill\",aliases:[Billy],phone:[{type:Mobile,code:01222,number:123456}],addresses:"
@@ -167,5 +179,22 @@ public class ThreeWayDiffTest {
 	System.out.println(twd.apply());
 	// Assert.assertEquals(GSON.fromJson("{A:a, B:b,C:[x,y,z]}", Map.class),lca);
     }
+
+    // @Test
+    // public void testProcessExtraTypes() {
+    // JsonParser parser = new JsonParser();
+    // JsonElement lca = parser.parse("[a,b,{X:x}]");
+    // ThreeWayDiff<JsonElement> twd = new ThreeWayDiff<>(lca, new DifferFactory() {
+    // {
+    // this.addApplicator(new JsonElementArray());
+    // this.addApplicator(new JsonElementMap());
+    // }
+    // });
+    // twd.addBranchSnapshot(parser.parse("[a,{X:x,Y:y}]"), "Branch 1");
+    // twd.addBranchSnapshot(parser.parse("[i,j,a,b,{Z:z}]"), "Branch 2");
+    // twd.apply();
+    // System.out.println(lca);
+    // Assert.assertEquals(4, lca.getAsJsonArray().size());
+    // }
 
 }

@@ -28,7 +28,7 @@ public class DifferFactory {
 	for (DifferFactoryElement a : applicators)
 	    if (a.supports(object)) {
 		if(LOG.isLoggable(Level.FINER))
-		    LOG.log(Level.FINER, "Using "+a+" to diff "+object);
+		    LOG.log(Level.FINER, "Using "+a.getClass().getSimpleName()+" to diff "+object);
 		return a.createApplicator();
 	    }
 	throw new java.lang.IllegalArgumentException(object.getClass()+" is not supported");

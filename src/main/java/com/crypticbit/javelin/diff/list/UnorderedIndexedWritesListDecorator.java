@@ -18,9 +18,17 @@ import java.util.Map.Entry;
  */
 public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
 
+    private static class AddRemoveRecord {
+	private Map<Integer, Integer> add = new HashMap<>();
+	private Map<Integer, Integer> delete = new HashMap<>();
+	public String toString() {
+	    return "+"+add+" -"+delete;
+	}
+    }
+
     private List<T> backingList;
-    private Map<Object, Map<Integer, Integer>> indexShifts = new HashMap<>();
-    private Map<Integer, Integer> indexShift;
+    private Map<Object, AddRemoveRecord> indexShifts = new HashMap<>();
+    private AddRemoveRecord indexShift;
 
     public UnorderedIndexedWritesListDecorator(List<T> backingList) {
 	this.backingList = backingList;
@@ -30,7 +38,7 @@ public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
 	if (indexShift != null)
 	    throw new IllegalStateException("You can't add modes after you start using the class");
 	if (!indexShifts.containsKey(mode))
-	    indexShifts.put(mode, new TreeMap<Integer, Integer>());
+	    indexShifts.put(mode, new AddRemoveRecord());
     }
 
     public UnorderedIndexedWritesListDecorator<T> chooseMode(Object mode) {
@@ -42,24 +50,61 @@ public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
     }
 
     public int transformIndex(final int index) {
+	checkMode();
 	int result = index;
-	for (Entry<Integer, Integer> x : indexShift.entrySet()) {
+	for (Entry<Integer, Integer> x : indexShift.add.entrySet()) {
 	    if (x.getKey() <= index)
 		result += x.getValue();
 	    else
 		break;
 	}
+	for (Entry<Integer, Integer> x : indexShift.delete.entrySet()) {
+	    if (x.getKey() <= index)
+		result += x.getValue();
+	    else
+		break;
+	}
+	System.out.println("Converted "+index+" to "+result+" using "+indexShifts);
+	return result;
+    }
+    
+    // FIXME - hack
+    public int inverseTransformIndex(final int index) {
+	checkMode();
+	int result = index;
+	for (Entry<Integer, Integer> x : indexShift.add.entrySet()) {
+	    if (x.getKey() <= index)
+		result -= x.getValue();
+	    else
+		break;
+	}
+	for (Entry<Integer, Integer> x : indexShift.delete.entrySet()) {
+	    if (x.getKey() <= index)
+		result -= x.getValue();
+	    else
+		break;
+	}
+	System.out.println("Inversed "+index+" to "+result);
 	return result;
     }
 
-    private void addIndexTransformation(int atIndex, int amount) {
-	for (Map<Integer, Integer> t : indexShifts.values())
-	    if (t != indexShift)
+    private void addIndexTransformation(int index, int amount) {
+	int atIndex = inverseTransformIndex(index);
+	checkMode();
+	for (AddRemoveRecord arr : indexShifts.values())
+	    if (arr != indexShift) {
+		Map<Integer, Integer> t = ((amount > 0) ? arr.add : arr.delete);
 		if (t.containsKey(atIndex)) {
 		    t.put(atIndex, t.get(atIndex) + amount);
 		}
 		else
 		    t.put(atIndex, amount);
+	    }
+    }
+
+    private void checkMode() {
+	if(indexShift == null)
+	    throw new IllegalStateException("You must set a mode");
     }
 
     @Override
@@ -141,7 +186,7 @@ public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
 
     @Override
     public T set(int index, T element) {
-	return backingList.set(index, element);
+	return backingList.set(transformIndex(index), element);
     }
 
     @Override

@@ -20,14 +20,12 @@ public class JsonElementArray implements DifferFactoryElement {
 
     @Override
     public SequenceDiff createApplicator() {
-	System.out.println("Creating JsonElement Applicator");
 	return new SequenceDiff<JsonElement, ListDelta>() {
 
 	    private ListSequenceDiff lsd = new ListSequenceDiff();
 
 	    @Override
 	    public JsonArray apply(JsonElement value) {
-		System.out.println("in apply");
 		return convert(lsd.apply(convert(value)));
 	    }
 
@@ -41,17 +39,14 @@ public class JsonElementArray implements DifferFactoryElement {
 	    }
 
 	    private List<JsonElement> convert(JsonElement value) {
-		System.out.println("convert a: " + value);
 		List<JsonElement> list = new ArrayList<>();
 		for (JsonElement o : ((JsonElement) value).getAsJsonArray()) {
 		    list.add(o);
 		}
-		System.out.println("returning :" + list.size());
 		return list;
 	    }
 
 	    private JsonArray convert(List<JsonElement> list) {
-		System.out.println("convert b: " + list);
 		JsonArray ja = new JsonArray();
 		for (JsonElement o : list)
 		    ja.add(o);

@@ -9,16 +9,21 @@ import com.google.common.collect.Iterables;
 
 /**
  * A List which allows views onto it, whereby the views are independent of each other (they can not see each others
- * changes) but the original List maintains a merged view of them all.
+ * changes) but the original List maintains a merged view of them all. We call these views, modes. This means that we
+ * wan re-order read and writes in different modes safe in the knowledge they won't affect each other - and the merged
+ * view is consistent.
+ * <p>
+ * This is not current threadsafe.
  * 
  * @author Leo
  * @param <T>
  */
-public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
+public class MultiViewList<T> implements List<T> {
 
-    private static final Object ROOT_MODE = new Object() {
+    private static final Object MERGED_MODE = new Object() {
+
 	public String toString() {
-	    return "ROOT";
+	    return "MERGED";
 	}
     };
 
@@ -38,12 +43,12 @@ public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
     private static class AddRemoveRecord<T> {
 	// we don't use String as it could be intern'd
 
-	private Object addedByMode;
-	private Set<Object> deletedByModes = new HashSet<Object>();
+	private final Object addedByMode;
+	private final Set<Object> deletedByModes = new HashSet<Object>();
 	private T value;
 
 	public AddRemoveRecord(T value) {
-	    this(ROOT_MODE, value);
+	    this(MERGED_MODE, value);
 	}
 
 	public AddRemoveRecord(Object mode, T value) {
@@ -58,14 +63,9 @@ public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
 	public boolean appliesToMode(Object currentMode) {
 	    // if added by root or current mode, and not removed by current mode (unless it is current is root, in which
 	    // case removed by any mode)
-	    return (addedByMode == ROOT_MODE || addedByMode == currentMode || currentMode == ROOT_MODE)
-		    && !((deletedByModes.size() > 0 && currentMode == ROOT_MODE) || deletedByModes
+	    return (addedByMode == MERGED_MODE || addedByMode == currentMode || currentMode == MERGED_MODE)
+		    && !((deletedByModes.size() > 0 && currentMode == MERGED_MODE) || deletedByModes
 			    .contains(currentMode));
-	}
-
-	public void setAddedByMode(Object mode) {
-	    this.addedByMode = mode;
-
 	}
 
 	public void addDeletedByMode(Object mode) {
@@ -78,48 +78,65 @@ public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
     private final List<AddRemoveRecord<T>> backingList;
     private final Object currentMode;
 
-    public UnorderedIndexedWritesListDecorator(List<T> backingList) {
+    /**
+     * The only public constructor. Given a starting list (which can be empty) we create a wrapper, which allows new
+     * modes to be entered. By default we are in the merged mode where we see the ongoing impact of merges from other
+     * modes.
+     */
+    public MultiViewList(List<T> backingList) {
 	this.backingList = new ArrayList<>();
 	for (T t : backingList) {
 	    this.backingList.add(new AddRemoveRecord<T>(t));
 	}
-	currentMode = ROOT_MODE;
+	currentMode = MERGED_MODE;
     }
 
-    private UnorderedIndexedWritesListDecorator(List<AddRemoveRecord<T>> backingList, Object mode) {
+    /** Create a view on an existing MultiViewList */
+    private MultiViewList(List<AddRemoveRecord<T>> backingList, Object mode) {
 	this.backingList = backingList;
 	this.currentMode = mode;
     }
 
-    public UnorderedIndexedWritesListDecorator<T> chooseMode(Object mode) {
+    /**
+     * Create a new view on this List. It is legitimate (but possibly not resource wise) to create multiple views with
+     * the same name. It is fine to create a view off a view - this is semantically equivalent to producing it off the
+     * root
+     */
+    public MultiViewList<T> getMode(Object mode) {
 	if (this.currentMode == mode)
 	    return this;
 	else
-	    return new UnorderedIndexedWritesListDecorator<>(backingList, mode);
+	    return new MultiViewList<>(backingList, mode);
     }
 
+    /**
+     * Works out which list elements between 0 and index aren't visible, and should thus be ignored - giving us a new
+     * index. This version assumed that a insert before element n, is actually a write after element n-1. This makes a
+     * difference when there are elements between n-1 and n that are not visible in this view.
+     */
     public int transformIndexForInsert(final int index) {
 	int i = 0;
 	for (int loop = 0; loop < index; loop++) {
-	    // System.out.println(">>"+i+","+loop);
 	    for (; !backingList.get(loop + i).appliesToMode(currentMode); i++)
-		System.out.println("Skipping " + backingList.get(loop + i) + " as does not apply to " + currentMode);
+		;
 	}
-	System.out.println("Returning " + (index + i));
 	return index + i;
     }
 
+    /**
+     * Works out which list elements between 0 and index aren't visible, and should thus be ignored - giving us a new
+     * index.
+     */
     public int transformIndexForAccess(final int index) {
 	int i = 0;
 	for (int loop = 0; loop <= index; loop++) {
-	    // System.out.println(">>"+i+","+loop);
 	    for (; !backingList.get(loop + i).appliesToMode(currentMode); i++)
-		System.out.println("Skipping " + backingList.get(loop + i) + " as does not apply to " + currentMode);
+		;
 	}
-	System.out.println("Returning " + (index + i));
 	return index + i;
     }
 
+    /** Return only the value from an Iterable of AddRemoveRecords. */
     private Iterable<T> transform(Iterable<AddRemoveRecord<T>> addRemoveList) {
 	return Iterables.transform(addRemoveList, new Function<AddRemoveRecord<T>, T>() {
 	    @Override
@@ -129,14 +146,17 @@ public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
 	});
     }
 
-    public List<T> transform() {
-	return ImmutableList.copyOf(transform(backingList));
-    }
-
+    /**
+     * Return a list with elements not applying to this mode removed, and only the value returned instead of teh full
+     * AddRemoveRecord
+     */
     private List<T> filterAndTransform() {
 	return ImmutableList.copyOf(transform(Iterables.filter(backingList, new ValidInModePredicate<T>(currentMode))));
     }
 
+    /**
+     * Return a list with elements not applying to this mode removed.
+     */
     private List<AddRemoveRecord<T>> filter() {
 	return ImmutableList.copyOf(Iterables.filter(backingList, new ValidInModePredicate<T>(currentMode)));
     }
@@ -180,7 +200,7 @@ public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
     public boolean remove(Object o) {
 	for (AddRemoveRecord<T> t : backingList)
 	    if (t.value == o && t.appliesToMode(currentMode)) {
-		t.deletedByModes.add(currentMode);
+		t.addDeletedByMode(currentMode);
 		return true;
 	    }
 	return false;
@@ -275,7 +295,7 @@ public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
     }
 
     public String toString() {
-	return filterAndTransform().toString();
+	return filterAndTransform().toString() + " in view " + currentMode + " = " + filterAndTransform();
     }
 
 }

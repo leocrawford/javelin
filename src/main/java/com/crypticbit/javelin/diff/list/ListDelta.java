@@ -25,16 +25,16 @@ public class ListDelta implements ItemDelta {
     }
 
     public <T> void apply(List list, Set<ThreeWayDiff> recursiveDiffs) {
-	UnorderedIndexedWritesListDecorator unorderedIndexedWriter = (UnorderedIndexedWritesListDecorator) list;
+	MultiViewList unorderedIndexedWriter = (MultiViewList) list;
 	try {
 	    for (Delta d : patch.getDeltas()) {
 		if(LOG.isLoggable(Level.FINEST))
 		    LOG.log(Level.FINEST, "Merge List @ "+d.getOriginal().getPosition()+" = "+d.getType());
 		if (d.getType() != Delta.TYPE.CHANGE) {
-		    d.applyTo(unorderedIndexedWriter.chooseMode(branch));
+		    d.applyTo(unorderedIndexedWriter.getMode(branch));
 		}
 		else {
-		    unorderedIndexedWriter.chooseMode(branch);
+		    unorderedIndexedWriter.getMode(branch);
 		    // FIXME assumes both change are of same length
 		    for (int loop = 0; loop < d.getOriginal().size() && loop < d.getRevised().size(); loop++) {
 			if(d.getRevised().getLines().get(loop).toString().equals("h"))

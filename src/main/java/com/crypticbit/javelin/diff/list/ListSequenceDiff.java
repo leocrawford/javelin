@@ -14,7 +14,7 @@ public class ListSequenceDiff<T> extends SequenceDiff<List<T>, ListDelta> {
 
 	// well access the list through a clever adapter than allows each write to use indexes that assume
 	// changes in other branches haven't been made
-	UnorderedIndexedWritesListDecorator<T> workingList = new UnorderedIndexedWritesListDecorator<T>(list);
+	MultiViewList<T> workingList = new MultiViewList<T>(list);
 
 	// if there is a change we're going to need to apply a recursive diff
 	Set<ThreeWayDiff> recursiveDiffs = new HashSet<>();

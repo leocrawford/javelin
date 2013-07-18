@@ -6,19 +6,19 @@ import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.crypticbit.javelin.diff.list.UnorderedIndexedWritesListDecorator;
+import com.crypticbit.javelin.diff.list.MultiViewList;
 
-public class UnorderedIndexedWritesListDecoratorTest {
+public class MultiViewListTest {
 
     private static final String[] SIMPLE_ARRAY = new String[] { "a", "b", "c", "d" };
 
     @Test
     public void testAddAllIntCollection() {
-	UnorderedIndexedWritesListDecorator<String> t = new UnorderedIndexedWritesListDecorator<>(new ArrayList<String>(Arrays.asList(SIMPLE_ARRAY)));
-	UnorderedIndexedWritesListDecorator<String> ma = t.chooseMode("a");
+	MultiViewList<String> t = new MultiViewList<>(new ArrayList<String>(Arrays.asList(SIMPLE_ARRAY)));
+	MultiViewList<String> ma = t.getMode("a");
 	ma.addAll(0, Arrays.asList(new String[] { "x", "y", "z" }));
 	ma.addAll(2, Arrays.asList(new String[] { "u" }));
-	UnorderedIndexedWritesListDecorator<String> mb = t.chooseMode("b");
+	MultiViewList<String> mb = t.getMode("b");
 	mb.addAll(1, Arrays.asList(new String[] {}));
 	mb.addAll(1, Arrays.asList(new String[] { "s", "t" }));
 	mb.addAll(2, Arrays.asList(new String[] { "v" }));
@@ -27,11 +27,11 @@ public class UnorderedIndexedWritesListDecoratorTest {
 
     @Test
     public void testSimpleAdd() {
-	UnorderedIndexedWritesListDecorator<String> t = new UnorderedIndexedWritesListDecorator<>(
+	MultiViewList<String> t = new MultiViewList<>(
 		new ArrayList<String>(Arrays.asList(SIMPLE_ARRAY)));
-	UnorderedIndexedWritesListDecorator<String> ma = t.chooseMode("a");
+	MultiViewList<String> ma = t.getMode("a");
 	ma.add(0, "x");
-	UnorderedIndexedWritesListDecorator<String> mb = t.chooseMode("b");
+	MultiViewList<String> mb = t.getMode("b");
 	mb.add(0, "y");
 	mb.add(1, "z");
 	
@@ -42,16 +42,16 @@ public class UnorderedIndexedWritesListDecoratorTest {
 
     @Test
     public void testAdd() {
-	UnorderedIndexedWritesListDecorator<String> t = new UnorderedIndexedWritesListDecorator<>(
+	MultiViewList<String> t = new MultiViewList<>(
 		new ArrayList<String>(Arrays.asList(SIMPLE_ARRAY)));
-	UnorderedIndexedWritesListDecorator<String> ma = t.chooseMode("a");
+	MultiViewList<String> ma = t.getMode("a");
 
 	ma.add(0, "u");
 	ma.add(0, "v");
 	ma.add(1, "w");
 	ma.add(2, "y");
 	Assert.assertArrayEquals(new String[] { "v", "w", "y", "u", "a", "b", "c", "d" }, t.toArray());
-	UnorderedIndexedWritesListDecorator<String> mb = t.chooseMode("b");
+	MultiViewList<String> mb = t.getMode("b");
 	mb.add(0, "U");
 	mb.add(0, "V");
 	mb.add(1, "W");
@@ -62,12 +62,12 @@ public class UnorderedIndexedWritesListDecoratorTest {
 
     @Test
     public void testRemove() {
-	UnorderedIndexedWritesListDecorator<String> t = new UnorderedIndexedWritesListDecorator<>(new ArrayList<String>(Arrays.asList(SIMPLE_ARRAY)));
-	UnorderedIndexedWritesListDecorator<String> ma = t.chooseMode("a");
+	MultiViewList<String> t = new MultiViewList<>(new ArrayList<String>(Arrays.asList(SIMPLE_ARRAY)));
+	MultiViewList<String> ma = t.getMode("a");
 	ma.remove(1);
 	ma.remove(2);
 	Assert.assertArrayEquals(new String[] { "a", "c" }, t.toArray());
-	UnorderedIndexedWritesListDecorator<String> mb = t.chooseMode("b");
+	MultiViewList<String> mb = t.getMode("b");
 	mb.remove(2);
 	Assert.assertArrayEquals(new String[] { "a" }, t.toArray());
 	
@@ -78,15 +78,15 @@ public class UnorderedIndexedWritesListDecoratorTest {
     
     @Test
     public void testComplexAddAndRemove() {
-	UnorderedIndexedWritesListDecorator<String> t = new UnorderedIndexedWritesListDecorator<>(new ArrayList<String>(Arrays.asList(SIMPLE_ARRAY)));
-	UnorderedIndexedWritesListDecorator<String> ma = t.chooseMode("a");
+	MultiViewList<String> t = new MultiViewList<>(new ArrayList<String>(Arrays.asList(SIMPLE_ARRAY)));
+	MultiViewList<String> ma = t.getMode("a");
 	ma.remove(1);
 	ma.remove(2);
 	
 	Assert.assertArrayEquals(new String[] { "a", "c" }, t.toArray());
 	ma.add(1,"x");
 	Assert.assertArrayEquals(new String[] { "a", "x","c" }, t.toArray());
-	UnorderedIndexedWritesListDecorator<String> mb = t.chooseMode("b");
+	MultiViewList<String> mb = t.getMode("b");
 	mb.remove(2);
 	mb.add("y");
 	mb.add("z");

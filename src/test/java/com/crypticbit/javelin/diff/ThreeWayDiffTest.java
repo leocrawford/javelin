@@ -17,9 +17,8 @@ public class ThreeWayDiffTest {
 	ThreeWayDiff<List<String>> twd = new ThreeWayDiff<List<String>>(lca);
 	twd.addBranchSnapshot(new Date(10000L), Arrays.asList(new String[] { "a", "b", "x", "c" }), "Branch 1");
 	twd.addBranchSnapshot(new Date(10001L), Arrays.asList(new String[] { "a", "b", "y", "c" }), "Branch 2");
-	twd.apply();
-	System.out.println(Arrays.toString(lca.toArray()));
-	Assert.assertArrayEquals(new String[] { "a", "b", "x", "y", "c" }, lca.toArray());
+	List<String> result = twd.apply();
+	Assert.assertArrayEquals(new String[] { "a", "b", "y", "x", "c" }, result.toArray());
     }
 
     @Test
@@ -28,8 +27,7 @@ public class ThreeWayDiffTest {
 	ThreeWayDiff<List<String>> twd = new ThreeWayDiff<List<String>>(lca);
 	twd.addBranchSnapshot(Arrays.asList(new String[] { "a", "b", "x", "c" }), "Branch 1");
 	twd.addBranchSnapshot(Arrays.asList(new String[] { "a", "b", "y", "c" }), "Branch 2");
-	twd.apply();
-	Assert.assertArrayEquals(new String[] { "a", "b", "x", "y", "c" }, lca.toArray());
+	Assert.assertArrayEquals(new String[] { "a", "b", "y", "x", "c" }, twd.apply().toArray());
     }
 
     @Test
@@ -40,8 +38,7 @@ public class ThreeWayDiffTest {
 	twd.addBranchSnapshot(Arrays.asList(new String[] { "a", "x", "c" }), "Branch 1");
 	twd.addBranchSnapshot(Arrays.asList(new String[] { "a", "b", "y", "c" }), "Branch 2");
 	twd.addBranchSnapshot(Arrays.asList(new String[] { "a", "x", "c", "d" }), "Branch 1");
-	twd.apply();
-	Assert.assertArrayEquals(new String[] { "a", "x", "y", "c", "d" }, lca.toArray());
+	Assert.assertArrayEquals(new String[] { "a", "y", "x", "c", "d" }, twd.apply().toArray());
     }
 
     @Test
@@ -53,9 +50,7 @@ public class ThreeWayDiffTest {
 	twd.addBranchSnapshot(Arrays.asList(new String[] { "i", "a", "x", "c" }), "Branch 1");
 	twd.addBranchSnapshot(Arrays.asList(new String[] { "j", "k", "l", "y", "b", "c" }), "Branch 2");
 	// System.out.println(twd.getPatch());
-	twd.apply();
-	System.out.println(lca);
-	Assert.assertArrayEquals(new String[] { "i", "j", "k", "l", "y", "x", "c" }, lca.toArray());
+	Assert.assertArrayEquals(new String[] {  "j", "k", "l", "i","y", "x", "c" }, twd.apply().toArray());
     }
 
     @Test
@@ -65,9 +60,7 @@ public class ThreeWayDiffTest {
 	ThreeWayDiff<List<Object>> twd = new ThreeWayDiff<List<Object>>(lca);
 	twd.addBranchSnapshot(GSON.fromJson("[a, b,[c,d]]", List.class), "Branch 1");
 	twd.addBranchSnapshot(GSON.fromJson("[a, b,[c,e]]", List.class), "Branch 2");
-	twd.apply();
-	System.out.println(lca);
-	Assert.assertArrayEquals(GSON.fromJson("[a, b,[c,d,e]]", List.class).toArray(), lca.toArray());
+	Assert.assertArrayEquals(GSON.fromJson("[a, b,[c,e,d]]", List.class).toArray(), twd.apply().toArray());
     }
 
     @Test
@@ -76,9 +69,7 @@ public class ThreeWayDiffTest {
 	ThreeWayDiff<Map<String, String>> twd = new ThreeWayDiff<>(lca);
 	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b,C:c,D:d}", Map.class), "Branch 1");
 	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b}", Map.class), "Branch 2");
-	twd.apply();
-	System.out.println(lca);
-	Assert.assertEquals(GSON.fromJson("{A:a, B:b, D:d}", Map.class), lca);
+	Assert.assertEquals(GSON.fromJson("{A:a, B:b, D:d}", Map.class), twd.apply());
     }
 
     @Test
@@ -87,9 +78,7 @@ public class ThreeWayDiffTest {
 	ThreeWayDiff<Map<String, String>> twd = new ThreeWayDiff<>(lca);
 	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b,C:{X:x,Y:y}}", Map.class), "Branch 1");
 	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b,C:{Z:z}}", Map.class), "Branch 2");
-	twd.apply();
-	System.out.println(lca);
-	Assert.assertEquals(GSON.fromJson("{A:a, B:b,C:{Y:y,Z:z}}", Map.class), lca);
+	Assert.assertEquals(GSON.fromJson("{A:a, B:b,C:{Y:y,Z:z}}", Map.class), twd.apply());
     }
 
     @Test
@@ -98,9 +87,7 @@ public class ThreeWayDiffTest {
 	ThreeWayDiff<List<String>> twd = new ThreeWayDiff<>(lca);
 	twd.addBranchSnapshot(GSON.fromJson("[a,b,{X:x,Y:y}]", List.class), "Branch 1");
 	twd.addBranchSnapshot(GSON.fromJson("[a,b,{Z:z}]", List.class), "Branch 2");
-	twd.apply();
-	System.out.println(lca);
-	Assert.assertEquals(GSON.fromJson("[a,b,{Y:y,Z:z}]", List.class), lca);
+	Assert.assertEquals(GSON.fromJson("[a,b,{Y:y,Z:z}]", List.class), twd.apply());
     }
 
     @Test
@@ -109,9 +96,7 @@ public class ThreeWayDiffTest {
 	ThreeWayDiff<Map<String, String>> twd = new ThreeWayDiff<>(lca);
 	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b,C:[x,y]}", Map.class), "Branch 1");
 	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b,C:[x,z]}", Map.class), "Branch 2");
-	twd.apply();
-	System.out.println(lca);
-	Assert.assertEquals(GSON.fromJson("{A:a, B:b,C:[x,y,z]}", Map.class), lca);
+	Assert.assertEquals(GSON.fromJson("{A:a, B:b,C:[x,z,y]}", Map.class), twd.apply());
     }
 
     @Test
@@ -120,9 +105,7 @@ public class ThreeWayDiffTest {
 	ThreeWayDiff<List<Object>> twd = new ThreeWayDiff<List<Object>>(lca);
 	twd.addBranchSnapshot(GSON.fromJson("[d,e]", List.class), "Branch 1");
 	twd.addBranchSnapshot(GSON.fromJson("[f,g,h,i]", List.class), "Branch 2");
-	twd.apply();
-	System.out.println(lca);
-	Assert.assertArrayEquals(GSON.fromJson("[a, b,[c,d,e]]", List.class).toArray(), lca.toArray());
+	Assert.assertArrayEquals(GSON.fromJson("[f,g,i]", List.class).toArray(), twd.apply().toArray());
 
     }
 

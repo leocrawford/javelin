@@ -12,19 +12,22 @@ import com.google.common.collect.Maps;
 public class MapSequenceDiff<T> extends SequenceDiff<Map<String, T>, MapDelta> {
     @Override
     public Map<String, T> apply(Map<String, T> value) {
+	
+	Map<String, T> result = new HashMap<>(value);
+	
 	// if there is a change we're going to need to apply a recursive diff
 	Map<String, ThreeWayDiff<T>> recursiveDiffs = new HashMap<>();
 
 	for (MapDelta d : getListOfDeltaInOrder()) {
-	    d.apply(value, recursiveDiffs);
+	    d.apply(result, recursiveDiffs);
 	}
 
 	// now catch up with the set of recursive diffs
 	for (Entry<String, ThreeWayDiff<T>> twds : recursiveDiffs.entrySet()) {
-	    value.put(twds.getKey(), twds.getValue().apply());
+	    result.put(twds.getKey(), twds.getValue().apply());
 	}
 
-	return value;
+	return result;
     }
 
     @Override

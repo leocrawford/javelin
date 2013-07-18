@@ -25,30 +25,29 @@ public class ListDelta implements ItemDelta {
     }
 
     public <T> void apply(List list, Set<ThreeWayDiff> recursiveDiffs) {
-	MultiViewList unorderedIndexedWriter = (MultiViewList) list;
+	MultiViewList<T> unorderedIndexedWriter = (MultiViewList) list;
 	try {
 	    for (Delta d : patch.getDeltas()) {
+		MultiViewList branchView = unorderedIndexedWriter.getMode(branch);
 		if(LOG.isLoggable(Level.FINEST))
 		    LOG.log(Level.FINEST, "Merge List @ "+d.getOriginal().getPosition()+" = "+d.getType());
 		if (d.getType() != Delta.TYPE.CHANGE) {
-		    d.applyTo(unorderedIndexedWriter.getMode(branch));
+		    d.applyTo(branchView);
 		}
 		else {
-		    unorderedIndexedWriter.getMode(branch);
 		    // FIXME assumes both change are of same length
 		    for (int loop = 0; loop < d.getOriginal().size() && loop < d.getRevised().size(); loop++) {
 			if(d.getRevised().getLines().get(loop).toString().equals("h"))
 			System.out.println("nn");
 			int key = d.getOriginal().getPosition() + loop;
 			// FIXME - use the filter
-			int transformedIndex = unorderedIndexedWriter.transformIndexForAccess(key);
-			Object o = unorderedIndexedWriter.get(transformedIndex);
+			Object o = branchView.get(key);
 			// we use the set rather than <code>instanceof</code> because it is legal to add any type of
 			// object, including ThreeWayDiff.
 			if (!recursiveDiffs.contains(o)) {
 			    // FIXME copy state into new three way diff if required
 			    ThreeWayDiff twd = new ThreeWayDiff(d.getOriginal().getLines().get(loop));
-			    unorderedIndexedWriter.set(transformedIndex, twd);
+			    branchView.set(key, twd);
 			    recursiveDiffs.add(twd);
 			    o = twd;
 			}
@@ -59,12 +58,12 @@ public class ListDelta implements ItemDelta {
 		    // if the original was longer..
 		    for(int loop=d.getRevised().size(); loop< d.getOriginal().size(); loop++) {
 			System.out.println("deleting "+loop+", "+d.getOriginal().getPosition());
-			unorderedIndexedWriter.remove(loop+d.getOriginal().getPosition());
+			branchView.remove(loop+d.getOriginal().getPosition());
 		    }
 		    // if the original was shorter..
 		    for(int loop=d.getOriginal().size(); loop< d.getRevised().size(); loop++) {
 			System.out.println("adding "+loop+", "+d.getOriginal().getPosition());
-			unorderedIndexedWriter.add(loop+d.getOriginal().getPosition(), d.getRevised().getLines().get(loop));
+			branchView.add(loop+d.getOriginal().getPosition(), d.getRevised().getLines().get(loop));
 		    }
 		    
 		   

@@ -1,5 +1,6 @@
 package com.crypticbit.javelin.diff.list;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +33,7 @@ public class ListSequenceDiff<T> extends SequenceDiff<List<T>, ListDelta> {
 	    }
 	}
 
-	return list;
+	return new ArrayList(workingList);
     }
 
     public ListDelta createDelta(List<T> parent, List<T> child, Object branch) {

@@ -1,235 +1,281 @@
 package com.crypticbit.javelin.diff.list;
 
 import java.util.*;
-import java.util.Map.Entry;
+
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
 /**
- * Allows a set of add and remove operations to a list, all based on the original indexes. Thus if we have the list
- * <code>a,b,c,d</code> and then delete index 1 we have <code>a,c,d</code>. A subsequent operation that deletes index 2
- * would then end up deleting </code>d</code> instead of the <code>c</code> which may have been intended.
- * <p>
- * This class isn't semantically strong (I'm sure it's easy to break the intended behaviour). What it will do is for any
- * <code>add</code> or <code>remove</code> operation that has an index, it will remember the change such that subsequent
- * <code>add</code> and <code>remove</code> operations with an index apply to the old index pattern. All other
- * operations are unaffected.
+ * A List which allows views onto it, whereby the views are independent of each other (they can not see each others
+ * changes) but the original List maintains a merged view of them all.
  * 
  * @author Leo
  * @param <T>
  */
 public class UnorderedIndexedWritesListDecorator<T> implements List<T> {
 
-    private static class AddRemoveRecord {
-	private Map<Integer, Integer> add = new HashMap<>();
-	private Map<Integer, Integer> delete = new HashMap<>();
+    private static final Object ROOT_MODE = new Object() {
 	public String toString() {
-	    return "+"+add+" -"+delete;
+	    return "ROOT";
+	}
+    };
+
+    public static final class ValidInModePredicate<T> implements Predicate<AddRemoveRecord<T>> {
+	private Object mode;
+
+	ValidInModePredicate(Object mode) {
+	    this.mode = mode;
+	}
+
+	@Override
+	public boolean apply(AddRemoveRecord<T> input) {
+	    return input.appliesToMode(mode);
 	}
     }
 
-    private List<T> backingList;
-    private Map<Object, AddRemoveRecord> indexShifts = new HashMap<>();
-    private AddRemoveRecord indexShift;
+    private static class AddRemoveRecord<T> {
+	// we don't use String as it could be intern'd
 
-    public UnorderedIndexedWritesListDecorator(List<T> backingList) {
-	this.backingList = backingList;
+	private Object addedByMode;
+	private Set<Object> deletedByModes = new HashSet<Object>();
+	private T value;
+
+	public AddRemoveRecord(T value) {
+	    this(ROOT_MODE, value);
+	}
+
+	public AddRemoveRecord(Object mode, T value) {
+	    this.value = value;
+	    this.addedByMode = mode;
+	}
+
+	public String toString() {
+	    return value + " +{" + addedByMode + "} -{" + deletedByModes + "}";
+	}
+
+	public boolean appliesToMode(Object currentMode) {
+	    // if added by root or current mode, and not removed by current mode (unless it is current is root, in which
+	    // case removed by any mode)
+	    return (addedByMode == ROOT_MODE || addedByMode == currentMode || currentMode == ROOT_MODE)
+		    && !((deletedByModes.size() > 0 && currentMode == ROOT_MODE) || deletedByModes
+			    .contains(currentMode));
+	}
+
+	public void setAddedByMode(Object mode) {
+	    this.addedByMode = mode;
+
+	}
+
+	public void addDeletedByMode(Object mode) {
+	    this.deletedByModes.add(mode);
+
+	}
+
     }
 
-    public void addMode(Object mode) {
-	if (indexShift != null)
-	    throw new IllegalStateException("You can't add modes after you start using the class");
-	if (!indexShifts.containsKey(mode))
-	    indexShifts.put(mode, new AddRemoveRecord());
+    private final List<AddRemoveRecord<T>> backingList;
+    private final Object currentMode;
+
+    public UnorderedIndexedWritesListDecorator(List<T> backingList) {
+	this.backingList = new ArrayList<>();
+	for (T t : backingList) {
+	    this.backingList.add(new AddRemoveRecord<T>(t));
+	}
+	currentMode = ROOT_MODE;
+    }
+
+    private UnorderedIndexedWritesListDecorator(List<AddRemoveRecord<T>> backingList, Object mode) {
+	this.backingList = backingList;
+	this.currentMode = mode;
     }
 
     public UnorderedIndexedWritesListDecorator<T> chooseMode(Object mode) {
-	if (indexShifts.containsKey(mode))
-	    indexShift = indexShifts.get(mode);
+	if (this.currentMode == mode)
+	    return this;
 	else
-	    throw new IllegalArgumentException("Not a valid mode. Choose from: " + indexShifts);
-	return this; // allow chaining
+	    return new UnorderedIndexedWritesListDecorator<>(backingList, mode);
     }
 
-    public int transformIndex(final int index) {
-	checkMode();
-	int result = index;
-	for (Entry<Integer, Integer> x : indexShift.add.entrySet()) {
-	    if (x.getKey() <= index)
-		result += x.getValue();
-	    else
-		break;
+    public int transformIndexForInsert(final int index) {
+	int i = 0;
+	for (int loop = 0; loop < index; loop++) {
+	    // System.out.println(">>"+i+","+loop);
+	    for (; !backingList.get(loop + i).appliesToMode(currentMode); i++)
+		System.out.println("Skipping " + backingList.get(loop + i) + " as does not apply to " + currentMode);
 	}
-	for (Entry<Integer, Integer> x : indexShift.delete.entrySet()) {
-	    if (x.getKey() <= index)
-		result += x.getValue();
-	    else
-		break;
-	}
-	System.out.println("Converted "+index+" to "+result+" using "+indexShifts);
-	return result;
-    }
-    
-    // FIXME - hack
-    public int inverseTransformIndex(final int index) {
-	checkMode();
-	int result = index;
-	for (Entry<Integer, Integer> x : indexShift.add.entrySet()) {
-	    if (x.getKey() <= index)
-		result -= x.getValue();
-	    else
-		break;
-	}
-	for (Entry<Integer, Integer> x : indexShift.delete.entrySet()) {
-	    if (x.getKey() <= index)
-		result -= x.getValue();
-	    else
-		break;
-	}
-	System.out.println("Inversed "+index+" to "+result);
-	return result;
+	System.out.println("Returning " + (index + i));
+	return index + i;
     }
 
-    private void addIndexTransformation(int index, int amount) {
-	int atIndex = inverseTransformIndex(index);
-	checkMode();
-	for (AddRemoveRecord arr : indexShifts.values())
-	    if (arr != indexShift) {
-		Map<Integer, Integer> t = ((amount > 0) ? arr.add : arr.delete);
-		if (t.containsKey(atIndex)) {
-		    t.put(atIndex, t.get(atIndex) + amount);
-		}
-		else
-		    t.put(atIndex, amount);
+    public int transformIndexForAccess(final int index) {
+	int i = 0;
+	for (int loop = 0; loop <= index; loop++) {
+	    // System.out.println(">>"+i+","+loop);
+	    for (; !backingList.get(loop + i).appliesToMode(currentMode); i++)
+		System.out.println("Skipping " + backingList.get(loop + i) + " as does not apply to " + currentMode);
+	}
+	System.out.println("Returning " + (index + i));
+	return index + i;
+    }
+
+    private Iterable<T> transform(Iterable<AddRemoveRecord<T>> addRemoveList) {
+	return Iterables.transform(addRemoveList, new Function<AddRemoveRecord<T>, T>() {
+	    @Override
+	    public T apply(AddRemoveRecord<T> input) {
+		return input.value;
 	    }
+	});
     }
 
-    private void checkMode() {
-	if(indexShift == null)
-	    throw new IllegalStateException("You must set a mode");
+    public List<T> transform() {
+	return ImmutableList.copyOf(transform(backingList));
+    }
+
+    private List<T> filterAndTransform() {
+	return ImmutableList.copyOf(transform(Iterables.filter(backingList, new ValidInModePredicate<T>(currentMode))));
+    }
+
+    private List<AddRemoveRecord<T>> filter() {
+	return ImmutableList.copyOf(Iterables.filter(backingList, new ValidInModePredicate<T>(currentMode)));
     }
 
     @Override
     public int size() {
-	return backingList.size();
+	return filterAndTransform().size();
     }
 
     @Override
     public boolean isEmpty() {
-	return backingList.isEmpty();
+	return filterAndTransform().isEmpty();
     }
 
     @Override
     public boolean contains(Object o) {
-	return backingList.contains(o);
+	return filterAndTransform().contains(o);
     }
 
     @Override
     public Iterator<T> iterator() {
-	return backingList.iterator();
+	return filterAndTransform().iterator();
     }
 
     @Override
     public Object[] toArray() {
-	return backingList.toArray();
+	return filterAndTransform().toArray();
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-	return backingList.toArray(a);
+	return filterAndTransform().toArray(a);
     }
 
     @Override
     public boolean add(T e) {
-	return backingList.add(e);
+	return backingList.add(new AddRemoveRecord<T>(currentMode, e));
     }
 
     @Override
     public boolean remove(Object o) {
-	return backingList.remove(o);
+	for (AddRemoveRecord<T> t : backingList)
+	    if (t.value == o && t.appliesToMode(currentMode)) {
+		t.deletedByModes.add(currentMode);
+		return true;
+	    }
+	return false;
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-	return backingList.containsAll(c);
+	return filterAndTransform().containsAll(c);
     }
 
     @Override
     public boolean addAll(Collection<? extends T> c) {
-	return backingList.addAll(c);
+	for (T t : c)
+	    add(t);
+	return c.size() > 0;
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends T> c) {
-	int revisedIndex = transformIndex(index);
-	addIndexTransformation(index, c.size());
-	return backingList.addAll(revisedIndex, c);
+	List<? extends T> cc = ImmutableList.copyOf(c);
+	for (int i = 0; i < c.size(); i++)
+	    add(i + index, cc.get(i));
+	return c.size() > 0;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-	return backingList.removeAll(c);
+	boolean result = false;
+	for (Object t : c)
+	    result = remove(t) | result;
+	return result;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-	return backingList.retainAll(c);
+	throw new UnsupportedOperationException();
     }
 
     @Override
     public void clear() {
-	backingList.clear();
+	throw new UnsupportedOperationException();
     }
 
     @Override
     public T get(int index) {
-	return backingList.get(index);
+	return filterAndTransform().get(index);
     }
 
     @Override
     public T set(int index, T element) {
-	return backingList.set(transformIndex(index), element);
+	return filter().get(index).value = element;
     }
 
     @Override
     public void add(int index, T element) {
-	int revisedIndex = transformIndex(index);
-	backingList.add(revisedIndex, element);
-	addIndexTransformation(index, 1);
+	int revisedIndex = transformIndexForInsert(index);
+	backingList.add(revisedIndex, new AddRemoveRecord<T>(currentMode, element));
     }
 
     @Override
     public T remove(int index) {
-	int revisedIndex = transformIndex(index);
-	addIndexTransformation(index, -1);
-	return backingList.remove(revisedIndex);
+	int revisedIndex = transformIndexForAccess(index);
+	AddRemoveRecord<T> addRemoveRecord = backingList.get(revisedIndex);
+	addRemoveRecord.addDeletedByMode(currentMode);
+	return addRemoveRecord.value;
+
     }
 
     @Override
     public int indexOf(Object o) {
-	return backingList.indexOf(o);
+	return filterAndTransform().indexOf(o);
     }
 
     @Override
     public int lastIndexOf(Object o) {
-	return backingList.lastIndexOf(o);
+	return filterAndTransform().lastIndexOf(o);
     }
 
     @Override
     public ListIterator<T> listIterator() {
-	return backingList.listIterator();
+	return filterAndTransform().listIterator();
     }
 
     @Override
     public ListIterator<T> listIterator(int index) {
-	return backingList.listIterator(index);
+	return filterAndTransform().listIterator(index);
     }
 
     @Override
     public List<T> subList(int fromIndex, int toIndex) {
-	return backingList.subList(fromIndex, toIndex);
+	return filterAndTransform().subList(fromIndex, toIndex);
     }
 
     public String toString() {
-	return backingList.toString();
+	return filterAndTransform().toString();
     }
 
 }

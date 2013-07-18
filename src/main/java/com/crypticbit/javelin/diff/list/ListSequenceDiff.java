@@ -16,10 +16,6 @@ public class ListSequenceDiff<T> extends SequenceDiff<List<T>, ListDelta> {
 	// changes in other branches haven't been made
 	UnorderedIndexedWritesListDecorator<T> workingList = new UnorderedIndexedWritesListDecorator<T>(list);
 
-	// but first we need to set up the clever list adapter so it knows about each branch before we start using it.
-	for (ListDelta d : getListOfDeltaInOrder()) {
-	    workingList.addMode(d.getBranch());
-	}
 	// if there is a change we're going to need to apply a recursive diff
 	Set<ThreeWayDiff> recursiveDiffs = new HashSet<>();
 

@@ -40,7 +40,8 @@ public class ListDelta implements ItemDelta {
 			if(d.getRevised().getLines().get(loop).toString().equals("h"))
 			System.out.println("nn");
 			int key = d.getOriginal().getPosition() + loop;
-			int transformedIndex = unorderedIndexedWriter.transformIndex(key);
+			// FIXME - use the filter
+			int transformedIndex = unorderedIndexedWriter.transformIndexForAccess(key);
 			Object o = unorderedIndexedWriter.get(transformedIndex);
 			// we use the set rather than <code>instanceof</code> because it is legal to add any type of
 			// object, including ThreeWayDiff.

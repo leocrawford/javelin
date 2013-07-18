@@ -111,13 +111,13 @@ public class JsonCasAdapter {
 	return commit.getObject();
     }
 
-    public JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, StoreException, PatchFailedException, IOException {
+    public JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, StoreException, PatchFailedException,
+	    IOException {
 	// FIXME - check no checkin needed
 	ThreeWayDiff patch = commit.createChangeSet(other.commit);
 	Object result = patch.apply();
 	// COPY and paste from commit - horrible
 	Identity valueIdentity = jsonFactory.writeAsObjects(result);
-	
 	CommitDao tempCommit = new CommitDao((Digest) valueIdentity, new Date(), "temp", (Digest) anchor.get());
 	Identity tempDigest = commitFactory.write(tempCommit);
 	anchor.write(tempDigest);
@@ -133,7 +133,7 @@ public class JsonCasAdapter {
     }
 
     public JsonCasAdapter write(String string) {
-	element = new JsonParser().parse(string);
+	element = new Gson().fromJson(string, JsonElement.class);
 	return this;
     }
 }

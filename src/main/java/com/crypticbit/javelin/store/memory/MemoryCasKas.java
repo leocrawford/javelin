@@ -79,4 +79,8 @@ public class MemoryCasKas implements CasKasStore {
 	return digest;
     }
 
+    public String toString() {
+	return casMap.toString();
+    }
+
 }

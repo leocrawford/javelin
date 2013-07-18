@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import com.crypticbit.javelin.diff.ItemDelta;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
+import com.google.common.collect.Lists;
 
 import difflib.Delta;
 import difflib.Patch;
@@ -27,11 +28,13 @@ public class ListDelta implements ItemDelta {
     public <T> void apply(List list, Set<ThreeWayDiff> recursiveDiffs) {
 	MultiViewList<T> unorderedIndexedWriter = (MultiViewList) list;
 	try {
-	    for (Delta d : patch.getDeltas()) {
+	    System.out.println(patch.getDeltas());
+	    for (Delta d : Lists.reverse(patch.getDeltas())) {
 		MultiViewList branchView = unorderedIndexedWriter.getMode(branch);
 		if(LOG.isLoggable(Level.FINEST))
 		    LOG.log(Level.FINEST, "Merge List @ "+d.getOriginal().getPosition()+" = "+d.getType());
 		if (d.getType() != Delta.TYPE.CHANGE) {
+		  System.out.println(d);
 		    d.applyTo(branchView);
 		}
 		else {
@@ -52,17 +55,14 @@ public class ListDelta implements ItemDelta {
 			    o = twd;
 			}
 			((ThreeWayDiff)o).addBranchSnapshot(d.getRevised().getLines().get(loop), branch);
-			System.out.println("-->"+list+","+d+","+loop);
-
+	
 		    }
 		    // if the original was longer..
 		    for(int loop=d.getRevised().size(); loop< d.getOriginal().size(); loop++) {
-			System.out.println("deleting "+loop+", "+d.getOriginal().getPosition());
 			branchView.remove(loop+d.getOriginal().getPosition());
 		    }
 		    // if the original was shorter..
 		    for(int loop=d.getOriginal().size(); loop< d.getRevised().size(); loop++) {
-			System.out.println("adding "+loop+", "+d.getOriginal().getPosition());
 			branchView.add(loop+d.getOriginal().getPosition(), d.getRevised().getLines().get(loop));
 		    }
 		    
@@ -73,7 +73,7 @@ public class ListDelta implements ItemDelta {
 	catch (PatchFailedException e) {
 	    // TODO Auto-generated catch block
 	    e.printStackTrace();
-	    throw new Error();
+	    throw new Error(e);
 	}
     }
 

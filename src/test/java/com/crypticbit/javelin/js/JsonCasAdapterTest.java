@@ -25,12 +25,13 @@ public class JsonCasAdapterTest {
 
     @Test
     public void testBasicBranch() throws IOException, StoreException, JsonSyntaxException, PatchFailedException {
-	String JSON_EXAMPLEa = "[\"foo\",100]";
-	String JSON_EXAMPLE_2a = "[\"a\",\"b\",\"c\",\"a\",\"b\",\"b\",\"a\"]";
-	String JSON_EXAMPLE_3a = "[\"x\",\"c\",\"b\",\"a\",\"b\",\"a\",\"c\"]";
+	String JSON_EXAMPLEa = "[\"foo\",\"a\"]";
+	String JSON_EXAMPLE_2a = "[\"foo\",\"b\"]";
+	String JSON_EXAMPLE_3a = "[\"a\",\"c\"]";
 
 	enableLog();
-	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
+	CasKasStore memoryStore = new StorageFactory().createMemoryCas();
+	JsonCasAdapter jca = new JsonCasAdapter(memoryStore);
 	jca.write(JSON_EXAMPLEa).commit();
 	JsonCasAdapter jca2 = jca.branch();
 
@@ -43,9 +44,14 @@ public class JsonCasAdapterTest {
 	System.out.println(jca2.read());
 	System.out.println(jca2.getCommit().getShortestHistory());
 
-	System.out.println(jca2.lazyRead());
-
-	System.out.println(jca.merge(jca2));
+	System.out.println("JCA-LR"+jca.lazyRead());
+	System.out.println("JCS2-LR"+jca2.lazyRead());
+	
+	jca.merge(jca2);
+	
+	System.out.println(memoryStore);
+	
+	System.out.println("MERGE="+jca.lazyRead());
 
     }
 

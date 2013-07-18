@@ -46,16 +46,16 @@ public class DereferencedCasAccessInterface extends DataAccessInterface<JsonElem
 
     // FIXME if already exists
     public Identity writeAsObjects(Object object) throws StoreException, IOException {
-	if (object instanceof LazyJsonArray) {
+	if (object instanceof List) {
 	    List<Digest> r = new LinkedList<>();
-	    for (Object o : (LazyJsonArray) object) {
+	    for (Object o : (List<Object>) object) {
 		r.add((Digest) writeAsObjects(o));
 	    }
 	    return cas.store(new GeneralPersistableResource(gson.toJson(r)));
 	}
-	else if (object instanceof LazyJsonMap) {
+	else if (object instanceof Map) {
 	    Map<String, Digest> r = new HashMap<>();
-	    for (Map.Entry<String, Object> o : ((LazyJsonMap) object).entrySet()) {
+	    for (Map.Entry<String, Object> o : ((Map<String,Object>) object).entrySet()) {
 		r.put(o.getKey(), (Digest) writeAsObjects(o.getValue()));
 	    }
 	    return cas.store(new GeneralPersistableResource(gson.toJson(r)));
@@ -88,6 +88,7 @@ public class DereferencedCasAccessInterface extends DataAccessInterface<JsonElem
 		return primative.getAsBoolean();
 	    }
 	    if (primative.isNumber()) {
+//		System.out.println("Got "+primative+","+primative.getAsNumber().);
 		return primative.getAsNumber();
 	    }
 	    if (primative.isString()) {
@@ -106,7 +107,6 @@ public class DereferencedCasAccessInterface extends DataAccessInterface<JsonElem
 
     @Override
     public Identity write(JsonElement element) throws StoreException, IOException {
-
 	if (element.isJsonArray()) {
 	    LinkedList<Identity> array = new LinkedList<>();
 	    for (JsonElement e : element.getAsJsonArray()) {

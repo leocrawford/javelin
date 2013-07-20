@@ -1,6 +1,9 @@
 package com.crypticbit.javelin.diff;
 
 import java.util.*;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -101,11 +104,12 @@ public class ThreeWayDiffTest {
 
     @Test
     public void testArrayMultipleChangesOfDifferentLengths() {
-	List<Object> lca = GSON.fromJson("[a, b, c]", List.class);
+	enableLog();
+	List<Object> lca = GSON.fromJson("[a, b, c, d,e]", List.class);
 	ThreeWayDiff<List<Object>> twd = new ThreeWayDiff<List<Object>>(lca);
-	twd.addBranchSnapshot(GSON.fromJson("[d,e]", List.class), "Branch 1");
-	twd.addBranchSnapshot(GSON.fromJson("[f,g,h,i]", List.class), "Branch 2");
-	Assert.assertArrayEquals(GSON.fromJson("[f,g,i]", List.class).toArray(), twd.apply().toArray());
+	twd.addBranchSnapshot(GSON.fromJson("[a,w,y,e]", List.class), "Branch 1");
+	twd.addBranchSnapshot(GSON.fromJson("[a,W,X,Y,Z,e]", List.class), "Branch 2");
+	Assert.assertArrayEquals(GSON.fromJson("[a,W,X,Z,e]", List.class).toArray(), twd.apply().toArray());
 
     }
 
@@ -180,4 +184,11 @@ public class ThreeWayDiffTest {
     // Assert.assertEquals(4, lca.getAsJsonArray().size());
     // }
 
+    private void enableLog() {
+	Logger LOG = Logger.getLogger("com.crypticbit.javelin.diff");
+	ConsoleHandler handler = new ConsoleHandler();
+	handler.setLevel(Level.FINEST);
+	LOG.addHandler(handler);
+	LOG.setLevel(Level.FINEST);
+    }
 }

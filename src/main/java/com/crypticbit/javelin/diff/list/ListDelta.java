@@ -17,7 +17,7 @@ public class ListDelta implements ItemDelta {
 
     private Patch patch;
     private Object branch;
-    
+
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.diff");
 
     public ListDelta(Patch patch, Object branch) {
@@ -28,22 +28,16 @@ public class ListDelta implements ItemDelta {
     public <T> void apply(List list, Set<ThreeWayDiff> recursiveDiffs) {
 	MultiViewList<T> unorderedIndexedWriter = (MultiViewList) list;
 	try {
-	    System.out.println(patch.getDeltas());
+	    MultiViewList branchView = unorderedIndexedWriter.getMode(branch);
 	    for (Delta d : Lists.reverse(patch.getDeltas())) {
-		MultiViewList branchView = unorderedIndexedWriter.getMode(branch);
-		if(LOG.isLoggable(Level.FINEST))
-		    LOG.log(Level.FINEST, "Merge List @ "+d.getOriginal().getPosition()+" = "+d.getType());
+		if (LOG.isLoggable(Level.FINEST))
+		    LOG.log(Level.FINEST, "Applying "+d+" to "+branchView);
 		if (d.getType() != Delta.TYPE.CHANGE) {
-		  System.out.println(d);
 		    d.applyTo(branchView);
 		}
 		else {
-		    // FIXME assumes both change are of same length
 		    for (int loop = 0; loop < d.getOriginal().size() && loop < d.getRevised().size(); loop++) {
-			if(d.getRevised().getLines().get(loop).toString().equals("h"))
-			System.out.println("nn");
 			int key = d.getOriginal().getPosition() + loop;
-			// FIXME - use the filter
 			Object o = branchView.get(key);
 			// we use the set rather than <code>instanceof</code> because it is legal to add any type of
 			// object, including ThreeWayDiff.
@@ -54,19 +48,18 @@ public class ListDelta implements ItemDelta {
 			    recursiveDiffs.add(twd);
 			    o = twd;
 			}
-			((ThreeWayDiff)o).addBranchSnapshot(d.getRevised().getLines().get(loop), branch);
-	
+			((ThreeWayDiff) o).addBranchSnapshot(d.getRevised().getLines().get(loop), branch);
+
 		    }
 		    // if the original was longer..
-		    for(int loop=d.getRevised().size(); loop< d.getOriginal().size(); loop++) {
-			branchView.remove(loop+d.getOriginal().getPosition());
+		    for (int loop = d.getRevised().size(); loop < d.getOriginal().size(); loop++) {
+			branchView.remove(loop + d.getOriginal().getPosition());
 		    }
 		    // if the original was shorter..
-		    for(int loop=d.getOriginal().size(); loop< d.getRevised().size(); loop++) {
-			branchView.add(loop+d.getOriginal().getPosition(), d.getRevised().getLines().get(loop));
+		    for (int loop = d.getOriginal().size(); loop < d.getRevised().size(); loop++) {
+			branchView.add(loop + d.getOriginal().getPosition(), d.getRevised().getLines().get(loop));
 		    }
-		    
-		   
+
 		}
 	    }
 	}

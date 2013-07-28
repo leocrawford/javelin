@@ -13,7 +13,7 @@ import org.jgrapht.graph.GraphUnion;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 import com.crypticbit.javelin.diff.ThreeWayDiff;
-import com.crypticbit.javelin.store.Digest;
+import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
@@ -125,8 +125,9 @@ public class Commit implements Comparable<Commit> {
 
     public Set<Commit> getParents() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
 	Set<Commit> parents = new TreeSet<>();
-	for (Digest parent : dao.getParents()) {
-	    parents.add(wrap(jsonFactory.getSimpleObjectAdapter(CommitDao.class).read(parent)));
+	DataAccessInterface<CommitDao> simpleObjectAdapter = jsonFactory.getSimpleObjectAdapter(CommitDao.class);
+	for (Identity parent : dao.getParents()) {
+	    parents.add(wrap(simpleObjectAdapter.read(parent)));
 	}
 	return parents;
     }

@@ -3,6 +3,7 @@ package com.crypticbit.javelin.js;
 import java.io.IOException;
 
 import com.crypticbit.javelin.store.Digest;
+import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,20 +20,19 @@ public class JsonStoreAdapterFactory {
     private ContentAddressableStorage cas;
 
     /** The internal gson object we use, which will write out Digest values properly */
-    private static final Gson gson = new GsonBuilder().registerTypeAdapter(Digest.class, new TypeAdapter<Digest>() {
+    private static final Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Identity.class,
+	    new TypeAdapter<Identity>() {
 
-	@Override
-	public Digest read(JsonReader in) throws IOException {
-	    return new Digest(in.nextString());
-	}
+		@Override
+		public Digest read(JsonReader in) throws IOException {
+		    return new Digest(in.nextString());
+		}
 
-	@Override
-	public void write(JsonWriter out, Digest value) throws IOException {
-	    if (value != null) {
-		out.value(value.getDigestAsString());
-	    }
-	}
-    }).create();
+		@Override
+		public void write(JsonWriter out, Identity value) throws IOException {
+		    out.value(value.getDigestAsString());
+		}
+	    }).create();
 
     JsonStoreAdapterFactory(ContentAddressableStorage cas) {
 	jea = new JsonElementStoreAdapter(cas, this);

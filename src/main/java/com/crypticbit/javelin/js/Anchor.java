@@ -19,7 +19,7 @@ public class Anchor {
     private KeyAddressableStorage kas;
     private Identity reference;
 
-    public Anchor(KeyAddressableStorage kas, Digest anchor) {
+    public Anchor(KeyAddressableStorage kas, Identity anchor) {
 	this.kas = kas;
 	this.anchor = anchor;
 

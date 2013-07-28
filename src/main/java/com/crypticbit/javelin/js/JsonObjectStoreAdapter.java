@@ -5,7 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.Map.Entry;
 
-import com.crypticbit.javelin.js.lazy.DigestReference;
+import com.crypticbit.javelin.js.lazy.IdentityReference;
 import com.crypticbit.javelin.js.lazy.LazyJsonArray;
 import com.crypticbit.javelin.js.lazy.LazyJsonMap;
 import com.crypticbit.javelin.js.lazy.Reference;
@@ -31,14 +31,14 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
 	if (in.isJsonArray()) {
 	    List<Reference> r = new LinkedList<>();
 	    for (JsonElement e : in.getAsJsonArray()) {
-		r.add(new DigestReference(jsa, getGson().fromJson(e, Digest.class)));
+		r.add(new IdentityReference(jsa, getGson().fromJson(e, Identity.class)));
 	    }
 	    return new LazyJsonArray(r);
 	}
 	else if (in.isJsonObject()) {
 	    Map<String, Reference> o = new HashMap<>();
 	    for (Entry<String, JsonElement> e : in.getAsJsonObject().entrySet()) {
-		o.put(e.getKey(), new DigestReference(jsa, getGson().fromJson(e.getValue(), Digest.class)));
+		o.put(e.getKey(), new IdentityReference(jsa, getGson().fromJson(e.getValue(), Identity.class)));
 	    }
 	    return new LazyJsonMap(o);
 	}
@@ -48,7 +48,6 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
 		return primative.getAsBoolean();
 	    }
 	    if (primative.isNumber()) {
-		System.out.println("-->" + primative.getAsString());
 		if (!primative.getAsString().contains(".")) {
 		    return primative.getAsInt();
 		}
@@ -76,16 +75,16 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
     @Override
     public Identity write(Object object) throws StoreException, IOException {
 	if (object instanceof List) {
-	    List<Digest> r = new LinkedList<>();
+	    List<Identity> r = new LinkedList<>();
 	    for (Object o : (List<Object>) object) {
-		r.add((Digest) write(o));
+		r.add(write(o));
 	    }
 	    return cas.store(new GeneralPersistableResource(getGson().toJson(r)));
 	}
 	else if (object instanceof Map) {
-	    Map<String, Digest> r = new HashMap<>();
+	    Map<String, Identity> r = new HashMap<>();
 	    for (Map.Entry<String, Object> o : ((Map<String, Object>) object).entrySet()) {
-		r.put(o.getKey(), (Digest) write(o.getValue()));
+		r.put(o.getKey(), write(o.getValue()));
 	    }
 	    return cas.store(new GeneralPersistableResource(getGson().toJson(r)));
 	}

@@ -42,7 +42,7 @@ public class JsonCasAdapter {
 
     }
 
-    public JsonCasAdapter(CasKasStore store, Digest anchor) {
+    public JsonCasAdapter(CasKasStore store, Identity anchor) {
 	this(store);
 	this.anchor = new Anchor(store, anchor);
     }
@@ -74,7 +74,7 @@ public class JsonCasAdapter {
     // FIXME - cast Digest
     public synchronized JsonCasAdapter commit() throws StoreException, IOException {
 	Identity valueIdentity = jsonFactory.getJsonElementAdapter().write(element);
-	CommitDao tempCommit = new CommitDao((Digest) valueIdentity, new Date(), "temp", (Digest) anchor.get());
+	CommitDao tempCommit = new CommitDao(valueIdentity, new Date(), "temp", anchor.get());
 	Identity tempDigest = commitFactory.write(tempCommit);
 	anchor.write(tempDigest);
 	commit = new Commit(tempCommit, jsonFactory);
@@ -103,7 +103,7 @@ public class JsonCasAdapter {
 	Object result = patch.apply();
 	// COPY and paste from commit - horrible
 	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(result);
-	CommitDao tempCommit = new CommitDao((Digest) valueIdentity, new Date(), "temp", (Digest) anchor.get());
+	CommitDao tempCommit = new CommitDao(valueIdentity, new Date(), "temp", anchor.get());
 	Identity tempDigest = commitFactory.write(tempCommit);
 	anchor.write(tempDigest);
 	commit = new Commit(tempCommit, jsonFactory);

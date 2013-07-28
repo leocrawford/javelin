@@ -20,6 +20,7 @@ public class JsonSimpleClassAdapter<T> extends DataAccessInterface<T> {
 
     @Override
     public T read(Identity commitId) throws StoreException, JsonSyntaxException, UnsupportedEncodingException {
+	System.out.println(cas.get(commitId).getAsString()+","+clazz);
 	return getGson().fromJson(cas.get(commitId).getAsString(), clazz);
     }
 

@@ -4,25 +4,26 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.crypticbit.javelin.store.Digest;
+import com.crypticbit.javelin.store.Identity;
 
 public class CommitDao {
 
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yy-MM-dd~HH:mm:ss:SSS");
     /** Reference to head of value tree */
-    private final Digest head;
+    private final Identity head;
     private final Date when;
     private final String user;
-    private final Digest parents[];
+    private final Identity parents[];
 
-    public CommitDao(Digest head, Date when, String user, Digest parent) {
-	this(head, when, user, (parent == null ? new Digest[] {} : new Digest[] { parent }));
+    public CommitDao(Identity head, Date when, String user, Identity parent) {
+	this(head, when, user, (parent == null ? new Identity[] {} : new Identity[] { parent }));
     }
 
-    public CommitDao(Digest head, Date when, String user, Digest[] parents) {
+    public CommitDao(Identity head, Date when, String user, Identity[] parents) {
 	this.head = head;
 	this.when = when;
 	this.user = user;
-	this.parents = parents;
+	this.parents =  parents;
     }
 
     @Override
@@ -31,11 +32,11 @@ public class CommitDao {
 	return head.equals(((CommitDao) obj).head);
     }
 
-    public Digest getHead() {
+    public Identity getHead() {
 	return head;
     }
 
-    public Digest[] getParents() {
+    public Identity[] getParents() {
 	return parents;
     }
 

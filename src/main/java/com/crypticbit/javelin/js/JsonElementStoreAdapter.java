@@ -26,14 +26,14 @@ public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> {
 	if (in.isJsonArray()) {
 	    JsonArray r = new JsonArray();
 	    for (JsonElement e : in.getAsJsonArray()) {
-		r.add(read(getGson().fromJson(e, Digest.class)));
+		r.add(read(getGson().fromJson(e, Identity.class)));
 	    }
 	    return r;
 	}
 	else if (in.isJsonObject()) {
 	    JsonObject o = new JsonObject();
 	    for (Entry<String, JsonElement> e : in.getAsJsonObject().entrySet()) {
-		o.add(e.getKey(), read(getGson().fromJson(e.getValue(), Digest.class)));
+		o.add(e.getKey(), read(getGson().fromJson(e.getValue(), Identity.class)));
 	    }
 	    return o;
 	}

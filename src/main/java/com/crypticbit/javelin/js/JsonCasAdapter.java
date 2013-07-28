@@ -33,27 +33,12 @@ public class JsonCasAdapter {
     private DataAccessInterface<CommitDao> commitFactory;
     private JsonStoreAdapterFactory jsonFactory;
 
-    /** The internal gson object we use, which will write out Digest values properly */
-    private static final Gson gson = new GsonBuilder().registerTypeAdapter(Digest.class, new TypeAdapter<Digest>() {
-
-	@Override
-	public Digest read(JsonReader in) throws IOException {
-	    return new Digest(in.nextString());
-	}
-
-	@Override
-	public void write(JsonWriter out, Digest value) throws IOException {
-	    if (value != null) {
-		out.value(value.getDigestAsString());
-	    }
-	}
-    }).create();
 
     /** Create a new json data structure with a random anchor, which can be retrieved using <code>getAnchor</code> */
     public JsonCasAdapter(CasKasStore store) {
 	this.store = store;
 	anchor = new Anchor(store);
-	jsonFactory = new JsonStoreAdapterFactory(store, gson);
+	jsonFactory = new JsonStoreAdapterFactory(store);
 	commitFactory = jsonFactory.getSimpleObjectAdapter(CommitDao.class);
 
     }

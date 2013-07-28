@@ -18,8 +18,8 @@ import com.google.gson.*;
 
 public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> {
 
-    JsonElementStoreAdapter(ContentAddressableStorage cas, Gson gson, JsonStoreAdapterFactory jsa) {
-	super(cas, gson, jsa);
+    JsonElementStoreAdapter(ContentAddressableStorage cas, JsonStoreAdapterFactory jsa) {
+	super(cas, jsa);
     }
 
     @Override
@@ -28,14 +28,14 @@ public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> {
 	if (in.isJsonArray()) {
 	    JsonArray r = new JsonArray();
 	    for (JsonElement e : in.getAsJsonArray()) {
-		r.add(read(gson.fromJson(e, Digest.class)));
+		r.add(read(getGson().fromJson(e, Digest.class)));
 	    }
 	    return r;
 	}
 	else if (in.isJsonObject()) {
 	    JsonObject o = new JsonObject();
 	    for (Entry<String, JsonElement> e : in.getAsJsonObject().entrySet()) {
-		o.add(e.getKey(), read(gson.fromJson(e.getValue(), Digest.class)));
+		o.add(e.getKey(), read(getGson().fromJson(e.getValue(), Digest.class)));
 	    }
 	    return o;
 	}
@@ -52,17 +52,17 @@ public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> {
 	    for (JsonElement e : element.getAsJsonArray()) {
 		array.add(write(e));
 	    }
-	    return cas.store(new GeneralPersistableResource(gson.toJson(array)));
+	    return cas.store(new GeneralPersistableResource(getGson().toJson(array)));
 	}
 	else if (element.isJsonObject()) {
 	    Map<String, Identity> map = new HashMap<>();
 	    for (Entry<String, JsonElement> e : element.getAsJsonObject().entrySet()) {
 		map.put(e.getKey(), write(e.getValue()));
 	    }
-	    return cas.store(new GeneralPersistableResource(gson.toJson(map)));
+	    return cas.store(new GeneralPersistableResource(getGson().toJson(map)));
 	}
 	else {
-	    return cas.store(new GeneralPersistableResource(gson.toJson(element)));
+	    return cas.store(new GeneralPersistableResource(getGson().toJson(element)));
 	}
 
     }

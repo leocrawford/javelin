@@ -18,8 +18,8 @@ import com.google.gson.*;
 
 public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
 
-    JsonObjectStoreAdapter(ContentAddressableStorage cas, Gson gson, JsonStoreAdapterFactory jsa) {
-	super(cas, gson, jsa);
+    JsonObjectStoreAdapter(ContentAddressableStorage cas, JsonStoreAdapterFactory jsa) {
+	super(cas, jsa);
     }
 
     // FIXME if already exists
@@ -29,17 +29,17 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
 	    for (Object o : (List<Object>) object) {
 		r.add((Digest) write(o));
 	    }
-	    return cas.store(new GeneralPersistableResource(gson.toJson(r)));
+	    return cas.store(new GeneralPersistableResource(getGson().toJson(r)));
 	}
 	else if (object instanceof Map) {
 	    Map<String, Digest> r = new HashMap<>();
 	    for (Map.Entry<String, Object> o : ((Map<String, Object>) object).entrySet()) {
 		r.put(o.getKey(), (Digest) write(o.getValue()));
 	    }
-	    return cas.store(new GeneralPersistableResource(gson.toJson(r)));
+	    return cas.store(new GeneralPersistableResource(getGson().toJson(r)));
 	}
 	else {
-	    return cas.store(new GeneralPersistableResource(gson.toJson(object)));
+	    return cas.store(new GeneralPersistableResource(getGson().toJson(object)));
 	}
     }
 
@@ -48,14 +48,14 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
 	if (in.isJsonArray()) {
 	    List<Reference> r = new LinkedList<>();
 	    for (JsonElement e : in.getAsJsonArray()) {
-		r.add(new DigestReference(jsa, gson.fromJson(e, Digest.class)));
+		r.add(new DigestReference(jsa, getGson().fromJson(e, Digest.class)));
 	    }
 	    return new LazyJsonArray(r);
 	}
 	else if (in.isJsonObject()) {
 	    Map<String, Reference> o = new HashMap<>();
 	    for (Entry<String, JsonElement> e : in.getAsJsonObject().entrySet()) {
-		o.put(e.getKey(), new DigestReference(jsa, gson.fromJson(e.getValue(), Digest.class)));
+		o.put(e.getKey(), new DigestReference(jsa, getGson().fromJson(e.getValue(), Digest.class)));
 	    }
 	    return new LazyJsonMap(o);
 	}

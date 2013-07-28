@@ -1,8 +1,15 @@
 package com.crypticbit.javelin.js;
 
+import java.io.IOException;
+
+import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 public class JsonStoreAdapterFactory {
 
@@ -10,14 +17,27 @@ public class JsonStoreAdapterFactory {
     private DataAccessInterface<Object> joa;
 
     private ContentAddressableStorage cas;
-    private Gson gson;
-    
-    JsonStoreAdapterFactory(ContentAddressableStorage cas,  Gson gson) {
-	jea = new JsonElementStoreAdapter(cas, gson, this);
-	joa = new JsonObjectStoreAdapter(cas, gson, this);
+
+    /** The internal gson object we use, which will write out Digest values properly */
+    private static final Gson gson = new GsonBuilder().registerTypeAdapter(Digest.class, new TypeAdapter<Digest>() {
+
+	@Override
+	public Digest read(JsonReader in) throws IOException {
+	    return new Digest(in.nextString());
+	}
+
+	@Override
+	public void write(JsonWriter out, Digest value) throws IOException {
+	    if (value != null) {
+		out.value(value.getDigestAsString());
+	    }
+	}
+    }).create();
+
+    JsonStoreAdapterFactory(ContentAddressableStorage cas) {
+	jea = new JsonElementStoreAdapter(cas, this);
+	joa = new JsonObjectStoreAdapter(cas, this);
 	this.cas = cas;
-	this.gson = gson;
-	
     }
 
     public DataAccessInterface<JsonElement> getJsonElementAdapter() {
@@ -28,8 +48,12 @@ public class JsonStoreAdapterFactory {
 	return joa;
     }
 
-    public <T> DataAccessInterface<T> getSimpleObjectAdapter(Class<T> clazz ) {
-	return new JsonSimpleClassAdapter<T>(cas, gson, clazz, this);
+    public <T> DataAccessInterface<T> getSimpleObjectAdapter(Class<T> clazz) {
+	return new JsonSimpleClassAdapter<T>(cas, clazz, this);
     }
-    
+
+    public Gson getGson() {
+	return gson;
+    }
+
 }

@@ -12,15 +12,17 @@ import com.google.gson.JsonSyntaxException;
 public abstract class DataAccessInterface<T> {
 
     protected ContentAddressableStorage cas;
-    protected Gson gson;
     protected JsonStoreAdapterFactory jsa;
 
-    protected DataAccessInterface(ContentAddressableStorage cas, Gson gson, JsonStoreAdapterFactory jsa) {
+    protected DataAccessInterface(ContentAddressableStorage cas, JsonStoreAdapterFactory jsa) {
 	this.cas = cas;
-	this.gson = gson;
 	this.jsa=jsa;
     }
 
+public Gson getGson() {
+    return jsa.getGson();
+}
+    
     public abstract T read(Identity commitId) throws StoreException, JsonSyntaxException, UnsupportedEncodingException;
 
     public abstract Identity write(T commit) throws StoreException, IOException;

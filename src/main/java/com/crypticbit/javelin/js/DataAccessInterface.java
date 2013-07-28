@@ -13,10 +13,12 @@ public abstract class DataAccessInterface<T> {
 
     protected ContentAddressableStorage cas;
     protected Gson gson;
+    protected JsonStoreAdapterFactory jsa;
 
-    protected DataAccessInterface(ContentAddressableStorage cas, Gson gson) {
+    protected DataAccessInterface(ContentAddressableStorage cas, Gson gson, JsonStoreAdapterFactory jsa) {
 	this.cas = cas;
 	this.gson = gson;
+	this.jsa=jsa;
     }
 
     public abstract T read(Identity commitId) throws StoreException, JsonSyntaxException, UnsupportedEncodingException;

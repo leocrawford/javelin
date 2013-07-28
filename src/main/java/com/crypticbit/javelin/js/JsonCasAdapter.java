@@ -30,8 +30,8 @@ public class JsonCasAdapter {
     private Commit commit;
     /** The underlying data store */
     private CasKasStore store;
-    private SimpleCasAccessInterface<CommitDao> commitFactory;
-    private DereferencedCasAccessInterface jsonFactory;
+    private DataAccessInterface<CommitDao> commitFactory;
+    private JsonStoreAdapterFactory jsonFactory;
 
     /** The internal gson object we use, which will write out Digest values properly */
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(Digest.class, new TypeAdapter<Digest>() {
@@ -53,8 +53,9 @@ public class JsonCasAdapter {
     public JsonCasAdapter(CasKasStore store) {
 	this.store = store;
 	anchor = new Anchor(store);
-	commitFactory = new SimpleCasAccessInterface<CommitDao>(store, gson, CommitDao.class);
-	jsonFactory = new DereferencedCasAccessInterface(store, gson);
+	jsonFactory = new JsonStoreAdapterFactory(store, gson);
+	commitFactory = jsonFactory.getSimpleObjectAdapter(CommitDao.class);
+
     }
 
     public JsonCasAdapter(CasKasStore store, Digest anchor) {
@@ -77,7 +78,7 @@ public class JsonCasAdapter {
 
     public synchronized JsonCasAdapter checkout() throws StoreException, JsonSyntaxException,
 	    UnsupportedEncodingException {
-	commit = new Commit(commitFactory.read(anchor.read()), jsonFactory, commitFactory);
+	commit = new Commit(commitFactory.read(anchor.read()), jsonFactory);
 	element = commit.getElement();
 	if (LOG.isLoggable(Level.FINER)) {
 	    LOG.log(Level.FINER, "Reading commit: " + commit);
@@ -88,11 +89,11 @@ public class JsonCasAdapter {
     // FIXME - horrible use of GeneralPersistableResource
     // FIXME - cast Digest
     public synchronized JsonCasAdapter commit() throws StoreException, IOException {
-	Identity valueIdentity = jsonFactory.write(element);
+	Identity valueIdentity = jsonFactory.getJsonElementAdapter().write(element);
 	CommitDao tempCommit = new CommitDao((Digest) valueIdentity, new Date(), "temp", (Digest) anchor.get());
 	Identity tempDigest = commitFactory.write(tempCommit);
 	anchor.write(tempDigest);
-	commit = new Commit(tempCommit, jsonFactory, commitFactory);
+	commit = new Commit(tempCommit, jsonFactory);
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
 	}
@@ -117,11 +118,11 @@ public class JsonCasAdapter {
 	ThreeWayDiff patch = commit.createChangeSet(other.commit);
 	Object result = patch.apply();
 	// COPY and paste from commit - horrible
-	Identity valueIdentity = jsonFactory.writeAsObjects(result);
+	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(result);
 	CommitDao tempCommit = new CommitDao((Digest) valueIdentity, new Date(), "temp", (Digest) anchor.get());
 	Identity tempDigest = commitFactory.write(tempCommit);
 	anchor.write(tempDigest);
-	commit = new Commit(tempCommit, jsonFactory, commitFactory);
+	commit = new Commit(tempCommit, jsonFactory);
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
 	}

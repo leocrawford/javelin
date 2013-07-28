@@ -24,16 +24,13 @@ import com.google.gson.JsonSyntaxException;
 public class Commit implements Comparable<Commit> {
 
     private CommitDao dao;
-    private DereferencedCasAccessInterface jsonFactory;
-    private SimpleCasAccessInterface<CommitDao> commitFactory;
+    private JsonStoreAdapterFactory jsonFactory;
 
-    Commit(CommitDao dao, DereferencedCasAccessInterface jsonFactory, SimpleCasAccessInterface<CommitDao> commitFactory) {
+    Commit(CommitDao dao, JsonStoreAdapterFactory jsonFactory) {
 	assert (dao != null);
 
 	this.dao = dao;
 	this.jsonFactory = jsonFactory;
-	this.commitFactory = commitFactory;
-
     }
 
     @Override
@@ -135,17 +132,17 @@ public class Commit implements Comparable<Commit> {
     }
 
     public JsonElement getElement() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
-	return jsonFactory.read(dao.getHead());
+	return jsonFactory.getJsonElementAdapter().read(dao.getHead());
     }
 
     public Object getObject() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
-	return jsonFactory.readAsObjects(dao.getHead());
+	return jsonFactory.getJsonObjectAdapter().read(dao.getHead());
     }
 
     public Set<Commit> getParents() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
 	Set<Commit> parents = new TreeSet<>();
 	for (Digest parent : dao.getParents()) {
-	    parents.add(wrap(commitFactory.read(parent)));
+	    parents.add(wrap(jsonFactory.getSimpleObjectAdapter(CommitDao.class).read(parent)));
 	}
 	return parents;
     }
@@ -194,7 +191,7 @@ public class Commit implements Comparable<Commit> {
 
     // FIXME - should we try and find an existing instance?
     private Commit wrap(CommitDao dao) {
-	return new Commit(dao, jsonFactory, commitFactory);
+	return new Commit(dao, jsonFactory);
     }
 
     public static Graph<CommitDao, DefaultEdge> getAsGraphToRoots(Commit[] commits) throws JsonSyntaxException,

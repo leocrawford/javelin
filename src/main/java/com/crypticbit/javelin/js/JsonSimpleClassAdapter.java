@@ -7,7 +7,6 @@ import com.crypticbit.javelin.store.GeneralPersistableResource;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 public class JsonSimpleClassAdapter<T> extends DataAccessInterface<T> {

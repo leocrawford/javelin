@@ -44,14 +44,14 @@ public class JsonCasAdapterTest {
 	System.out.println(jca2.read());
 	System.out.println(jca2.getCommit().getShortestHistory());
 
-	System.out.println("JCA-LR"+jca.lazyRead());
-	System.out.println("JCS2-LR"+jca2.lazyRead());
-	
+	System.out.println("JCA-LR" + jca.lazyRead());
+	System.out.println("JCS2-LR" + jca2.lazyRead());
+
 	jca.merge(jca2);
-	
+
 	System.out.println(memoryStore);
-	
-	System.out.println("MERGE="+jca.lazyRead());
+
+	System.out.println("MERGE=" + jca.lazyRead());
 
     }
 

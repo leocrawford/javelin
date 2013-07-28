@@ -9,13 +9,13 @@ public class ThreeWayDiff<T> {
     private List<Snapshot<T>> list = new LinkedList<>();
     private DifferFactory applicatorFactory;
 
+    public ThreeWayDiff(T commonAncestor) {
+	this(commonAncestor, new DifferFactory());
+    }
+
     public ThreeWayDiff(T commonAncestor, DifferFactory applicatorFactory) {
 	this.commonAncestor = commonAncestor;
 	this.applicatorFactory = applicatorFactory;
-    }
-
-    public ThreeWayDiff(T commonAncestor) {
-	this(commonAncestor, new DifferFactory());
     }
 
     /** Add a snapshot with a specified date - can be out of order */
@@ -28,9 +28,18 @@ public class ThreeWayDiff<T> {
 	list.add(new Snapshot(null, object, branch));
     }
 
-    private SequenceDiff<T,?> getPatch() {
+    public T apply() {
+	return getPatch().apply(commonAncestor);
+    }
+
+    @Override
+    public String toString() {
+	return list.toString() + "->" + apply().toString();
+    }
+
+    private SequenceDiff<T, ?> getPatch() {
 	List<Snapshot<T>> workingList = list;
-	SequenceDiff<T,?> result = applicatorFactory.createApplicator(commonAncestor);
+	SequenceDiff<T, ?> result = applicatorFactory.createApplicator(commonAncestor);
 	Map<Object, T> parents = new HashMap<>();
 	for (Snapshot<T> snapshot : workingList) {
 	    T parent = parents.get(snapshot.getBranch());
@@ -41,14 +50,6 @@ public class ThreeWayDiff<T> {
 	    parents.put(snapshot.getBranch(), snapshot.getObject());
 	}
 	return result;
-    }
-     
-    public T apply() {
-	return getPatch().apply(commonAncestor);
-    }
-    
-    public String toString() {
-	return list.toString()+"->"+apply().toString();
     }
 
 }

@@ -12,9 +12,6 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.GraphUnion;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
-import com.crypticbit.javelin.diff.DifferFactory;
-import com.crypticbit.javelin.diff.DifferFactoryElement;
-import com.crypticbit.javelin.diff.SequenceDiff;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.StoreException;
@@ -54,32 +51,6 @@ public class Commit implements Comparable<Commit> {
 	return twd;
     }
 
-    private void addCommitToTreeMap(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1,
-	    ThreeWayDiff twd) throws UnsupportedEncodingException, StoreException {
-	for (DefaultEdge e : p1.getEdgeList()) {
-	    Commit end = wrap(x.getEdgeTarget(e));
-	    twd.addBranchSnapshot(end.getDate(), end.getObject(), p1);
-	}
-    }
-
-//    private void printDelta(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1)
-//	    throws UnsupportedEncodingException, StoreException {
-//	for (DefaultEdge e : p1.getEdgeList()) {
-//	    Patch patch = wrap(x.getEdgeSource(e)).createChangeSetFromParent(wrap(x.getEdgeTarget(e)));
-//	    System.out.println("The difference between " + x.getEdgeSource(e) + " and " + x.getEdgeTarget(e));
-//	    for (Delta delta : patch.getDeltas()) {
-//		List<Digest> lines = (List<Digest>) delta.getRevised().getLines();
-//		for (Digest next : lines)
-//		    System.out.println(delta + "," + jsonFactory.read(next));
-//	    }
-//	}
-//    }
-
-    public GraphPath<CommitDao, DefaultEdge> getShortestPath(Graph<CommitDao, DefaultEdge> graph, CommitDao start,
-	    CommitDao end) {
-	return new DijkstraShortestPath<CommitDao, DefaultEdge>(graph, start, end).getPath();
-    }
-
     @Override
     public boolean equals(Object obj) {
 	if (this == obj) {
@@ -102,6 +73,19 @@ public class Commit implements Comparable<Commit> {
 	}
 	return true;
     }
+
+    // private void printDelta(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1)
+    // throws UnsupportedEncodingException, StoreException {
+    // for (DefaultEdge e : p1.getEdgeList()) {
+    // Patch patch = wrap(x.getEdgeSource(e)).createChangeSetFromParent(wrap(x.getEdgeTarget(e)));
+    // System.out.println("The difference between " + x.getEdgeSource(e) + " and " + x.getEdgeTarget(e));
+    // for (Delta delta : patch.getDeltas()) {
+    // List<Digest> lines = (List<Digest>) delta.getRevised().getLines();
+    // for (Digest next : lines)
+    // System.out.println(delta + "," + jsonFactory.read(next));
+    // }
+    // }
+    // }
 
     /**
      * Generate a graph from this node to root. This allows us to treat the commit tree like a graph, and use standard
@@ -163,6 +147,11 @@ public class Commit implements Comparable<Commit> {
 	return shortest;
     }
 
+    public GraphPath<CommitDao, DefaultEdge> getShortestPath(Graph<CommitDao, DefaultEdge> graph, CommitDao start,
+	    CommitDao end) {
+	return new DijkstraShortestPath<CommitDao, DefaultEdge>(graph, start, end).getPath();
+    }
+
     public String getUser() {
 	return dao.getUser();
     }
@@ -187,6 +176,14 @@ public class Commit implements Comparable<Commit> {
     protected Commit findRoot() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
 	List<Commit> shortestHistory = getShortestHistory();
 	return shortestHistory.get(shortestHistory.size() - 1);
+    }
+
+    private void addCommitToTreeMap(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1,
+	    ThreeWayDiff twd) throws UnsupportedEncodingException, StoreException {
+	for (DefaultEdge e : p1.getEdgeList()) {
+	    Commit end = wrap(x.getEdgeTarget(e));
+	    twd.addBranchSnapshot(end.getDate(), end.getObject(), p1);
+	}
     }
 
     // FIXME - should we try and find an existing instance?

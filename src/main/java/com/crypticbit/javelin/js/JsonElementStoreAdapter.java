@@ -2,13 +2,11 @@ package com.crypticbit.javelin.js;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Map.Entry;
 
-import com.crypticbit.javelin.js.lazy.DigestReference;
-import com.crypticbit.javelin.js.lazy.LazyJsonArray;
-import com.crypticbit.javelin.js.lazy.LazyJsonMap;
-import com.crypticbit.javelin.js.lazy.Reference;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.GeneralPersistableResource;
 import com.crypticbit.javelin.store.Identity;
@@ -44,7 +42,6 @@ public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> {
 	}
     }
 
- 
     @Override
     public Identity write(JsonElement element) throws StoreException, IOException {
 	if (element.isJsonArray()) {

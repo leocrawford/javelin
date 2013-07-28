@@ -14,23 +14,19 @@ import com.google.gson.JsonElement;
 public class JsonElementArray implements DifferFactoryElement {
 
     @Override
-    public boolean supports(Object object) {
-	return (object instanceof JsonElement && ((JsonElement) object).isJsonArray());
-    }
-
-    @Override
     public SequenceDiff createApplicator() {
 	return new SequenceDiff<JsonElement, ListDelta>() {
 
 	    private ListSequenceDiff lsd = new ListSequenceDiff();
 
 	    @Override
-	    public JsonArray apply(JsonElement value) {
-		return convert(lsd.apply(convert(value)));
-	    }
-
 	    public void add(Date date, JsonElement parent, JsonElement child, Object branch) {
 		lsd.add(date, convert(parent), convert(child), branch);
+	    }
+
+	    @Override
+	    public JsonArray apply(JsonElement value) {
+		return convert(lsd.apply(convert(value)));
 	    }
 
 	    @Override
@@ -40,7 +36,7 @@ public class JsonElementArray implements DifferFactoryElement {
 
 	    private List<JsonElement> convert(JsonElement value) {
 		List<JsonElement> list = new ArrayList<>();
-		for (JsonElement o : ((JsonElement) value).getAsJsonArray()) {
+		for (JsonElement o : value.getAsJsonArray()) {
 		    list.add(o);
 		}
 		return list;
@@ -48,12 +44,18 @@ public class JsonElementArray implements DifferFactoryElement {
 
 	    private JsonArray convert(List<JsonElement> list) {
 		JsonArray ja = new JsonArray();
-		for (JsonElement o : list)
+		for (JsonElement o : list) {
 		    ja.add(o);
+		}
 		return ja;
 	    }
 
 	};
+    }
+
+    @Override
+    public boolean supports(Object object) {
+	return (object instanceof JsonElement && ((JsonElement) object).isJsonArray());
     }
 
 }

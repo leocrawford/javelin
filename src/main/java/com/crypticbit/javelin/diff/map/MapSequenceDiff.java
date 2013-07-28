@@ -12,9 +12,9 @@ import com.google.common.collect.Maps;
 public class MapSequenceDiff<T> extends SequenceDiff<Map<String, T>, MapDelta> {
     @Override
     public Map<String, T> apply(Map<String, T> value) {
-	
+
 	Map<String, T> result = new HashMap<>(value);
-	
+
 	// if there is a change we're going to need to apply a recursive diff
 	Map<String, ThreeWayDiff<T>> recursiveDiffs = new HashMap<>();
 

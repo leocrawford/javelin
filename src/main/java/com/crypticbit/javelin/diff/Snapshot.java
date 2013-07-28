@@ -19,20 +19,21 @@ public class Snapshot<T> {
 	this.branch = branch;
     }
 
-    public Date getDate() {
-	return date;
-    }
-
     public Object getBranch() {
 	return branch;
+    }
+
+    public Date getDate() {
+	return date;
     }
 
     public T getObject() {
 	return object;
     }
 
+    @Override
     public String toString() {
-	return getBranch()+": "+object.toString();
+	return getBranch() + ": " + object.toString();
     }
-    
+
 }

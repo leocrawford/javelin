@@ -30,8 +30,9 @@ public class ListDelta implements ItemDelta {
 	try {
 	    MultiViewList branchView = unorderedIndexedWriter.getMode(branch);
 	    for (Delta d : Lists.reverse(patch.getDeltas())) {
-		if (LOG.isLoggable(Level.FINEST))
-		    LOG.log(Level.FINEST, "Applying "+d+" to "+branchView);
+		if (LOG.isLoggable(Level.FINEST)) {
+		    LOG.log(Level.FINEST, "Applying " + d + " to " + branchView);
+		}
 		if (d.getType() != Delta.TYPE.CHANGE) {
 		    d.applyTo(branchView);
 		}
@@ -70,15 +71,18 @@ public class ListDelta implements ItemDelta {
 	}
     }
 
-    public String toString() {
-	StringBuffer p = new StringBuffer();
-	for (Delta d : patch.getDeltas())
-	    p.append(d);
-	return branch + ":" + p;
-    }
-
+    @Override
     public Object getBranch() {
 	return branch;
+    }
+
+    @Override
+    public String toString() {
+	StringBuffer p = new StringBuffer();
+	for (Delta d : patch.getDeltas()) {
+	    p.append(d);
+	}
+	return branch + ":" + p;
     }
 
 }

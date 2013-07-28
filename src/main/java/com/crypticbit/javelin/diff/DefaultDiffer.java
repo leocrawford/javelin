@@ -5,11 +5,6 @@ import java.util.List;
 public class DefaultDiffer implements DifferFactoryElement {
 
     @Override
-    public boolean supports(Object object) {
-	return true;
-    }
-
-    @Override
     public SequenceDiff createApplicator() {
 	return new SequenceDiff() {
 
@@ -26,6 +21,11 @@ public class DefaultDiffer implements DifferFactoryElement {
 	};
     }
 
+    @Override
+    public boolean supports(Object object) {
+	return true;
+    }
+
     static class DefaultItemDelta implements ItemDelta {
 	private Object object, branch;
 
@@ -39,6 +39,7 @@ public class DefaultDiffer implements DifferFactoryElement {
 	    return branch;
 	}
 
+	@Override
 	public String toString() {
 	    return object + " [" + branch + "]";
 	}

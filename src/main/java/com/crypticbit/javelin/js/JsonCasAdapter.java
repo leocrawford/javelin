@@ -11,9 +11,9 @@ import com.crypticbit.javelin.store.CasKasStore;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
-import com.google.gson.*;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSyntaxException;
 
 import difflib.PatchFailedException;
 
@@ -32,7 +32,6 @@ public class JsonCasAdapter {
     private CasKasStore store;
     private DataAccessInterface<CommitDao> commitFactory;
     private JsonStoreAdapterFactory jsonFactory;
-
 
     /** Create a new json data structure with a random anchor, which can be retrieved using <code>getAnchor</code> */
     public JsonCasAdapter(CasKasStore store) {

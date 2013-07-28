@@ -14,7 +14,10 @@ import com.crypticbit.javelin.store.GeneralPersistableResource;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 
 public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
 
@@ -22,27 +25,7 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
 	super(cas, jsa);
     }
 
-    // FIXME if already exists
-    public Identity write(Object object) throws StoreException, IOException {
-	if (object instanceof List) {
-	    List<Digest> r = new LinkedList<>();
-	    for (Object o : (List<Object>) object) {
-		r.add((Digest) write(o));
-	    }
-	    return cas.store(new GeneralPersistableResource(getGson().toJson(r)));
-	}
-	else if (object instanceof Map) {
-	    Map<String, Digest> r = new HashMap<>();
-	    for (Map.Entry<String, Object> o : ((Map<String, Object>) object).entrySet()) {
-		r.put(o.getKey(), (Digest) write(o.getValue()));
-	    }
-	    return cas.store(new GeneralPersistableResource(getGson().toJson(r)));
-	}
-	else {
-	    return cas.store(new GeneralPersistableResource(getGson().toJson(object)));
-	}
-    }
-
+    @Override
     public Object read(Identity digest) throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
 	JsonElement in = new JsonParser().parse(cas.get(digest).getAsString());
 	if (in.isJsonArray()) {
@@ -69,10 +52,11 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
 		if (!primative.getAsString().contains(".")) {
 		    return primative.getAsInt();
 		}
-		else
+		else {
 		    return primative.getAsFloat();
-		// System.out.println("Got "+primative+","+primative.getAsNumber().);
-		// return primative.getAsNumber();
+		    // System.out.println("Got "+primative+","+primative.getAsNumber().);
+		    // return primative.getAsNumber();
+		}
 	    }
 	    if (primative.isString()) {
 		return primative.getAsString();
@@ -86,5 +70,27 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
 	    throw new Error("Unknown Json Type: " + in);
 	}
 
+    }
+
+    // FIXME if already exists
+    @Override
+    public Identity write(Object object) throws StoreException, IOException {
+	if (object instanceof List) {
+	    List<Digest> r = new LinkedList<>();
+	    for (Object o : (List<Object>) object) {
+		r.add((Digest) write(o));
+	    }
+	    return cas.store(new GeneralPersistableResource(getGson().toJson(r)));
+	}
+	else if (object instanceof Map) {
+	    Map<String, Digest> r = new HashMap<>();
+	    for (Map.Entry<String, Object> o : ((Map<String, Object>) object).entrySet()) {
+		r.put(o.getKey(), (Digest) write(o.getValue()));
+	    }
+	    return cas.store(new GeneralPersistableResource(getGson().toJson(r)));
+	}
+	else {
+	    return cas.store(new GeneralPersistableResource(getGson().toJson(object)));
+	}
     }
 }

@@ -7,24 +7,9 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-
 public class Demo implements OKCancelListener {
 
     private JSONEditFrame theFrame;
-
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-	Logger LOG = Logger.getLogger("com.crypticbit.javelin.diff");
-	ConsoleHandler handler = new ConsoleHandler();
-	handler.setLevel(Level.ALL);
-	LOG.addHandler(handler);
-	LOG.setLevel(Level.ALL);
-
-	new Demo();
-
-    }
 
     private Demo() {
 	theFrame = new JSONEditFrame(this, "Testing JSONEditFrame", "{}");
@@ -47,6 +32,20 @@ public class Demo implements OKCancelListener {
 			JOptionPane.INFORMATION_MESSAGE);
 	    }
 	}
+    }
+
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+	Logger LOG = Logger.getLogger("com.crypticbit.javelin.diff");
+	ConsoleHandler handler = new ConsoleHandler();
+	handler.setLevel(Level.ALL);
+	LOG.addHandler(handler);
+	LOG.setLevel(Level.ALL);
+
+	new Demo();
+
     }
 
 }

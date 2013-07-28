@@ -11,6 +11,7 @@ import com.crypticbit.javelin.diff.ThreeWayDiff;
 import difflib.DiffUtils;
 
 public class ListSequenceDiff<T> extends SequenceDiff<List<T>, ListDelta> {
+    @Override
     public List<T> apply(List<T> list) {
 
 	// well access the list through a clever adapter than allows each write to use indexes that assume
@@ -36,6 +37,7 @@ public class ListSequenceDiff<T> extends SequenceDiff<List<T>, ListDelta> {
 	return new ArrayList(workingList);
     }
 
+    @Override
     public ListDelta createDelta(List<T> parent, List<T> child, Object branch) {
 	return new ListDelta(DiffUtils.diff(parent, child), branch);
     }

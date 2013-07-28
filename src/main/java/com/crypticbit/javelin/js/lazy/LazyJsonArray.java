@@ -14,26 +14,28 @@ public class LazyJsonArray extends AbstractList<Object> implements BackedElement
     }
 
     @Override
-    public Object get(int index) {
-	return backingList.get(index).getValue();
-    }
-
-    public Object set(int index, Object element) {
-	return backingList.set(index, new ValueReference(element)).getValue();
-    }
-
     public void add(int index, Object element) {
 	backingList.add(index, new ValueReference(element));
     }
 
     @Override
-    public int size() {
-	return backingList.size();
+    public Object get(int index) {
+	return backingList.get(index).getValue();
     }
 
     @Override
     public Object getBackedValue() {
 	return backingList;
+    }
+
+    @Override
+    public Object set(int index, Object element) {
+	return backingList.set(index, new ValueReference(element)).getValue();
+    }
+
+    @Override
+    public int size() {
+	return backingList.size();
     }
 
 }

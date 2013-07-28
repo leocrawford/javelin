@@ -8,13 +8,13 @@ import com.crypticbit.javelin.diff.SequenceDiff;
 public class MapDiffer<T> implements DifferFactoryElement {
 
     @Override
-    public boolean supports(Object object) {
-	return object instanceof Map;
+    public SequenceDiff<Map<String, T>, MapDelta> createApplicator() {
+	return new MapSequenceDiff<T>();
     }
 
     @Override
-    public SequenceDiff<Map<String, T>, MapDelta> createApplicator() {
-	return new MapSequenceDiff<T>();
+    public boolean supports(Object object) {
+	return object instanceof Map;
     }
 
 }

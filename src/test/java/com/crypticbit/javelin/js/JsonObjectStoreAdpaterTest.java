@@ -34,8 +34,8 @@ public class JsonObjectStoreAdpaterTest {
 	Identity integerIdentity = jsonObjectAdapter.write(100);
 	Identity floatIdentity = jsonObjectAdapter.write(2.1);
 	Identity booleanIdentity = jsonObjectAdapter.write(true);
-	Identity arrayIdentity = jsonObjectAdapter.write(Arrays.asList(new Integer[]{1,2,3}));
-	Map<String,Object> m = new HashMap<>();
+	Identity arrayIdentity = jsonObjectAdapter.write(Arrays.asList(new Integer[] { 1, 2, 3 }));
+	Map<String, Object> m = new HashMap<>();
 	m.put("a", 1);
 	m.put("b", null);
 	m.put("c", false);
@@ -46,17 +46,17 @@ public class JsonObjectStoreAdpaterTest {
 	assertTrue(jsonObjectAdapter.read(integerIdentity) instanceof Integer);
 	assertEquals(100, jsonObjectAdapter.read(integerIdentity));
 	assertTrue(jsonObjectAdapter.read(floatIdentity) instanceof Float);
-	assertEquals(2.1f, (Float) jsonObjectAdapter.read(floatIdentity),0.001);
+	assertEquals(2.1f, (Float) jsonObjectAdapter.read(floatIdentity), 0.001);
 	assertTrue(jsonObjectAdapter.read(booleanIdentity) instanceof Boolean);
 	assertEquals(true, jsonObjectAdapter.read(booleanIdentity));
 
 	assertTrue(jsonObjectAdapter.read(arrayIdentity) instanceof List);
-	assertEquals(3, ((List<Object>)jsonObjectAdapter.read(arrayIdentity)).size());
-	assertEquals(1, ((List<Object>)jsonObjectAdapter.read(arrayIdentity)).get(0));
+	assertEquals(3, ((List<Object>) jsonObjectAdapter.read(arrayIdentity)).size());
+	assertEquals(1, ((List<Object>) jsonObjectAdapter.read(arrayIdentity)).get(0));
 
 	assertTrue(jsonObjectAdapter.read(mapIdentity) instanceof Map);
-	assertEquals(3, ((Map<String,Object>)jsonObjectAdapter.read(mapIdentity)).size());
-	assertTrue(((Map<String,Object>)jsonObjectAdapter.read(mapIdentity)).get("b") == null);
+	assertEquals(3, ((Map<String, Object>) jsonObjectAdapter.read(mapIdentity)).size());
+	assertTrue(((Map<String, Object>) jsonObjectAdapter.read(mapIdentity)).get("b") == null);
 
     }
 

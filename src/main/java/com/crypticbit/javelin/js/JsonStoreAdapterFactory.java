@@ -40,6 +40,10 @@ public class JsonStoreAdapterFactory {
 	this.cas = cas;
     }
 
+    public Gson getGson() {
+	return gson;
+    }
+
     public DataAccessInterface<JsonElement> getJsonElementAdapter() {
 	return jea;
     }
@@ -50,10 +54,6 @@ public class JsonStoreAdapterFactory {
 
     public <T> DataAccessInterface<T> getSimpleObjectAdapter(Class<T> clazz) {
 	return new JsonSimpleClassAdapter<T>(cas, clazz, this);
-    }
-
-    public Gson getGson() {
-	return gson;
     }
 
 }

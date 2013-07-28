@@ -217,13 +217,21 @@ public class JSONEditFrame extends JFrame implements TreeSelectionListener {
 	    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	else {
-	    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+	    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 	    setAlwaysOnTop(true);
 	    addWindowListener(new ExitListener(new OkCancelAction(this, parent, OKCancelListener.Action.DEFAULT_CLOSE)));
 	}
 	setLocationRelativeTo(null);
 	setVisible(true);
 	updateButtonStates();
+    }
+
+    /**
+     * Call this when finished using this frame.
+     */
+    public void closeWindow() {
+	setVisible(false);
+	dispose();
     }
 
     /**
@@ -235,34 +243,54 @@ public class JSONEditFrame extends JFrame implements TreeSelectionListener {
 	return treeView[currentIndex].getJson();
     }
 
-    /**
-     * Call this when finished using this frame.
-     */
-    public void closeWindow() {
-	setVisible(false);
-	dispose();
+    @Override
+    public void valueChanged(TreeSelectionEvent treeSelectionEvent) {
+	currentIndex = getIndex(treeSelectionEvent);
+	System.out.println(currentIndex);
+	updateButtonStates();
     }
 
-    private static class OkCancelAction extends AbstractAction {
-	/**
-	 * Default serial version id
-	 */
-	private static final long serialVersionUID = 1L;
-
-	private final OKCancelListener listener;
-	private final OKCancelListener.Action action;
-	private final JFrame frame;
-
-	public OkCancelAction(JFrame frame, OKCancelListener listener, OKCancelListener.Action action) {
-	    super(action.name());
-	    this.action = action;
-	    this.listener = listener;
-	    this.frame = frame;
+    private int getIndex(TreeSelectionEvent treeSelectionEvent) {
+	int loop = 0;
+	for (JSONEditPanel tv : treeView) {
+	    if (tv.jTree == treeSelectionEvent.getSource()) {
+		return loop;
+	    }
+	    else {
+		loop++;
+	    }
 	}
+	return -1;
+    }
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-	    listener.onFrameAction(action, frame);
+    private void updateButtonStates() {
+	// Update the button controls to enable and disable tree manipulation
+	// operations
+	List<JSONEditPanel.AllowedOps> allowedOps = treeView[currentIndex].getAllowedOperations();
+	for (Entry<JSONEditPanel.AllowedOps, JButton> entry : treeChangeButtons.entrySet()) {
+	    if (allowedOps.contains(entry.getKey())) {
+		entry.getValue().setEnabled(true);
+	    }
+	    else {
+		entry.getValue().setEnabled(false);
+	    }
+	}
+    }
+
+    public enum Direction {
+	INSERT("Insert", "Insert a node using json in text area to create the node before the selected node."), APPEND(
+		"Append", "Put a new node using the json in the text area immediately after selected node."), AS_CHILD(
+		"New Child", "Put a new child node into the child list of the node selected."), REPLACE("Replace",
+		"Push tree view or selected node with the JSON in the text area."), GET("Get",
+		"Get JSON from the tree view or selected tree node into text area."), RENAME("Rename",
+		"Rename selected node."), DELETE("Delete", "Delete selected node.");
+
+	final String shortName;
+	final String description;
+
+	private Direction(String shortName, String description) {
+	    this.shortName = shortName;
+	    this.description = description;
 	}
     }
 
@@ -275,6 +303,15 @@ public class JSONEditFrame extends JFrame implements TreeSelectionListener {
 	private final Direction direction;
 	private final JSONEditPanel[] jEditPanel;
 	private final JTextArea jTextArea;
+
+	private final JsonParser parser = new JsonParser();
+
+	private final ThreeWayDiff<JsonElement> twd = new ThreeWayDiff<>(parser.parse("{}"), new DifferFactory() {
+	    {
+		addApplicator(new JsonElementArray());
+		addApplicator(new JsonElementMap());
+	    }
+	});
 
 	public CopyJsonAction(Direction direction, JSONEditPanel[] treeView, JTextArea jTextArea) {
 	    super(direction.shortName);
@@ -314,47 +351,10 @@ public class JSONEditFrame extends JFrame implements TreeSelectionListener {
 		    JSONEditPanel.UpdateType.REPLACE);
 	}
 
-	private final JsonParser parser = new JsonParser();
-	private final ThreeWayDiff<JsonElement> twd = new ThreeWayDiff<>(parser.parse("{}"), new DifferFactory() {
-	    {
-		addApplicator(new JsonElementArray());
-		addApplicator(new JsonElementMap());
-	    }
-	});
-
 	private String mergeJson(String json, int index) {
 	    twd.addBranchSnapshot(parser.parse(json), index);
 	    System.out.println(twd);
 	    return new Gson().toJson(twd.apply());
-	}
-    }
-
-    @Override
-    public void valueChanged(TreeSelectionEvent treeSelectionEvent) {
-	currentIndex = getIndex(treeSelectionEvent);
-	System.out.println(currentIndex);
-	updateButtonStates();
-    }
-
-    private int getIndex(TreeSelectionEvent treeSelectionEvent) {
-	int loop = 0;
-	for (JSONEditPanel tv : treeView)
-	    if (tv.jTree == treeSelectionEvent.getSource())
-		return loop;
-	    else
-		loop++;
-	return -1;
-    }
-
-    private void updateButtonStates() {
-	// Update the button controls to enable and disable tree manipulation
-	// operations
-	List<JSONEditPanel.AllowedOps> allowedOps = treeView[currentIndex].getAllowedOperations();
-	for (Entry<JSONEditPanel.AllowedOps, JButton> entry : treeChangeButtons.entrySet()) {
-	    if (allowedOps.contains(entry.getKey()))
-		entry.getValue().setEnabled(true);
-	    else
-		entry.getValue().setEnabled(false);
 	}
     }
 
@@ -365,25 +365,32 @@ public class JSONEditFrame extends JFrame implements TreeSelectionListener {
 	    this.action = action;
 	}
 
+	@Override
 	public void windowClosing(WindowEvent event) {
 	    action.actionPerformed(null);
 	}
     }
 
-    public enum Direction {
-	INSERT("Insert", "Insert a node using json in text area to create the node before the selected node."), APPEND(
-		"Append", "Put a new node using the json in the text area immediately after selected node."), AS_CHILD(
-		"New Child", "Put a new child node into the child list of the node selected."), REPLACE("Replace",
-		"Push tree view or selected node with the JSON in the text area."), GET("Get",
-		"Get JSON from the tree view or selected tree node into text area."), RENAME("Rename",
-		"Rename selected node."), DELETE("Delete", "Delete selected node.");
+    private static class OkCancelAction extends AbstractAction {
+	/**
+	 * Default serial version id
+	 */
+	private static final long serialVersionUID = 1L;
 
-	final String shortName;
-	final String description;
+	private final OKCancelListener listener;
+	private final OKCancelListener.Action action;
+	private final JFrame frame;
 
-	private Direction(String shortName, String description) {
-	    this.shortName = shortName;
-	    this.description = description;
+	public OkCancelAction(JFrame frame, OKCancelListener listener, OKCancelListener.Action action) {
+	    super(action.name());
+	    this.action = action;
+	    this.listener = listener;
+	    this.frame = frame;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+	    listener.onFrameAction(action, frame);
 	}
     };
 

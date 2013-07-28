@@ -31,8 +31,9 @@ public class JsonElementStoreAdpaterTest {
 	Identity floatIdentity = jsonElementAdapter.write(GSON.fromJson("2.1", JsonElement.class));
 	Identity booleanIdentity = jsonElementAdapter.write(GSON.fromJson("TRUE", JsonElement.class));
 	Identity arrayIdentity = jsonElementAdapter.write(GSON.fromJson("[1,2,3]", JsonElement.class));
+	Identity mapIdentity = jsonElementAdapter.write(GSON.fromJson("{\"a\":1,\"b\":null,\"c\":FALSE}",
+		JsonElement.class));
 
-	
 	assertTrue(jsonElementAdapter.read(stringIdentity).getAsJsonPrimitive().isString());
 	assertTrue(jsonElementAdapter.read(nullIdentity).isJsonNull());
 	assertTrue(jsonElementAdapter.read(integerIdentity).getAsJsonPrimitive().getAsJsonPrimitive().isNumber());
@@ -45,8 +46,11 @@ public class JsonElementStoreAdpaterTest {
 	assertTrue(jsonElementAdapter.read(arrayIdentity).isJsonArray());
 	assertEquals(3, jsonElementAdapter.read(arrayIdentity).getAsJsonArray().size());
 	assertEquals(1, jsonElementAdapter.read(arrayIdentity).getAsJsonArray().get(0).getAsInt());
-	
-    
+
+	assertTrue(jsonElementAdapter.read(mapIdentity).isJsonObject());
+	assertEquals(3, jsonElementAdapter.read(mapIdentity).getAsJsonObject().entrySet().size());
+	assertTrue(jsonElementAdapter.read(mapIdentity).getAsJsonObject().get("b").isJsonNull());
+
     }
 
 }

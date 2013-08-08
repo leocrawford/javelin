@@ -61,7 +61,8 @@ public class JsonCasAdapter {
 
     public synchronized JsonCasAdapter checkout() throws StoreException, JsonSyntaxException,
 	    UnsupportedEncodingException {
-	commit = new Commit(commitFactory.read(anchor.read()), jsonFactory);
+	Identity daoDigest = anchor.read();
+	commit = new Commit(commitFactory.read(daoDigest),daoDigest, jsonFactory);
 	element = commit.getElement();
 	if (LOG.isLoggable(Level.FINER)) {
 	    LOG.log(Level.FINER, "Reading commit: " + commit);
@@ -96,10 +97,10 @@ public class JsonCasAdapter {
     }
 
     private void writeIdentity(Identity valueIdentity, Identity... parents) throws StoreException, IOException {
-	CommitDao tempCommit = new CommitDao(valueIdentity, new Date(), "temp", parents);
+	CommitDao tempCommit = new CommitDao(valueIdentity, new Date(), "auser", parents);
 	Identity tempDigest = commitFactory.write(tempCommit);
 	anchor.write(tempDigest);
-	commit = new Commit(tempCommit, jsonFactory);
+	commit = new Commit(tempCommit, tempDigest, jsonFactory);
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
 	}

@@ -7,10 +7,14 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.swing.JFrame;
 
 import org.jgraph.JGraph;
+import org.jgraph.event.GraphSelectionEvent;
+import org.jgraph.event.GraphSelectionListener;
+import org.jgraph.graph.DefaultGraphCell;
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.junit.Test;
@@ -24,7 +28,7 @@ import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
 
 import difflib.PatchFailedException;
 
-public class CommitTest {
+public class CommitTest extends TestUtils {
 
     // FIXME - test production of graph that contains a merge
 
@@ -53,10 +57,10 @@ public class CommitTest {
     @Test
     public void testCreateChangeSet() throws JsonSyntaxException, StoreException, PatchFailedException, IOException {
 	ThreeWayDiff patch = jca1.getCommit().createChangeSet(jca4.getCommit());
-//	System.out.println("X-"+patch.apply());
+	// System.out.println("X-"+patch.apply());
 	jca1.merge(jca4);
 	// FIXME - should be unnecessary
-//	jca1.checkout();
+	// jca1.checkout();
 	System.out.println(jca1.read());
 	System.out.println(jca1.read().getAsJsonArray().get(4).getAsJsonArray().get(0));
     }
@@ -75,15 +79,48 @@ public class CommitTest {
 	assertEquals(4, jca4.getCommit().getAsGraphToRoot().vertexSet().size());
     }
 
-    private void show() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
-	JGraph jgraph = new JGraph(new JGraphModelAdapter<CommitDao, DefaultEdge>(Commit
-		.getAsGraphToRoots(new Commit[] { jca4.getCommit(), jca1.getCommit() })));
+    private void show() throws JsonSyntaxException, StoreException, PatchFailedException, IOException {
+	enableLog("com.crypticbit.javelin.js", Level.FINEST);
+	jca1.merge(jca4);
+
+	System.out.println("Jc1C=" + jca1.getCommit());
+
+	JGraphModelAdapter<Commit, DefaultEdge> model = new JGraphModelAdapter<Commit, DefaultEdge>(Commit
+		.getAsGraphToRoots(new Commit[] { jca4.getCommit(), jca1.getCommit() }));
+
+	JGraph jgraph = new JGraph(model);
+
+	jgraph.addGraphSelectionListener(new GraphSelectionListener() {
+
+	    @Override
+	    public void valueChanged(GraphSelectionEvent e) {
+		if (e.getCell() instanceof DefaultGraphCell) {
+		    Commit c = (Commit) ((DefaultGraphCell) e.getCell()).getUserObject();
+		    try {
+			System.out.println(c.getElement() + "," + c.getParents());
+		    }
+		    catch (JsonSyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		    }
+		    catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		    }
+		    catch (StoreException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		    }
+		}
+
+	    }
+	});
 	jgraph.setPreferredSize(new Dimension(400, 400));
 	final JGraphHierarchicalLayout hir = new JGraphHierarchicalLayout();
 	final JGraphFacade graphFacade = new JGraphFacade(jgraph);
 	hir.run(graphFacade);
 	final Map<?, ?> nestedMap = graphFacade.createNestedMap(true, true); //
-	jgraph.getGraphLayoutCache().edit(nestedMap);
+	// jgraph.getGraphLayoutCache().edit(nestedMap);
 	JFrame frame = new JFrame("FrameDemo"); // 2. Optional: What happens
 						// when the frame closes?
 	// frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // 3. Create
@@ -95,7 +132,8 @@ public class CommitTest {
 	frame.setVisible(true);
     }
 
-    public static void main(String args[]) throws StoreException, IOException {
+    public static void main(String args[]) throws StoreException, IOException, JsonSyntaxException,
+	    PatchFailedException {
 	new CommitTest().show();
 
     }

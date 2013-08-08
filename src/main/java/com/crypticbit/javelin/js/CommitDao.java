@@ -29,7 +29,8 @@ public class CommitDao {
     @Override
     // FIXME
     public boolean equals(Object obj) {
-	return head.equals(((CommitDao) obj).head);
+	throw new Error();
+//	return head.equals(((CommitDao) obj).head);
     }
 
     public Identity getHead() {

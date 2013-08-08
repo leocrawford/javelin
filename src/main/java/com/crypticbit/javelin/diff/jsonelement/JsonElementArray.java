@@ -20,8 +20,8 @@ public class JsonElementArray implements DifferFactoryElement {
 	    private ListSequenceDiff lsd = new ListSequenceDiff();
 
 	    @Override
-	    public void add(Date date, JsonElement parent, JsonElement child, Object branch) {
-		lsd.add(date, convert(parent), convert(child), branch);
+	    public void addDelta(JsonElement parent, JsonElement child, Object branch) {
+		lsd.addDelta(convert(parent), convert(child), branch);
 	    }
 
 	    @Override

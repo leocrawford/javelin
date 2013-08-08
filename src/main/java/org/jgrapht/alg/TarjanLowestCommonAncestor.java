@@ -19,7 +19,8 @@ public class TarjanLowestCommonAncestor<V, E> {
     public TarjanLowestCommonAncestor(Graph<V, E> g) {
 	this.g = g;
     }
-
+    
+  
     /**
      * Calculate the LCM between <code>a</code> and <code>b</code> treating <code>start</code> as the root we want to
      * search from.

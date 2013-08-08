@@ -53,8 +53,6 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
 		}
 		else {
 		    return primative.getAsFloat();
-		    // System.out.println("Got "+primative+","+primative.getAsNumber().);
-		    // return primative.getAsNumber();
 		}
 	    }
 	    if (primative.isString()) {

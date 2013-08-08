@@ -25,9 +25,9 @@ public class JsonCasAdapterTest {
 
     @Test
     public void testBasicBranch() throws IOException, StoreException, JsonSyntaxException, PatchFailedException {
-	String JSON_EXAMPLEa = "[\"foo\",\"a\"]";
-	String JSON_EXAMPLE_2a = "[\"foo\",\"b\"]";
-	String JSON_EXAMPLE_3a = "[\"a\",\"c\"]";
+	String JSON_EXAMPLEa = "[\"foo\",{\"a\":1,\"b\":TRUE}]";
+	String JSON_EXAMPLE_2a = "[\"foo\",{\"a\":2,\"b\":FALSE}]";
+	String JSON_EXAMPLE_3a = "[\"a\",{\"a\":1,\"b\":TRUE,\"c\":2.1}]";
 
 	enableLog();
 	CasKasStore memoryStore = new StorageFactory().createMemoryCas();
@@ -38,20 +38,26 @@ public class JsonCasAdapterTest {
 	jca.write(JSON_EXAMPLE_2a).commit();
 	jca2.write(JSON_EXAMPLE_3a).commit();
 
-	System.out.println(jca.read());
-	System.out.println(jca.getCommit().getShortestHistory());
 
-	System.out.println(jca2.read());
-	System.out.println(jca2.getCommit().getShortestHistory());
-
-	System.out.println("JCA-LR" + jca.lazyRead());
-	System.out.println("JCS2-LR" + jca2.lazyRead());
-
+//	System.out.println(jca.read());
+//	System.out.println(jca.getCommit().getShortestHistory());
+//
+//	System.out.println(jca2.read());
+//	System.out.println(jca2.getCommit().getShortestHistory());
+//
+//	System.out.println("JCA-LR" + jca.lazyRead());
+//	System.out.println("JCS2-LR" + jca2.lazyRead());
+//
+//	System.out.println("A="+jca.read());
+//	System.out.println(jca.getCommit().getShortestHistory());
 	jca.merge(jca2);
+//	System.out.println("B="+jca.read());
+//	System.out.println(jca.getCommit().getShortestHistory());
 
-	System.out.println(memoryStore);
-
+//	System.out.println(memoryStore);
+//	jca.checkout();
 	System.out.println("MERGE=" + jca.lazyRead());
+//	Assert.assertEquals(new JsonParser().parse("[\"a\", {\"b\":FALSE, \"c\":2.1, \"a\":2}]"), jca.read());
 
     }
 
@@ -146,10 +152,10 @@ public class JsonCasAdapterTest {
     }
 
     private void enableLog() {
-	Logger LOG = Logger.getLogger("com.crypticbit");
+	Logger LOG = Logger.getLogger("com.crypticbit.javelin.diff");
 	ConsoleHandler handler = new ConsoleHandler();
-	handler.setLevel(Level.FINER);
+	handler.setLevel(Level.FINEST);
 	LOG.addHandler(handler);
-	LOG.setLevel(Level.FINER);
+	LOG.setLevel(Level.FINEST);
     }
 }

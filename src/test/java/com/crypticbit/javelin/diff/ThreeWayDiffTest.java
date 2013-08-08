@@ -24,6 +24,21 @@ public class ThreeWayDiffTest {
     }
 
     @Test
+    public void testMapAndArrayChange2() {
+	List<Object> lca = GSON.fromJson("[\"foo\",{\"a\":1,\"b\":TRUE}]", List.class);
+	ThreeWayDiff<List<Object>> twd = new ThreeWayDiff<>(lca);
+	twd.addBranchSnapshot(GSON.fromJson("[\"foo\",{\"a\":2,\"b\":FALSE}]", List.class), "Branch 1");
+	twd.addBranchSnapshot(GSON.fromJson("[\"a\",{\"a\":1,\"b\":TRUE,\"c\":2.1}]", List.class), "Branch 2");
+	System.out.println(twd.apply());
+	System.out.println(twd.toString());
+	Assert.assertEquals(GSON.fromJson("[\"a\",{\"a\":2,\"b\":FALSE,\"c\":2.1}]", List.class), twd.apply());
+    }
+    
+	String JSON_EXAMPLEa = "";
+	String JSON_EXAMPLE_2a = "";
+	String JSON_EXAMPLE_3a = "";
+    
+    @Test
     public void testArrayMultipleChangesOfDifferentLengths() {
 	enableLog();
 	List<Object> lca = GSON.fromJson("[a, b, c, d,e]", List.class);
@@ -32,16 +47,6 @@ public class ThreeWayDiffTest {
 	twd.addBranchSnapshot(GSON.fromJson("[a,W,X,Y,Z,e]", List.class), "Branch 2");
 	Assert.assertArrayEquals(GSON.fromJson("[a,W,X,Z,e]", List.class).toArray(), twd.apply().toArray());
 
-    }
-
-    @Test
-    public void testListAddWithDate() {
-	List<String> lca = new ArrayList<>(Arrays.asList(new String[] { "a", "b", "c" }));
-	ThreeWayDiff<List<String>> twd = new ThreeWayDiff<List<String>>(lca);
-	twd.addBranchSnapshot(new Date(10000L), Arrays.asList(new String[] { "a", "b", "x", "c" }), "Branch 1");
-	twd.addBranchSnapshot(new Date(10001L), Arrays.asList(new String[] { "a", "b", "y", "c" }), "Branch 2");
-	List<String> result = twd.apply();
-	Assert.assertArrayEquals(new String[] { "a", "b", "y", "x", "c" }, result.toArray());
     }
 
     @Test

@@ -26,7 +26,7 @@ public class MapDelta<T> implements ItemDelta {
     public void apply(Map<String, T> object, Map<String, ThreeWayDiff> recursiveDiffs) {
 
 	if (LOG.isLoggable(Level.FINEST)) {
-	    LOG.log(Level.FINEST, "Merge Map = " + diff);
+	    LOG.log(Level.FINEST, "Merge Map = " + diff +" to " + object);
 	}
 
 	for (String key : getRemoved().keySet()) {
@@ -50,6 +50,11 @@ public class MapDelta<T> implements ItemDelta {
 
 		    }), recursiveDiffs);
 	}
+	
+	if (LOG.isLoggable(Level.FINEST)) {
+	    LOG.log(Level.FINEST, "Merge Map Result = " + object);
+	}
+	
     }
 
     public Map<String, T> getAdded() {

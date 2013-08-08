@@ -1,8 +1,11 @@
 package com.crypticbit.javelin.diff.map;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.crypticbit.javelin.diff.SequenceDiff;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
@@ -10,6 +13,9 @@ import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 
 public class MapSequenceDiff<T> extends SequenceDiff<Map<String, T>, MapDelta> {
+
+    private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.diff");
+
     @Override
     public Map<String, T> apply(Map<String, T> value) {
 
@@ -18,7 +24,16 @@ public class MapSequenceDiff<T> extends SequenceDiff<Map<String, T>, MapDelta> {
 	// if there is a change we're going to need to apply a recursive diff
 	Map<String, ThreeWayDiff<T>> recursiveDiffs = new HashMap<>();
 
-	for (MapDelta d : getListOfDeltaInOrder()) {
+	List<MapDelta> listOfDeltaInOrder = getListOfDeltaInOrder();
+	if (LOG.isLoggable(Level.FINER)) {
+	    LOG.log(Level.FINER, "Applying these " + listOfDeltaInOrder.size() + " map deltas in order "
+		    + listOfDeltaInOrder);
+	}
+
+	for (MapDelta d : listOfDeltaInOrder) {
+	    if (LOG.isLoggable(Level.FINEST)) {
+		LOG.log(Level.FINEST, "Applying map delta " + d + " to " + result);
+	    }
 	    d.apply(result, recursiveDiffs);
 	}
 

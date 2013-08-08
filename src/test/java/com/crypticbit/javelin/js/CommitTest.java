@@ -53,12 +53,12 @@ public class CommitTest {
     @Test
     public void testCreateChangeSet() throws JsonSyntaxException, StoreException, PatchFailedException, IOException {
 	ThreeWayDiff patch = jca1.getCommit().createChangeSet(jca4.getCommit());
-	System.out.println(patch.apply());
+//	System.out.println("X-"+patch.apply());
 	jca1.merge(jca4);
 	// FIXME - should be unnecessary
-	jca1.checkout();
+//	jca1.checkout();
 	System.out.println(jca1.read());
-	System.out.println(jca1.read().getAsJsonArray().get(5).getAsJsonArray().get(0));
+	System.out.println(jca1.read().getAsJsonArray().get(4).getAsJsonArray().get(0));
     }
 
     // @Test

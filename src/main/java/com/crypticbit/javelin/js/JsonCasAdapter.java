@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.store.CasKasStore;
-import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
@@ -70,18 +69,10 @@ public class JsonCasAdapter {
 	return this;
     }
 
-    // FIXME - horrible use of GeneralPersistableResource
-    // FIXME - cast Digest
     public synchronized JsonCasAdapter commit() throws StoreException, IOException {
-	Identity valueIdentity = jsonFactory.getJsonElementAdapter().write(element);
-	CommitDao tempCommit = new CommitDao(valueIdentity, new Date(), "temp", anchor.get());
-	Identity tempDigest = commitFactory.write(tempCommit);
-	anchor.write(tempDigest);
-	commit = new Commit(tempCommit, jsonFactory);
-	if (LOG.isLoggable(Level.FINEST)) {
-	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
-	}
-	return this;
+	Identity write = jsonFactory.getJsonElementAdapter().write(element);
+	writeIdentity(write, anchor.get());
+	return checkout();
     }
 
     public Identity getAnchor() {
@@ -96,21 +87,22 @@ public class JsonCasAdapter {
 	return commit.getObject();
     }
 
-    public JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, StoreException, PatchFailedException,
-	    IOException {
-	// FIXME - check no checkin needed
+    public synchronized JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, StoreException,
+	    PatchFailedException, IOException {
 	ThreeWayDiff patch = commit.createChangeSet(other.commit);
-	Object result = patch.apply();
-	// COPY and paste from commit - horrible
-	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(result);
-	CommitDao tempCommit = new CommitDao(valueIdentity, new Date(), "temp", anchor.get());
+	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(patch.apply());
+	writeIdentity(valueIdentity, anchor.get(), other.anchor.get());
+	return checkout();
+    }
+
+    private void writeIdentity(Identity valueIdentity, Identity... parents) throws StoreException, IOException {
+	CommitDao tempCommit = new CommitDao(valueIdentity, new Date(), "temp", parents);
 	Identity tempDigest = commitFactory.write(tempCommit);
 	anchor.write(tempDigest);
 	commit = new Commit(tempCommit, jsonFactory);
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
 	}
-	return this;
     }
 
     public JsonElement read() {

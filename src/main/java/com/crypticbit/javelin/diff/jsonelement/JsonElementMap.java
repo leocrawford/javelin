@@ -21,8 +21,8 @@ public class JsonElementMap implements DifferFactoryElement {
 	    private MapSequenceDiff msd = new MapSequenceDiff();
 
 	    @Override
-	    public void add(Date date, JsonElement parent, JsonElement child, Object branch) {
-		msd.add(date, convert(parent), convert(child), branch);
+	    public void addDelta(JsonElement parent, JsonElement child, Object branch) {
+		msd.addDelta(convert(parent), convert(child), branch);
 	    }
 
 	    @Override

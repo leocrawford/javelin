@@ -2,6 +2,7 @@ package com.crypticbit.javelin.js;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.Map.Entry;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
@@ -12,9 +13,15 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.GraphUnion;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
+import com.crypticbit.javelin.diff.Snapshot;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
+import com.google.common.base.Supplier;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 
@@ -41,13 +48,12 @@ public class Commit implements Comparable<Commit> {
 	Graph<CommitDao, DefaultEdge> x = getAsGraphToRoots(new Commit[] { this, other });
 	CommitDao lca = new TarjanLowestCommonAncestor<CommitDao, DefaultEdge>(x).calculate(findRoot().dao, this.dao,
 		other.dao);
-	GraphPath<CommitDao, DefaultEdge> p1, p2;
-	p1 = getShortestPath(x, lca, this.dao);
-	p2 = getShortestPath(x, lca, other.dao);
+	Collection<GraphPath<CommitDao, DefaultEdge>> pathsToValues = new LinkedList<>();
+	pathsToValues.add(getShortestPath(x, lca, this.dao));
+	pathsToValues.add(getShortestPath(x, lca, other.dao));
 
 	ThreeWayDiff twd = new ThreeWayDiff(wrap(lca).getObject());
-	addCommitToTreeMap(x, p1, twd);
-	addCommitToTreeMap(x, p2, twd);
+	addCommitToTreeMap(x, twd, pathsToValues);
 	return twd;
     }
 
@@ -73,19 +79,6 @@ public class Commit implements Comparable<Commit> {
 	}
 	return true;
     }
-
-    // private void printDelta(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1)
-    // throws UnsupportedEncodingException, StoreException {
-    // for (DefaultEdge e : p1.getEdgeList()) {
-    // Patch patch = wrap(x.getEdgeSource(e)).createChangeSetFromParent(wrap(x.getEdgeTarget(e)));
-    // System.out.println("The difference between " + x.getEdgeSource(e) + " and " + x.getEdgeTarget(e));
-    // for (Delta delta : patch.getDeltas()) {
-    // List<Digest> lines = (List<Digest>) delta.getRevised().getLines();
-    // for (Digest next : lines)
-    // System.out.println(delta + "," + jsonFactory.read(next));
-    // }
-    // }
-    // }
 
     /**
      * Generate a graph from this node to root. This allows us to treat the commit tree like a graph, and use standard
@@ -179,12 +172,26 @@ public class Commit implements Comparable<Commit> {
 	return shortestHistory.get(shortestHistory.size() - 1);
     }
 
-    private void addCommitToTreeMap(Graph<CommitDao, DefaultEdge> x, GraphPath<CommitDao, DefaultEdge> p1,
-	    ThreeWayDiff twd) throws UnsupportedEncodingException, StoreException {
-	for (DefaultEdge e : p1.getEdgeList()) {
-	    Commit end = wrap(x.getEdgeTarget(e));
-	    twd.addBranchSnapshot(end.getDate(), end.getObject(), p1);
+    private void addCommitToTreeMap(Graph<CommitDao, DefaultEdge> x, ThreeWayDiff<Object> twd,
+	    Collection<GraphPath<CommitDao, DefaultEdge>> paths) throws UnsupportedEncodingException, StoreException {
+	Multimap<Date, Snapshot<Object>> multimap = Multimaps.newListMultimap(Maps
+		.<Date, Collection<Snapshot<Object>>> newTreeMap(), new Supplier<List<Snapshot<Object>>>() {
+	    public List<Snapshot<Object>> get() {
+		return Lists.newLinkedList();
+	    }
+	});
+
+	for (GraphPath<CommitDao, DefaultEdge> path : paths) {
+	    for (DefaultEdge e : path.getEdgeList()) {
+		Commit end = wrap(x.getEdgeTarget(e));
+		multimap.put(end.getDate(), new Snapshot<Object>(end.getObject(), path));
+	    }
 	}
+
+	for (Entry<Date, Snapshot<Object>> entry : multimap.entries()) {
+	    twd.addBranchSnapshot(entry.getValue());
+	}
+
     }
 
     // FIXME - should we try and find an existing instance?

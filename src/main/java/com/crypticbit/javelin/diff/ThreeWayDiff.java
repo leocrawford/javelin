@@ -10,6 +10,8 @@ import java.util.logging.Logger;
 /** Performa three way diff for a range of inbuilt types, which can be extended by adding them to the DifferFactory */
 public class ThreeWayDiff<T> {
 
+    // FIXME - will this work if an element changes type?
+    
     private T commonAncestor;
     private List<Snapshot<T>> list = new LinkedList<>();
     private DifferFactory applicatorFactory;

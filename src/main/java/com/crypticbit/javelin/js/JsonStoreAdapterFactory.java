@@ -30,8 +30,9 @@ public class JsonStoreAdapterFactory {
 
 		@Override
 		public void write(JsonWriter out, Identity value) throws IOException {
-		    if (value != null)
+		    if (value != null) {
 			out.value(value.getDigestAsString());
+		    }
 		}
 	    }).create();
 

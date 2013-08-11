@@ -35,14 +35,11 @@ public class JsonSimpleClassAdapterTest extends TestUtils {
 
 	CommitDao cd2 = a.read(i);
 
-	assertEquals(d.getTime()/1000,cd2.getWhen().getTime()/1000);
-	assertEquals(d1,cd2.getHead());
-	assertEquals("test",cd2.getUser());
-	assertEquals(d2,cd2.getParents()[0]);
-	assertEquals(d3,cd2.getParents()[1]);
-	
-	
-	
+	assertEquals(d.getTime() / 1000, cd2.getWhen().getTime() / 1000);
+	assertEquals(d1, cd2.getHead());
+	assertEquals("test", cd2.getUser());
+	assertEquals(d2, cd2.getParents()[0]);
+	assertEquals(d3, cd2.getParents()[1]);
 
     }
 

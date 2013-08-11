@@ -4,7 +4,7 @@ import java.io.InputStream;
 
 public interface PersistableResource {
 
-    public String getAsString() ;
+    public String getAsString();
 
     public byte[] getBytes();
 

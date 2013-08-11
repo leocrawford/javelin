@@ -1,6 +1,5 @@
 package com.crypticbit.javelin.diff;
 
-import java.util.Date;
 
 /** Represents a particular snapshot of a change graph */
 public class Snapshot<T> {

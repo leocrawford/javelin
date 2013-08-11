@@ -6,12 +6,12 @@ import java.util.logging.Logger;
 
 public class TestUtils {
 
-    void enableLog(String path,Level level) {
+    void enableLog(String path, Level level) {
 	Logger LOG = Logger.getLogger(path);
 	ConsoleHandler handler = new ConsoleHandler();
 	handler.setLevel(level);
 	LOG.addHandler(handler);
 	LOG.setLevel(level);
     }
-    
+
 }

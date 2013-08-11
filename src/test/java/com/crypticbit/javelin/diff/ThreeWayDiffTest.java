@@ -1,6 +1,9 @@
 package com.crypticbit.javelin.diff;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,6 +17,12 @@ public class ThreeWayDiffTest {
 
     private static final Gson GSON = new Gson();
 
+    String JSON_EXAMPLEa = "";
+
+    String JSON_EXAMPLE_2a = "";
+
+    String JSON_EXAMPLE_3a = "";
+
     @Test
     public void testArrayAndMapChange() {
 	Map<String, String> lca = GSON.fromJson("{A:a,B:b,C:[x]}", Map.class);
@@ -23,21 +32,6 @@ public class ThreeWayDiffTest {
 	Assert.assertEquals(GSON.fromJson("{A:a, B:b,C:[x,z,y]}", Map.class), twd.apply());
     }
 
-    @Test
-    public void testMapAndArrayChange2() {
-	List<Object> lca = GSON.fromJson("[\"foo\",{\"a\":1,\"b\":TRUE}]", List.class);
-	ThreeWayDiff<List<Object>> twd = new ThreeWayDiff<>(lca);
-	twd.addBranchSnapshot(GSON.fromJson("[\"foo\",{\"a\":2,\"b\":FALSE}]", List.class), "Branch 1");
-	twd.addBranchSnapshot(GSON.fromJson("[\"a\",{\"a\":1,\"b\":TRUE,\"c\":2.1}]", List.class), "Branch 2");
-	System.out.println(twd.apply());
-	System.out.println(twd.toString());
-	Assert.assertEquals(GSON.fromJson("[\"a\",{\"a\":2,\"b\":FALSE,\"c\":2.1}]", List.class), twd.apply());
-    }
-    
-	String JSON_EXAMPLEa = "";
-	String JSON_EXAMPLE_2a = "";
-	String JSON_EXAMPLE_3a = "";
-    
     @Test
     public void testArrayMultipleChangesOfDifferentLengths() {
 	enableLog();
@@ -107,6 +101,17 @@ public class ThreeWayDiffTest {
 	twd.addBranchSnapshot(GSON.fromJson("[a,b,{X:x,Y:y}]", List.class), "Branch 1");
 	twd.addBranchSnapshot(GSON.fromJson("[a,b,{Z:z}]", List.class), "Branch 2");
 	Assert.assertEquals(GSON.fromJson("[a,b,{Y:y,Z:z}]", List.class), twd.apply());
+    }
+
+    @Test
+    public void testMapAndArrayChange2() {
+	List<Object> lca = GSON.fromJson("[\"foo\",{\"a\":1,\"b\":TRUE}]", List.class);
+	ThreeWayDiff<List<Object>> twd = new ThreeWayDiff<>(lca);
+	twd.addBranchSnapshot(GSON.fromJson("[\"foo\",{\"a\":2,\"b\":FALSE}]", List.class), "Branch 1");
+	twd.addBranchSnapshot(GSON.fromJson("[\"a\",{\"a\":1,\"b\":TRUE,\"c\":2.1}]", List.class), "Branch 2");
+	System.out.println(twd.apply());
+	System.out.println(twd.toString());
+	Assert.assertEquals(GSON.fromJson("[\"a\",{\"a\":2,\"b\":FALSE,\"c\":2.1}]", List.class), twd.apply());
     }
 
     @Test

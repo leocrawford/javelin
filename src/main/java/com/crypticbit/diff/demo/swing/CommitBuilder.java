@@ -1,6 +1,5 @@
 package com.crypticbit.diff.demo.swing;
 
-import java.awt.BorderLayout;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
@@ -30,28 +29,8 @@ import difflib.PatchFailedException;
 
 public class CommitBuilder extends JFrame {
 
-
-    public static final class MergeableDirectedGraph extends ListenableDirectedGraph<Commit, DefaultEdge> {
-	public MergeableDirectedGraph(Class<? extends DefaultEdge> edgeClass) {
-	    super(edgeClass);
-
-	}
-
-	public void merge(DirectedGraph<Commit, DefaultEdge> asGraphToRoots1) {
-	    for (DefaultEdge x : asGraphToRoots1.edgeSet()) {
-		Commit edgeSource = asGraphToRoots1.getEdgeSource(x);
-		Commit edgeTarget = asGraphToRoots1.getEdgeTarget(x);
-		if (!containsVertex(edgeSource))
-		    addVertex(edgeSource);
-		if (!containsVertex(edgeTarget))
-		    addVertex(edgeTarget);
-		addEdge(edgeSource, edgeTarget);
-	    }
-
-	}
-    }
-
     private JsonCasAdapter jca1, jca2, jca3, jca4;
+
     private SmartJGraph commitPanel;
 
     public CommitBuilder() throws StoreException, IOException, JsonSyntaxException, PatchFailedException,
@@ -62,34 +41,33 @@ public class CommitBuilder extends JFrame {
 	commitPanel.merge(new Commit[] { jca4.getCommit(), jca1.getCommit() });
 	JSplitPane jSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 	final JSONEditPanel jsonPanel = new JSONEditPanel();
-	
+
 	jSplit.add(commitPanel);
 	jSplit.add(jsonPanel);
-	
 
-	
 	getContentPane().add(jSplit);
 	commitPanel.addGraphSelectionListener(new GraphSelectionListener() {
 
-		@Override
-		public void valueChanged(GraphSelectionEvent e) {
-		    if (e.getCell() instanceof DefaultGraphCell
-			    && ((DefaultGraphCell) e.getCell()).getUserObject() instanceof Commit) {
-			Commit c = (Commit) ((DefaultGraphCell) e.getCell()).getUserObject();
-			try {
-			    jsonPanel.setJson(c.getElement().toString(), UpdateType.REPLACE);
-			}
-			catch (JsonSyntaxException | StoreException e1) {
-			    // TODO Auto-generated catch block
-			    e1.printStackTrace();
-			}
+	    @Override
+	    public void valueChanged(GraphSelectionEvent e) {
+		if (e.getCell() instanceof DefaultGraphCell
+			&& ((DefaultGraphCell) e.getCell()).getUserObject() instanceof Commit) {
+		    Commit c = (Commit) ((DefaultGraphCell) e.getCell()).getUserObject();
+		    try {
+			jsonPanel.setJson(c.getElement().toString(), UpdateType.REPLACE);
 		    }
-
+		    catch (JsonSyntaxException | StoreException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		    }
 		}
-	    });
-	
+
+	    }
+	});
+
 	pack();
 	new Thread() {
+	    @Override
 	    public void run() {
 		setVisible(true);
 	    }
@@ -118,11 +96,6 @@ public class CommitBuilder extends JFrame {
 	jca4.write(c7).commit();
     }
 
-    public static void main(String args[]) throws JsonSyntaxException, PatchFailedException, StoreException,
-	    IOException, InterruptedException {
-	new CommitBuilder();
-    }
-
     private void demo() throws JsonSyntaxException, StoreException, PatchFailedException, IOException,
 	    InterruptedException {
 	Thread.sleep(4000);
@@ -138,6 +111,33 @@ public class CommitBuilder extends JFrame {
 	System.out.println("x");
     }
 
+    public static void main(String args[]) throws JsonSyntaxException, PatchFailedException, StoreException,
+	    IOException, InterruptedException {
+	new CommitBuilder();
+    }
+
+    public static final class MergeableDirectedGraph extends ListenableDirectedGraph<Commit, DefaultEdge> {
+	public MergeableDirectedGraph(Class<? extends DefaultEdge> edgeClass) {
+	    super(edgeClass);
+
+	}
+
+	public void merge(DirectedGraph<Commit, DefaultEdge> asGraphToRoots1) {
+	    for (DefaultEdge x : asGraphToRoots1.edgeSet()) {
+		Commit edgeSource = asGraphToRoots1.getEdgeSource(x);
+		Commit edgeTarget = asGraphToRoots1.getEdgeTarget(x);
+		if (!containsVertex(edgeSource)) {
+		    addVertex(edgeSource);
+		}
+		if (!containsVertex(edgeTarget)) {
+		    addVertex(edgeTarget);
+		}
+		addEdge(edgeSource, edgeTarget);
+	    }
+
+	}
+    }
+
     static class SmartJGraph extends JGraph {
 
 	private MergeableDirectedGraph asGraphToRoots = new MergeableDirectedGraph(DefaultEdge.class);;
@@ -145,8 +145,6 @@ public class CommitBuilder extends JFrame {
 	SmartJGraph() {
 	    super();
 	    this.setModel(new JGraphModelAdapter<Commit, DefaultEdge>(asGraphToRoots));
-
-	    
 
 	}
 

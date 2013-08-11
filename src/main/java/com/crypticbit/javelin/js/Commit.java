@@ -59,8 +59,9 @@ public class Commit implements Comparable<Commit> {
 
     @Override
     public boolean equals(Object obj) {
-	if (getClass() != obj.getClass())
+	if (getClass() != obj.getClass()) {
 	    return false;
+	}
 	return ((Commit) obj).daoDigest.equals(daoDigest);
     }
 
@@ -68,8 +69,7 @@ public class Commit implements Comparable<Commit> {
      * Generate a graph from this node to root. This allows us to treat the commit tree like a graph, and use standard
      * graph operations rather than coding our own
      */
-    public DirectedGraph<Commit, DefaultEdge> getAsGraphToRoot() throws JsonSyntaxException,
-	    StoreException {
+    public DirectedGraph<Commit, DefaultEdge> getAsGraphToRoot() throws JsonSyntaxException, StoreException {
 	// FIXME - we should consider caching results
 
 	DirectedGraph<Commit, DefaultEdge> thisAndParentsAsGraph = new SimpleDirectedGraph<Commit, DefaultEdge>(
@@ -144,6 +144,11 @@ public class Commit implements Comparable<Commit> {
 	return dao.toString();
     }
 
+    // FIXME - should we try and find an existing instance?
+    Commit wrap(CommitDao dao, Identity digest) {
+	return new Commit(dao, digest, jsonFactory);
+    }
+
     /**
      * Find very first commit in tree
      * 
@@ -160,6 +165,7 @@ public class Commit implements Comparable<Commit> {
 	    Collection<GraphPath<Commit, DefaultEdge>> paths) throws StoreException {
 	Multimap<Date, Snapshot<Object>> multimap = Multimaps.newListMultimap(Maps
 		.<Date, Collection<Snapshot<Object>>> newTreeMap(), new Supplier<List<Snapshot<Object>>>() {
+	    @Override
 	    public List<Snapshot<Object>> get() {
 		return Lists.newLinkedList();
 	    }
@@ -176,11 +182,6 @@ public class Commit implements Comparable<Commit> {
 	    twd.addBranchSnapshot(entry.getValue());
 	}
 
-    }
-
-    // FIXME - should we try and find an existing instance?
-    Commit wrap(CommitDao dao, Identity digest) {
-	return new Commit(dao, digest, jsonFactory);
     }
 
     public static DirectedGraph<Commit, DefaultEdge> getAsGraphToRoots(Commit[] commits) throws JsonSyntaxException,

@@ -68,7 +68,7 @@ public class MemoryCasKas implements CasKasStore {
     }
 
     @Override
-    public Identity store(PersistableResource pr)  {
+    public Identity store(PersistableResource pr) {
 	Digest digest = digestFactory.getDefaultDigest(pr.getBytes());
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Adding " + pr.getBytes().length + " bytes to " + digest + " in memory CAS");

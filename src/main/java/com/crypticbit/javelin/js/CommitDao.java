@@ -3,7 +3,6 @@ package com.crypticbit.javelin.js;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
 
 public class CommitDao {
@@ -23,14 +22,14 @@ public class CommitDao {
 	this.head = head;
 	this.when = when;
 	this.user = user;
-	this.parents =  parents;
+	this.parents = parents;
     }
 
     @Override
     // FIXME
     public boolean equals(Object obj) {
 	throw new Error();
-//	return head.equals(((CommitDao) obj).head);
+	// return head.equals(((CommitDao) obj).head);
     }
 
     public Identity getHead() {

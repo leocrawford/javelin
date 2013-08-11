@@ -59,7 +59,7 @@ public class JsonCasAdapter {
 
     public synchronized JsonCasAdapter checkout() throws StoreException, JsonSyntaxException {
 	Identity daoDigest = anchor.read();
-	commit = new Commit(commitFactory.read(daoDigest),daoDigest, jsonFactory);
+	commit = new Commit(commitFactory.read(daoDigest), daoDigest, jsonFactory);
 	element = commit.getElement();
 	if (LOG.isLoggable(Level.FINER)) {
 	    LOG.log(Level.FINER, "Reading commit: " + commit);
@@ -93,6 +93,15 @@ public class JsonCasAdapter {
 	return checkout();
     }
 
+    public JsonElement read() {
+	return element;
+    }
+
+    public JsonCasAdapter write(String string) {
+	element = new Gson().fromJson(string, JsonElement.class);
+	return this;
+    }
+
     private void writeIdentity(Identity valueIdentity, Identity... parents) throws StoreException {
 	CommitDao tempCommit = new CommitDao(valueIdentity, new Date(), "auser", parents);
 	Identity tempDigest = commitFactory.write(tempCommit);
@@ -101,14 +110,5 @@ public class JsonCasAdapter {
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
 	}
-    }
-
-    public JsonElement read() {
-	return element;
-    }
-
-    public JsonCasAdapter write(String string) {
-	element = new Gson().fromJson(string, JsonElement.class);
-	return this;
     }
 }

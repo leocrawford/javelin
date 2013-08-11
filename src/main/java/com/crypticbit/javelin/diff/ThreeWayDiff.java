@@ -21,20 +21,21 @@ public class ThreeWayDiff<T> {
     }
 
     public ThreeWayDiff(T commonAncestor, DifferFactory applicatorFactory) {
-	if (LOG.isLoggable(Level.FINER))
+	if (LOG.isLoggable(Level.FINER)) {
 	    LOG.log(Level.FINER, "Created ThreeWayDiff for ancestor" + commonAncestor);
+	}
 	this.commonAncestor = commonAncestor;
 	this.applicatorFactory = applicatorFactory;
     }
 
     /** Add a snapshot - assumes they are given in order from oldest to youngest */
-    public void addBranchSnapshot(T object, Object branch) {
-	addBranchSnapshot(new Snapshot<T>(object, branch));
+    public void addBranchSnapshot(Snapshot<T> snapshot) {
+	list.add(snapshot);
     }
 
     /** Add a snapshot - assumes they are given in order from oldest to youngest */
-    public void addBranchSnapshot(Snapshot<T> snapshot) {
-	list.add(snapshot);
+    public void addBranchSnapshot(T object, Object branch) {
+	addBranchSnapshot(new Snapshot<T>(object, branch));
     }
 
     public T apply() {
@@ -47,8 +48,9 @@ public class ThreeWayDiff<T> {
     }
 
     private SequenceDiff<T, ?> getPatch() {
-	if (LOG.isLoggable(Level.FINE))
+	if (LOG.isLoggable(Level.FINE)) {
 	    LOG.log(Level.FINE, "Creating patch for " + commonAncestor + "-> " + list.toString());
+	}
 
 	List<Snapshot<T>> workingList = list;
 	SequenceDiff<T, ?> result = applicatorFactory.createApplicator(commonAncestor);

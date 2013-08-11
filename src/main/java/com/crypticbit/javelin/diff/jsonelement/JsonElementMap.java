@@ -1,6 +1,5 @@
 package com.crypticbit.javelin.diff.jsonelement;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;

@@ -38,26 +38,25 @@ public class JsonCasAdapterTest {
 	jca.write(JSON_EXAMPLE_2a).commit();
 	jca2.write(JSON_EXAMPLE_3a).commit();
 
-
-//	System.out.println(jca.read());
-//	System.out.println(jca.getCommit().getShortestHistory());
-//
-//	System.out.println(jca2.read());
-//	System.out.println(jca2.getCommit().getShortestHistory());
-//
-//	System.out.println("JCA-LR" + jca.lazyRead());
-//	System.out.println("JCS2-LR" + jca2.lazyRead());
-//
-//	System.out.println("A="+jca.read());
-//	System.out.println(jca.getCommit().getShortestHistory());
+	// System.out.println(jca.read());
+	// System.out.println(jca.getCommit().getShortestHistory());
+	//
+	// System.out.println(jca2.read());
+	// System.out.println(jca2.getCommit().getShortestHistory());
+	//
+	// System.out.println("JCA-LR" + jca.lazyRead());
+	// System.out.println("JCS2-LR" + jca2.lazyRead());
+	//
+	// System.out.println("A="+jca.read());
+	// System.out.println(jca.getCommit().getShortestHistory());
 	jca.merge(jca2);
-//	System.out.println("B="+jca.read());
-//	System.out.println(jca.getCommit().getShortestHistory());
+	// System.out.println("B="+jca.read());
+	// System.out.println(jca.getCommit().getShortestHistory());
 
-//	System.out.println(memoryStore);
-//	jca.checkout();
+	// System.out.println(memoryStore);
+	// jca.checkout();
 	System.out.println("MERGE=" + jca.lazyRead());
-//	Assert.assertEquals(new JsonParser().parse("[\"a\", {\"b\":FALSE, \"c\":2.1, \"a\":2}]"), jca.read());
+	// Assert.assertEquals(new JsonParser().parse("[\"a\", {\"b\":FALSE, \"c\":2.1, \"a\":2}]"), jca.read());
 
     }
 
@@ -114,7 +113,7 @@ public class JsonCasAdapterTest {
 	jca.commit();
 	jca.write(JSON_EXAMPLE_2);
 
-	JsonCasAdapter jca2 = new JsonCasAdapter(store, (Digest) jca.getAnchor());
+	JsonCasAdapter jca2 = new JsonCasAdapter(store, jca.getAnchor());
 	jca2.checkout();
 	jca2.write(JSON_EXAMPLE_3);
 

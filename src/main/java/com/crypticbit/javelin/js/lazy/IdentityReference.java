@@ -1,7 +1,5 @@
 package com.crypticbit.javelin.js.lazy;
 
-import java.io.UnsupportedEncodingException;
-
 import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;

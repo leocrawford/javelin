@@ -1,6 +1,8 @@
 package com.crypticbit.javelin.diff;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * An abstract class that allows implementations to supports an ordered set of deltas

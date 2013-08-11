@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.logging.Level;
 

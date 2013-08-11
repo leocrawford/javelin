@@ -44,8 +44,7 @@ public class Commit implements Comparable<Commit> {
 	return daoDigest.compareTo(o.daoDigest);
     }
 
-    public ThreeWayDiff createChangeSet(Commit other) throws JsonSyntaxException, UnsupportedEncodingException,
-	    StoreException {
+    public ThreeWayDiff createChangeSet(Commit other) throws JsonSyntaxException, StoreException {
 
 	Graph<Commit, DefaultEdge> x = getAsGraphToRoots(new Commit[] { this, other });
 	Commit lca = new TarjanLowestCommonAncestor<Commit, DefaultEdge>(x).calculate(findRoot(), this, other);
@@ -70,7 +69,7 @@ public class Commit implements Comparable<Commit> {
      * graph operations rather than coding our own
      */
     public DirectedGraph<Commit, DefaultEdge> getAsGraphToRoot() throws JsonSyntaxException,
-	    UnsupportedEncodingException, StoreException {
+	    StoreException {
 	// FIXME - we should consider caching results
 
 	DirectedGraph<Commit, DefaultEdge> thisAndParentsAsGraph = new SimpleDirectedGraph<Commit, DefaultEdge>(
@@ -93,15 +92,15 @@ public class Commit implements Comparable<Commit> {
 	return dao.getWhen();
     }
 
-    public JsonElement getElement() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+    public JsonElement getElement() throws JsonSyntaxException, StoreException {
 	return jsonFactory.getJsonElementAdapter().read(dao.getHead());
     }
 
-    public Object getObject() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+    public Object getObject() throws JsonSyntaxException, StoreException {
 	return jsonFactory.getJsonObjectAdapter().read(dao.getHead());
     }
 
-    public Set<Commit> getParents() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+    public Set<Commit> getParents() throws JsonSyntaxException, StoreException {
 	Set<Commit> parents = new TreeSet<>();
 	DataAccessInterface<CommitDao> simpleObjectAdapter = jsonFactory.getSimpleObjectAdapter(CommitDao.class);
 	for (Identity parent : dao.getParents()) {
@@ -111,7 +110,7 @@ public class Commit implements Comparable<Commit> {
 	return parents;
     }
 
-    public List<Commit> getShortestHistory() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+    public List<Commit> getShortestHistory() throws JsonSyntaxException, StoreException {
 
 	List<Commit> shortest = null;
 	for (Commit c : getParents()) {
@@ -152,13 +151,13 @@ public class Commit implements Comparable<Commit> {
      * @throws UnsupportedEncodingException
      * @throws JsonSyntaxException
      */
-    protected Commit findRoot() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+    protected Commit findRoot() throws JsonSyntaxException, StoreException {
 	List<Commit> shortestHistory = getShortestHistory();
 	return shortestHistory.get(shortestHistory.size() - 1);
     }
 
     private void addCommitToTreeMap(Graph<Commit, DefaultEdge> x, ThreeWayDiff<Object> twd,
-	    Collection<GraphPath<Commit, DefaultEdge>> paths) throws UnsupportedEncodingException, StoreException {
+	    Collection<GraphPath<Commit, DefaultEdge>> paths) throws StoreException {
 	Multimap<Date, Snapshot<Object>> multimap = Multimaps.newListMultimap(Maps
 		.<Date, Collection<Snapshot<Object>>> newTreeMap(), new Supplier<List<Snapshot<Object>>>() {
 	    public List<Snapshot<Object>> get() {
@@ -185,7 +184,7 @@ public class Commit implements Comparable<Commit> {
     }
 
     public static DirectedGraph<Commit, DefaultEdge> getAsGraphToRoots(Commit[] commits) throws JsonSyntaxException,
-	    UnsupportedEncodingException, StoreException {
+	    StoreException {
 	DirectedGraph<Commit, DefaultEdge> result = null;
 	for (Commit c : commits) {
 	    if (result == null) {

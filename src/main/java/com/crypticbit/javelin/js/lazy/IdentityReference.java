@@ -22,7 +22,7 @@ public class IdentityReference implements Reference {
 	try {
 	    return dereferencedCasAccessInterface.getJsonObjectAdapter().read(identity);
 	}
-	catch (JsonSyntaxException | UnsupportedEncodingException | StoreException e) {
+	catch (JsonSyntaxException | StoreException e) {
 	    e.printStackTrace();
 	    throw new Error();
 	    // FIXME

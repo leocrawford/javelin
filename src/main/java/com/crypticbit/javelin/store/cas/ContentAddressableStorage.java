@@ -1,7 +1,5 @@
 package com.crypticbit.javelin.store.cas;
 
-import java.io.IOException;
-
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
@@ -17,9 +15,6 @@ public interface ContentAddressableStorage extends AddressableStorage {
 
     /**
      * Store the data against against its digest, and return that digest
-     * 
-     * @throws IOException
      */
-    Identity store(PersistableResource po) throws StoreException, IOException;
-
+    Identity store(PersistableResource po) throws StoreException;
 }

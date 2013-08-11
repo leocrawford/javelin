@@ -1,6 +1,5 @@
 package com.crypticbit.javelin.store.memory;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
@@ -58,8 +57,7 @@ public class MemoryCasKas implements CasKasStore {
     }
 
     @Override
-    public synchronized void store(Identity id, Identity oldDigest, Identity newDigest) throws StoreException,
-	    IOException {
+    public synchronized void store(Identity id, Identity oldDigest, Identity newDigest) throws StoreException {
 	if (!check(id) || new Digest(get(id).getBytes()).equals(oldDigest)) {
 	    casMap.put(id, newDigest.getDigestAsByte());
 	}
@@ -70,7 +68,7 @@ public class MemoryCasKas implements CasKasStore {
     }
 
     @Override
-    public Identity store(PersistableResource pr) throws IOException {
+    public Identity store(PersistableResource pr)  {
 	Digest digest = digestFactory.getDefaultDigest(pr.getBytes());
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Adding " + pr.getBytes().length + " bytes to " + digest + " in memory CAS");

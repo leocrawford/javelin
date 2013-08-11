@@ -1,7 +1,5 @@
 package com.crypticbit.javelin.js;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -9,7 +7,6 @@ import com.crypticbit.javelin.js.lazy.IdentityReference;
 import com.crypticbit.javelin.js.lazy.LazyJsonArray;
 import com.crypticbit.javelin.js.lazy.LazyJsonMap;
 import com.crypticbit.javelin.js.lazy.Reference;
-import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.GeneralPersistableResource;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
@@ -26,7 +23,7 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
     }
 
     @Override
-    public Object read(Identity digest) throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+    public Object read(Identity digest) throws JsonSyntaxException, StoreException {
 	JsonElement in = new JsonParser().parse(cas.get(digest).getAsString());
 	if (in.isJsonArray()) {
 	    List<Reference> r = new LinkedList<>();
@@ -71,7 +68,7 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
 
     // FIXME if already exists
     @Override
-    public Identity write(Object object) throws StoreException, IOException {
+    public Identity write(Object object) throws StoreException {
 	if (object instanceof List) {
 	    List<Identity> r = new LinkedList<>();
 	    for (Object o : (List<Object>) object) {

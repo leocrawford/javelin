@@ -1,13 +1,10 @@
 package com.crypticbit.javelin.js;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.GeneralPersistableResource;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
@@ -21,7 +18,7 @@ public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> {
     }
 
     @Override
-    public JsonElement read(Identity digest) throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+    public JsonElement read(Identity digest) throws JsonSyntaxException, StoreException {
 	JsonElement in = new JsonParser().parse(cas.get(digest).getAsString());
 	if (in.isJsonArray()) {
 	    JsonArray r = new JsonArray();
@@ -43,7 +40,7 @@ public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> {
     }
 
     @Override
-    public Identity write(JsonElement element) throws StoreException, IOException {
+    public Identity write(JsonElement element) throws StoreException {
 	if (element.isJsonArray()) {
 	    LinkedList<Identity> array = new LinkedList<>();
 	    for (JsonElement e : element.getAsJsonArray()) {

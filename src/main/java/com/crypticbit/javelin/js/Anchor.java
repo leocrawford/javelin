@@ -1,7 +1,5 @@
 package com.crypticbit.javelin.js;
 
-import java.io.IOException;
-
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
@@ -30,7 +28,7 @@ public class Anchor {
 	this.kas = kas;
     }
 
-    Anchor(KeyAddressableStorage kas, Anchor clone) throws StoreException, IOException {
+    Anchor(KeyAddressableStorage kas, Anchor clone) throws StoreException {
 	anchor = new Digest();
 	this.kas = kas;
 	write(clone.read());
@@ -56,7 +54,7 @@ public class Anchor {
 	}
     }
 
-    public void write(Identity newReference) throws StoreException, IOException {
+    public void write(Identity newReference) throws StoreException {
 	kas.store(anchor, reference, newReference);
 	reference = newReference;
     }

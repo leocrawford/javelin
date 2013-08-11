@@ -1,7 +1,5 @@
 package com.crypticbit.javelin.js;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,12 +53,11 @@ public class JsonCasAdapter {
 	this.anchor = anchor;
     }
 
-    public JsonCasAdapter branch() throws StoreException, IOException {
+    public JsonCasAdapter branch() throws StoreException {
 	return new JsonCasAdapter(store, new Anchor(store, anchor));
     }
 
-    public synchronized JsonCasAdapter checkout() throws StoreException, JsonSyntaxException,
-	    UnsupportedEncodingException {
+    public synchronized JsonCasAdapter checkout() throws StoreException, JsonSyntaxException {
 	Identity daoDigest = anchor.read();
 	commit = new Commit(commitFactory.read(daoDigest),daoDigest, jsonFactory);
 	element = commit.getElement();
@@ -70,7 +67,7 @@ public class JsonCasAdapter {
 	return this;
     }
 
-    public synchronized JsonCasAdapter commit() throws StoreException, IOException {
+    public synchronized JsonCasAdapter commit() throws StoreException {
 	Identity write = jsonFactory.getJsonElementAdapter().write(element);
 	writeIdentity(write, anchor.get());
 	return checkout();
@@ -84,19 +81,19 @@ public class JsonCasAdapter {
 	return commit;
     }
 
-    public Object lazyRead() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+    public Object lazyRead() throws JsonSyntaxException, StoreException {
 	return commit.getObject();
     }
 
     public synchronized JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, StoreException,
-	    PatchFailedException, IOException {
+	    PatchFailedException {
 	ThreeWayDiff patch = commit.createChangeSet(other.commit);
 	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(patch.apply());
 	writeIdentity(valueIdentity, anchor.get(), other.anchor.get());
 	return checkout();
     }
 
-    private void writeIdentity(Identity valueIdentity, Identity... parents) throws StoreException, IOException {
+    private void writeIdentity(Identity valueIdentity, Identity... parents) throws StoreException {
 	CommitDao tempCommit = new CommitDao(valueIdentity, new Date(), "auser", parents);
 	Identity tempDigest = commitFactory.write(tempCommit);
 	anchor.write(tempDigest);

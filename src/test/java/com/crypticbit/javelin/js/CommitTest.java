@@ -103,10 +103,6 @@ public class CommitTest extends TestUtils {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		    }
-		    catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		    }
 		    catch (StoreException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

@@ -4,13 +4,13 @@ import org.jgrapht.DirectedGraph;
 
 import com.crypticbit.javelin.js.Commit;
 
-@SuppressWarnings("serial")
-public
-class HackedDirectedGraphUnion extends DirectedGraphUnion<Commit, DefaultEdge> {
+/** A horrible hack to allow us to instantiate a DirectedGraphUnion by extending it, as constructor wasn't public */
 
-    public HackedDirectedGraphUnion(DirectedGraph<Commit, DefaultEdge> a,
-    	DirectedGraph<Commit, DefaultEdge> b) {
-        super(a,b);
+@SuppressWarnings("serial")
+public class HackedDirectedGraphUnion extends DirectedGraphUnion<Commit, DefaultEdge> {
+
+    public HackedDirectedGraphUnion(DirectedGraph<Commit, DefaultEdge> a, DirectedGraph<Commit, DefaultEdge> b) {
+	super(a, b);
     }
-    
+
 }

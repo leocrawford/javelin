@@ -24,8 +24,13 @@ public class GeneralPersistableResource implements PersistableResource {
     }
 
     @Override
-    public String getAsString() throws UnsupportedEncodingException {
-	return new String(getBytes(), "UTF-8");
+    public String getAsString() {
+	try {
+	    return new String(getBytes(), "UTF-8");
+	}
+	catch (UnsupportedEncodingException e) {
+	    throw new Error("UTF-8 is not supported on this platform");
+	}
     }
 
     @Override
@@ -40,18 +45,14 @@ public class GeneralPersistableResource implements PersistableResource {
 
     @Override
     public String toString() {
-	try {
-	    String full = getAsString();
-	    if (full.length() > 60) {
-		return full.substring(0, 60) + "...";
-	    }
-	    else {
-		return full;
-	    }
+	String full = getAsString();
+	if (full.length() > 60) {
+	    return full.substring(0, 60) + "...";
 	}
-	catch (UnsupportedEncodingException e) {
-	    throw new Error("UTF-8 is not supported on this platform");
+	else {
+	    return full;
 	}
+
     }
 
 }

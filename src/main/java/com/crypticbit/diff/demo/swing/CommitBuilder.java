@@ -79,7 +79,7 @@ public class CommitBuilder extends JFrame {
 			try {
 			    jsonPanel.setJson(c.getElement().toString(), UpdateType.REPLACE);
 			}
-			catch (JsonSyntaxException | UnsupportedEncodingException | StoreException e1) {
+			catch (JsonSyntaxException | StoreException e1) {
 			    // TODO Auto-generated catch block
 			    e1.printStackTrace();
 			}

@@ -10,7 +10,7 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.TarjanLowestCommonAncestor;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.GraphUnion;
+import org.jgrapht.graph.HackedDirectedGraphUnion;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 import com.crypticbit.javelin.diff.Snapshot;
@@ -48,8 +48,7 @@ public class Commit implements Comparable<Commit> {
 	    StoreException {
 
 	Graph<Commit, DefaultEdge> x = getAsGraphToRoots(new Commit[] { this, other });
-	Commit lca = new TarjanLowestCommonAncestor<Commit, DefaultEdge>(x).calculate(findRoot(), this,
-		other);
+	Commit lca = new TarjanLowestCommonAncestor<Commit, DefaultEdge>(x).calculate(findRoot(), this, other);
 	Collection<GraphPath<Commit, DefaultEdge>> pathsToValues = new LinkedList<>();
 	pathsToValues.add(getShortestPath(x, lca, this));
 	pathsToValues.add(getShortestPath(x, lca, other));
@@ -70,8 +69,8 @@ public class Commit implements Comparable<Commit> {
      * Generate a graph from this node to root. This allows us to treat the commit tree like a graph, and use standard
      * graph operations rather than coding our own
      */
-    public Graph<Commit, DefaultEdge> getAsGraphToRoot() throws JsonSyntaxException, UnsupportedEncodingException,
-	    StoreException {
+    public DirectedGraph<Commit, DefaultEdge> getAsGraphToRoot() throws JsonSyntaxException,
+	    UnsupportedEncodingException, StoreException {
 	// FIXME - we should consider caching results
 
 	DirectedGraph<Commit, DefaultEdge> thisAndParentsAsGraph = new SimpleDirectedGraph<Commit, DefaultEdge>(
@@ -82,10 +81,10 @@ public class Commit implements Comparable<Commit> {
 	    // FIXME - which way are we directing our graph
 	    thisAndParentsAsGraph.addEdge(c, this);
 	}
-	Graph<Commit, DefaultEdge> thisAndParentsTreeAsGraph = thisAndParentsAsGraph;
+	DirectedGraph<Commit, DefaultEdge> thisAndParentsTreeAsGraph = thisAndParentsAsGraph;
 	for (Commit c : getParents()) {
-	    thisAndParentsTreeAsGraph = new GraphUnion<Commit, DefaultEdge, Graph<Commit, DefaultEdge>>(
-		    thisAndParentsTreeAsGraph, c.getAsGraphToRoot());
+	    thisAndParentsTreeAsGraph = new HackedDirectedGraphUnion(thisAndParentsTreeAsGraph, c.getAsGraphToRoot()) {
+	    };
 	}
 	return thisAndParentsTreeAsGraph;
     }
@@ -106,12 +105,11 @@ public class Commit implements Comparable<Commit> {
 	Set<Commit> parents = new TreeSet<>();
 	DataAccessInterface<CommitDao> simpleObjectAdapter = jsonFactory.getSimpleObjectAdapter(CommitDao.class);
 	for (Identity parent : dao.getParents()) {
-	    Commit wrap = wrap(simpleObjectAdapter.read(parent),parent);
+	    Commit wrap = wrap(simpleObjectAdapter.read(parent), parent);
 	    parents.add(wrap);
 	}
 	return parents;
     }
-    
 
     public List<Commit> getShortestHistory() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
 
@@ -129,8 +127,7 @@ public class Commit implements Comparable<Commit> {
 	return shortest;
     }
 
-    public GraphPath<Commit, DefaultEdge> getShortestPath(Graph<Commit, DefaultEdge> graph, Commit start,
-	    Commit end) {
+    public GraphPath<Commit, DefaultEdge> getShortestPath(Graph<Commit, DefaultEdge> graph, Commit start, Commit end) {
 	return new DijkstraShortestPath<Commit, DefaultEdge>(graph, start, end).getPath();
     }
 
@@ -187,18 +184,18 @@ public class Commit implements Comparable<Commit> {
 	return new Commit(dao, digest, jsonFactory);
     }
 
-    public static Graph<Commit, DefaultEdge> getAsGraphToRoots(Commit[] commits) throws JsonSyntaxException,
+    public static DirectedGraph<Commit, DefaultEdge> getAsGraphToRoots(Commit[] commits) throws JsonSyntaxException,
 	    UnsupportedEncodingException, StoreException {
-	Graph<Commit, DefaultEdge> result = null;
+	DirectedGraph<Commit, DefaultEdge> result = null;
 	for (Commit c : commits) {
 	    if (result == null) {
 		result = c.getAsGraphToRoot();
 	    }
 	    else {
-		result = new GraphUnion<Commit, DefaultEdge, Graph<Commit, DefaultEdge>>(result, c
-			.getAsGraphToRoot());
+		result = new HackedDirectedGraphUnion(result, c.getAsGraphToRoot());
 	    }
 	}
 	return result;
     }
+
 }

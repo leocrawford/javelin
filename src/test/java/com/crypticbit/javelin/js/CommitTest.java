@@ -69,6 +69,15 @@ public class CommitTest extends TestUtils {
     // assertEquals(jca2.getCommit(),
     // jca4.getCommit().findLca(jca3.getCommit()));
     // }
+    
+    @Test
+    public void testNavigate() throws JsonSyntaxException, StoreException {
+	String c8 = "{\"a\":\"b\",\"c\":{\"d\":\"e\"},\"f\":[\"g\",1,2,3,{\"k\":true,\"l\":false}]}";
+	jca4.write(c8).commit();
+	
+	assertEquals(false, jca4.getCommit().navigate("f[4].l"));
+	assertEquals("e", jca4.getCommit().navigate("c.d"));
+    }
 
     @Test
     public void testGetAsGraph() throws StoreException, IOException {

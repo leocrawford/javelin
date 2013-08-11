@@ -24,6 +24,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
+import com.jayway.jsonpath.Filter;
+import com.jayway.jsonpath.JsonPath;
 
 public class Commit implements Comparable<Commit> {
 
@@ -98,6 +100,13 @@ public class Commit implements Comparable<Commit> {
 
     public Object getObject() throws JsonSyntaxException, StoreException {
 	return jsonFactory.getJsonObjectAdapter().read(dao.getHead());
+    }
+    
+    public Object navigate(String path) throws JsonSyntaxException, StoreException {
+	JsonPath compiledPath = new JsonPath(path,new Filter[]{});
+	Object x = compiledPath.read(getObject());
+	return x;
+//	getObject()
     }
 
     public Set<Commit> getParents() throws JsonSyntaxException, StoreException {

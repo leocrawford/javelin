@@ -4,9 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.swing.*;
@@ -17,7 +15,6 @@ import com.crypticbit.javelin.diff.DifferFactory;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.diff.jsonelement.JsonElementArray;
 import com.crypticbit.javelin.diff.jsonelement.JsonElementMap;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -221,7 +218,7 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
     @Override
     public void valueChanged(TreeSelectionEvent treeSelectionEvent) {
 	currentIndex = getIndex(treeSelectionEvent);
-	System.out.println(currentIndex);
+	jsonTextArea.setText(treeView[currentIndex].getJson());
 	updateButtonStates();
     }
 
@@ -322,15 +319,15 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 		break;
 	    }
 
-	    jEditPanel[2].setJson(mergeJson(jEditPanel[currentIndex].getJson(), currentIndex),
-		    JSONEditPanel.UpdateType.REPLACE);
+	 
+	    for (JsonChangeListener c : changeListeners)
+		c.notify(jEditPanel[currentIndex].getJson());
 	}
-
-	private String mergeJson(String json, int index) {
-	    twd.addBranchSnapshot(parser.parse(json), index);
-	    System.out.println(twd);
-	    return new Gson().toJson(twd.apply());
-	}
+    }
+    
+    List<JsonChangeListener> changeListeners = new LinkedList<>();;
+    public void addJsonChangeListener(JsonChangeListener cl) {
+	this.changeListeners.add(cl);
     }
 
     private static class OkCancelAction extends AbstractAction {
@@ -359,7 +356,6 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
     public void setJson(String string) {
 
 	treeView[0].setJson(string, JSONEditPanel.UpdateType.REPLACE);
-
     };
 
 }

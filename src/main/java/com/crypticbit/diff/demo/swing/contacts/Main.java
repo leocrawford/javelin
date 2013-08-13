@@ -12,6 +12,8 @@ import com.crypticbit.javelin.store.StoreException;
 
 public class Main extends JFrame {
 
+    private String lastPath = null;
+    
     public Main() throws StoreException {
 	super("Contacts");
 	Container content = getContentPane();
@@ -25,11 +27,21 @@ public class Main extends JFrame {
 	NamePanel namePanel = new NamePanel(jsonStore, new JsonElementSelectionListener(){
 
 	    @Override
-	    public void jsonElementSelected(Object element) {
-		System.out.println(element);
+	    public void jsonElementSelected(String path, Object element) {
+		System.out.println(path+"->"+element+","+element.getClass());
+		lastPath = path;
 		contactEditPanel.setJson(element.toString());
 		
 	    }});
+	contactEditPanel.addJsonChangeListener(new JsonChangeListener() {
+	    
+	    @Override
+	    public void notify(String json) {
+		System.out.println("Setting "+lastPath+" as "+json);
+		
+	    }
+	});
+	
 	jSplit.add(namePanel);
 	jSplit.add(contactEditPanel);
 	

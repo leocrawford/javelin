@@ -24,7 +24,7 @@ public class NamePanel extends JPanel {
 	    
 	    @Override
 	    public void valueChanged(ListSelectionEvent e) {
-		jsonElementSelectionListener.jsonElementSelected(dataModel.getJsonElementAt(e.getFirstIndex()));	
+		jsonElementSelectionListener.jsonElementSelected("people."+e.getFirstIndex(),dataModel.getJsonElementAt(e.getFirstIndex()));	
 	    }
 	});
     }

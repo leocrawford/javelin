@@ -22,10 +22,17 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.jayway.jsonpath.Filter;
+import com.jayway.jsonpath.HackedJsonPath;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.internal.PathToken;
+import com.jayway.jsonpath.internal.PathTokenizer;
+import com.jayway.jsonpath.internal.filter.PathTokenFilter;
+import com.jayway.jsonpath.spi.JsonProvider;
+import com.jayway.jsonpath.spi.JsonProviderFactory;
 
 public class Commit implements Comparable<Commit> {
 
@@ -101,13 +108,13 @@ public class Commit implements Comparable<Commit> {
     public Object getObject() throws JsonSyntaxException, StoreException {
 	return jsonFactory.getJsonObjectAdapter().read(dao.getHead());
     }
-    
+
     public Object navigate(String path) throws JsonSyntaxException, StoreException {
-	JsonPath compiledPath = new JsonPath(path,new Filter[]{});
-	Object x = compiledPath.read(getObject());
-	return x;
-//	getObject()
+	JsonPath compiledPath = new JsonPath(path, new Filter[] {});
+	return compiledPath.read(getObject());
     }
+
+
 
     public Set<Commit> getParents() throws JsonSyntaxException, StoreException {
 	Set<Commit> parents = new TreeSet<>();

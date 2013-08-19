@@ -9,6 +9,7 @@ import javax.swing.JSplitPane;
 import com.crypticbit.javelin.js.JsonCasAdapter;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
+import com.google.gson.JsonSyntaxException;
 
 public class Main extends JFrame {
 
@@ -20,7 +21,7 @@ public class Main extends JFrame {
 	JSplitPane jSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 	content.add(jSplit);
 
-	JsonCasAdapter jsonStore = new JsonCasAdapter(new StorageFactory().createMemoryCas());
+	final JsonCasAdapter jsonStore = new JsonCasAdapter(new StorageFactory().createMemoryCas());
 	jsonStore.write("{people:[{name:\"Leo\"},{name:\"John\"},{name:\"Caroline\"}]}").commit();
 
 	final ContactEditPanel contactEditPanel = new ContactEditPanel();
@@ -37,8 +38,14 @@ public class Main extends JFrame {
 	    
 	    @Override
 	    public void notify(String json) {
-		System.out.println("Setting "+lastPath+" as "+json);
-		
+		System.out.println("Setting "+lastPath+" as "+json+","+json.getClass());
+		try {
+		    jsonStore.write(lastPath, json);
+		}
+		catch (JsonSyntaxException | StoreException e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		}
 	    }
 	});
 	

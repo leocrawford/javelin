@@ -9,6 +9,8 @@ public class IdentityReference implements Reference {
 
     private Identity identity;
     private JsonStoreAdapterFactory dereferencedCasAccessInterface;
+    private Object value;
+    private boolean loaded = false;
 
     public IdentityReference(JsonStoreAdapterFactory dereferencedCasAccessInterface, Identity identity) {
 	this.dereferencedCasAccessInterface = dereferencedCasAccessInterface;
@@ -17,14 +19,19 @@ public class IdentityReference implements Reference {
 
     @Override
     public Object getValue() {
-	try {
-	    return dereferencedCasAccessInterface.getJsonObjectAdapter().read(identity);
+	if (!loaded) {
+	    try {
+		value = dereferencedCasAccessInterface.getJsonObjectAdapter().read(identity);
+		loaded = true;
+	    }
+	    catch (JsonSyntaxException | StoreException e) {
+		e.printStackTrace();
+		throw new Error();
+		// FIXME
+	    }
 	}
-	catch (JsonSyntaxException | StoreException e) {
-	    e.printStackTrace();
-	    throw new Error();
-	    // FIXME
-	}
+	return value;
+
     }
 
 }

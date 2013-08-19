@@ -1,6 +1,8 @@
 package com.crypticbit.javelin.js;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,6 +13,13 @@ import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
+import com.jayway.jsonpath.Filter;
+import com.jayway.jsonpath.HackedJsonPath;
+import com.jayway.jsonpath.internal.PathToken;
+import com.jayway.jsonpath.internal.PathTokenizer;
+import com.jayway.jsonpath.internal.filter.PathTokenFilter;
+import com.jayway.jsonpath.spi.JsonProvider;
+import com.jayway.jsonpath.spi.JsonProviderFactory;
 
 import difflib.PatchFailedException;
 
@@ -98,8 +107,42 @@ public class JsonCasAdapter {
     }
 
     public JsonCasAdapter write(String string) {
+	// FIXME resue Gson
 	element = new Gson().fromJson(string, JsonElement.class);
 	return this;
+    }
+
+    public void write(String path, String json) throws JsonSyntaxException, StoreException {
+	HackedJsonPath compiledPath = new HackedJsonPath(path, new Filter[] {});
+	// code copied from jsonpath
+	// FIXME reuse JSON
+	// FIXME should this be in JCA?
+	Object jsonObject = new Gson().fromJson(json, Object.class);
+	System.out.println(jsonObject.getClass());
+	if (!(jsonObject instanceof Map) && !(jsonObject instanceof List)) {
+	    throw new IllegalArgumentException("Invalid container object");
+	}
+	JsonProvider jsonProvider = JsonProviderFactory.createProvider();
+	Object originalResult, result;
+	originalResult = result = lazyRead();
+
+	PathTokenizer tokenizer = compiledPath.getTokenizer();
+	PathToken lastToken = tokenizer.removeLastPathToken();
+	for (PathToken pathToken : tokenizer) {
+	    PathTokenFilter filter = pathToken.getFilter();
+	    result = filter.filter(result, jsonProvider);
+	}
+
+	if (lastToken.isArrayIndexToken()) {
+	    ((List) result).set(lastToken.getArrayIndex(), jsonObject);
+	}
+	else {
+	    ((Map) result).put(lastToken.getFragment(), jsonObject);
+	}
+
+	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(originalResult);
+	writeIdentity(valueIdentity, anchor.get());
+	checkout();
     }
 
     private void writeIdentity(Identity valueIdentity, Identity... parents) throws StoreException {

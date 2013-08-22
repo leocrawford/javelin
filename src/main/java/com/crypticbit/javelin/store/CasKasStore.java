@@ -5,4 +5,6 @@ import com.crypticbit.javelin.store.kas.KeyAddressableStorage;
 
 public interface CasKasStore extends ContentAddressableStorage, KeyAddressableStorage {
 
+    
+    
 }

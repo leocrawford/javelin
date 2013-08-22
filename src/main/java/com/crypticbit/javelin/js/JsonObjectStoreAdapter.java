@@ -11,60 +11,49 @@ import com.crypticbit.javelin.store.GeneralPersistableResource;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
+import com.google.common.base.Function;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 
-public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
-
+public class JsonObjectStoreAdapter extends DataAccessInterface<Object>  implements StoreVisitorCallback<Object, Reference> {
+    private StoreVisitor<Object,Reference> sv;
+    
     JsonObjectStoreAdapter(ContentAddressableStorage cas, JsonStoreAdapterFactory jsa) {
 	super(cas, jsa);
+	sv =  new StoreVisitor<>(cas, this, jsa.getGson());
+    }
+    
+    @Override
+    public Object arriveList(List<Reference> list) {
+	    return new LazyJsonArray(list);
     }
 
     @Override
-    public Object read(Identity digest) throws JsonSyntaxException, StoreException {
-	JsonElement in = new JsonParser().parse(cas.get(digest).getAsString());
-	if (in.isJsonArray()) {
-	    List<Reference> r = new LinkedList<>();
-	    for (JsonElement e : in.getAsJsonArray()) {
-		r.add(new IdentityReference(jsa, getGson().fromJson(e, Identity.class)));
-	    }
-	    return new LazyJsonArray(r);
-	}
-	else if (in.isJsonObject()) {
-	    Map<String, Reference> o = new HashMap<>();
-	    for (Entry<String, JsonElement> e : in.getAsJsonObject().entrySet()) {
-		o.put(e.getKey(), new IdentityReference(jsa, getGson().fromJson(e.getValue(), Identity.class)));
-	    }
-	    return new LazyJsonMap(o);
-	}
-	else if (in.isJsonPrimitive()) {
-	    JsonPrimitive primative = in.getAsJsonPrimitive();
-	    if (primative.isBoolean()) {
-		return primative.getAsBoolean();
-	    }
-	    if (primative.isNumber()) {
-		if (!primative.getAsString().contains(".")) {
-		    return primative.getAsInt();
-		}
-		else {
-		    return primative.getAsFloat();
-		}
-	    }
-	    if (primative.isString()) {
-		return primative.getAsString();
-	    }
-	    throw new Error("Unknown Json Type: " + in);
-	}
-	else if (in.isJsonNull()) {
-	    return null;
-	}
-	else {
-	    throw new Error("Unknown Json Type: " + in);
-	}
-
+    public Object arriveMap(Map<String, Reference> map) {
+	    return new LazyJsonMap(map);
     }
+
+    @Override
+    public Object arriveValue(Object value) {
+	 return value;
+    }
+
+    @Override
+    public Function<Identity, Reference> getTransform() {
+	return new Function<Identity, Reference>() {
+	    public Reference apply(Identity identity) {
+		return new IdentityReference(jsa, identity);
+	    }
+	};
+    }
+    
+    @Override
+    public Object read(Identity commitId) throws StoreException, JsonSyntaxException {
+	return sv.visit(commitId);
+    }
+
 
     // FIXME if already exists
     @Override
@@ -87,4 +76,8 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object> {
 	    return cas.store(new GeneralPersistableResource(getGson().toJson(object)));
 	}
     }
+
+
+
+
 }

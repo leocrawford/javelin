@@ -47,8 +47,8 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 
     private final static int COPIES = 1;
     private JTextArea jsonTextArea;
-    private JSONEditPanel[] treeView = new JSONEditPanel[COPIES];
-    private Map<JSONEditPanel.AllowedOps, JButton> treeChangeButtons = new HashMap<JSONEditPanel.AllowedOps, JButton>();
+    private JsonEditPanel[] treeView = new JsonEditPanel[COPIES];
+    private Map<JsonEditPanel.AllowedOps, JButton> treeChangeButtons = new HashMap<JsonEditPanel.AllowedOps, JButton>();
     private int currentIndex = 0;
 
     /**
@@ -96,8 +96,8 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 	    JLabel label = new JLabel("JSON Tree View:", SwingConstants.LEFT);
 	    label.setAlignmentX(LEFT_ALIGNMENT);
 	    centerPanel.add(label);
-	    treeView[loop] = new JSONEditPanel();
-	    treeView[loop].setJson("", JSONEditPanel.UpdateType.REPLACE);
+	    treeView[loop] = new JsonEditPanel();
+	    treeView[loop].setJson("", JsonEditPanel.UpdateType.REPLACE);
 	    treeView[loop].setAlignmentX(LEFT_ALIGNMENT);
 	    treeView[loop].addTreeSelectionListener(this);
 	    centerPanel.add(treeView[loop]);
@@ -140,41 +140,41 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 	buttonPanel.setAlignmentX(RIGHT_ALIGNMENT);
 	JButton button = new JButton(new CopyJsonAction(Direction.REPLACE, treeView, jsonTextArea));
 	buttonPanel.add(button);
-	treeChangeButtons.put(JSONEditPanel.AllowedOps.REPLACE, button);
+	treeChangeButtons.put(JsonEditPanel.AllowedOps.REPLACE, button);
 	buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 
 	button = new JButton(new CopyJsonAction(Direction.INSERT, treeView, jsonTextArea));
-	treeChangeButtons.put(JSONEditPanel.AllowedOps.INSERT, button);
+	treeChangeButtons.put(JsonEditPanel.AllowedOps.INSERT, button);
 	buttonPanel.add(button);
 	bottomPanel.add(buttonPanel);
 	buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 
 	button = new JButton(new CopyJsonAction(Direction.APPEND, treeView, jsonTextArea));
-	treeChangeButtons.put(JSONEditPanel.AllowedOps.APPEND, button);
+	treeChangeButtons.put(JsonEditPanel.AllowedOps.APPEND, button);
 	buttonPanel.add(button);
 	bottomPanel.add(buttonPanel);
 	buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 
 	button = new JButton(new CopyJsonAction(Direction.AS_CHILD, treeView, jsonTextArea));
-	treeChangeButtons.put(JSONEditPanel.AllowedOps.AS_CHILD, button);
+	treeChangeButtons.put(JsonEditPanel.AllowedOps.AS_CHILD, button);
 	buttonPanel.add(button);
 	bottomPanel.add(buttonPanel);
 	buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 
 	button = new JButton(new CopyJsonAction(Direction.RENAME, treeView, jsonTextArea));
 	buttonPanel.add(button);
-	treeChangeButtons.put(JSONEditPanel.AllowedOps.RENAME, button);
+	treeChangeButtons.put(JsonEditPanel.AllowedOps.RENAME, button);
 	bottomPanel.add(buttonPanel);
 	buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 
 	button = new JButton(new CopyJsonAction(Direction.DELETE, treeView, jsonTextArea));
 	buttonPanel.add(button);
-	treeChangeButtons.put(JSONEditPanel.AllowedOps.DELETE, button);
+	treeChangeButtons.put(JsonEditPanel.AllowedOps.DELETE, button);
 	bottomPanel.add(buttonPanel);
 	buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 
 	button = new JButton(new CopyJsonAction(Direction.GET, treeView, jsonTextArea));
-	treeChangeButtons.put(JSONEditPanel.AllowedOps.GET_JSON, button);
+	treeChangeButtons.put(JsonEditPanel.AllowedOps.GET_JSON, button);
 	buttonPanel.add(button);
 	bottomPanel.add(buttonPanel);
 	bottomPanel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -224,7 +224,7 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 
     private int getIndex(TreeSelectionEvent treeSelectionEvent) {
 	int loop = 0;
-	for (JSONEditPanel tv : treeView) {
+	for (JsonEditPanel tv : treeView) {
 	    if (tv.jTree == treeSelectionEvent.getSource()) {
 		return loop;
 	    }
@@ -238,8 +238,8 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
     private void updateButtonStates() {
 	// Update the button controls to enable and disable tree manipulation
 	// operations
-	List<JSONEditPanel.AllowedOps> allowedOps = treeView[currentIndex].getAllowedOperations();
-	for (Entry<JSONEditPanel.AllowedOps, JButton> entry : treeChangeButtons.entrySet()) {
+	List<JsonEditPanel.AllowedOps> allowedOps = treeView[currentIndex].getAllowedOperations();
+	for (Entry<JsonEditPanel.AllowedOps, JButton> entry : treeChangeButtons.entrySet()) {
 	    if (allowedOps.contains(entry.getKey())) {
 		entry.getValue().setEnabled(true);
 	    }
@@ -273,7 +273,7 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 	private static final long serialVersionUID = 1L;
 
 	private final Direction direction;
-	private final JSONEditPanel[] jEditPanel;
+	private final JsonEditPanel[] jEditPanel;
 	private final JTextArea jTextArea;
 
 	private final JsonParser parser = new JsonParser();
@@ -285,7 +285,7 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 	    }
 	});
 
-	public CopyJsonAction(Direction direction, JSONEditPanel[] treeView, JTextArea jTextArea) {
+	public CopyJsonAction(Direction direction, JsonEditPanel[] treeView, JTextArea jTextArea) {
 	    super(direction.shortName);
 	    putValue(SHORT_DESCRIPTION, direction.description);
 	    this.direction = direction;
@@ -297,16 +297,16 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 	public void actionPerformed(ActionEvent e) {
 	    switch (direction) {
 	    case AS_CHILD:
-		jEditPanel[currentIndex].setJson(jTextArea.getText(), JSONEditPanel.UpdateType.AS_CHILD);
+		jEditPanel[currentIndex].setJson(jTextArea.getText(), JsonEditPanel.UpdateType.AS_CHILD);
 		break;
 	    case APPEND:
-		jEditPanel[currentIndex].setJson(jTextArea.getText(), JSONEditPanel.UpdateType.APPEND);
+		jEditPanel[currentIndex].setJson(jTextArea.getText(), JsonEditPanel.UpdateType.APPEND);
 		break;
 	    case INSERT:
-		jEditPanel[currentIndex].setJson(jTextArea.getText(), JSONEditPanel.UpdateType.INSERT);
+		jEditPanel[currentIndex].setJson(jTextArea.getText(), JsonEditPanel.UpdateType.INSERT);
 		break;
 	    case REPLACE:
-		jEditPanel[currentIndex].setJson(jTextArea.getText(), JSONEditPanel.UpdateType.REPLACE);
+		jEditPanel[currentIndex].setJson(jTextArea.getText(), JsonEditPanel.UpdateType.REPLACE);
 		break;
 	    case GET:
 		jTextArea.setText(jEditPanel[currentIndex].getJson());
@@ -355,7 +355,7 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 
     public void setJson(String string) {
 
-	treeView[0].setJson(string, JSONEditPanel.UpdateType.REPLACE);
+	treeView[0].setJson(string, JsonEditPanel.UpdateType.REPLACE);
     };
 
 }

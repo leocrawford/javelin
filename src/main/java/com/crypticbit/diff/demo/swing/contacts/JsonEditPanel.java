@@ -38,7 +38,7 @@ import com.google.gson.JsonParser;
  *         the License for the specific language governing permissions and limitations under the License.
  *         </p>
  */
-public class JSONEditPanel extends JPanel {
+public class JsonEditPanel extends JPanel {
     /**
      * Using default serial version id.
      */
@@ -50,9 +50,9 @@ public class JSONEditPanel extends JPanel {
     /**
      * Default constructor for the JSONEditPanel object. Creates an empty tree.
      */
-    public JSONEditPanel() {
+    public JsonEditPanel() {
 	setLayout(new BorderLayout());
-	JSONJTreeNode root = new JSONJTreeNode(null, -1, new JsonNull());
+	JsonJTreeNode root = new JsonJTreeNode(null, -1, new JsonNull());
 	jTree = new JTree(root);
 	jTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 	add(new JScrollPane(jTree), BorderLayout.CENTER);
@@ -75,14 +75,14 @@ public class JSONEditPanel extends JPanel {
 	TreePath selection = jTree.getSelectionPath();
 	if (selection == null) {
 	    // Replace root with emptyness
-	    jTree.setModel(new DefaultTreeModel(new JSONJTreeNode(null, -1, new JsonNull())));
+	    jTree.setModel(new DefaultTreeModel(new JsonJTreeNode(null, -1, new JsonNull())));
 	}
 	else {
-	    JSONJTreeNode node = (JSONJTreeNode) selection.getLastPathComponent();
-	    JSONJTreeNode parent = (JSONJTreeNode) node.getParent();
+	    JsonJTreeNode node = (JsonJTreeNode) selection.getLastPathComponent();
+	    JsonJTreeNode parent = (JsonJTreeNode) node.getParent();
 	    if (parent == null) {
 		// Replace root with emptyness
-		jTree.setModel(new DefaultTreeModel(new JSONJTreeNode(null, -1, new JsonNull())));
+		jTree.setModel(new DefaultTreeModel(new JsonJTreeNode(null, -1, new JsonNull())));
 	    }
 	    else {
 		node.removeFromParent();
@@ -106,22 +106,22 @@ public class JSONEditPanel extends JPanel {
 	    return result;
 	}
 
-	JSONJTreeNode selectedNode = (JSONJTreeNode) selection.getLastPathComponent();
-	JSONJTreeNode parentNode = null;
+	JsonJTreeNode selectedNode = (JsonJTreeNode) selection.getLastPathComponent();
+	JsonJTreeNode parentNode = null;
 
 	if (selectedNode != null) {
 	    result.add(AllowedOps.DELETE);
-	    parentNode = (JSONJTreeNode) selectedNode.getParent();
+	    parentNode = (JsonJTreeNode) selectedNode.getParent();
 	}
 	if (parentNode != null) {
 	    result.add(AllowedOps.APPEND);
 	    result.add(AllowedOps.INSERT);
 	}
-	if (selectedNode.dataType.equals(JSONJTreeNode.DataType.ARRAY)
-		|| selectedNode.dataType.equals(JSONJTreeNode.DataType.OBJECT)) {
+	if (selectedNode.dataType.equals(JsonJTreeNode.DataType.ARRAY)
+		|| selectedNode.dataType.equals(JsonJTreeNode.DataType.OBJECT)) {
 	    result.add(AllowedOps.AS_CHILD);
 	}
-	if ((parentNode != null) && (parentNode.dataType.equals(JSONJTreeNode.DataType.OBJECT))) {
+	if ((parentNode != null) && (parentNode.dataType.equals(JsonJTreeNode.DataType.OBJECT))) {
 	    result.add(AllowedOps.RENAME);
 	}
 	return result;
@@ -134,14 +134,14 @@ public class JSONEditPanel extends JPanel {
      */
     public String getJson() {
 	TreePath selection = jTree.getSelectionPath();
-	JSONJTreeNode node = null;
+	JsonJTreeNode node = null;
 	if (selection == null) {
 	    ((DefaultTreeModel) jTree.getModel()).reload();
-	    node = (JSONJTreeNode) jTree.getModel().getRoot();
+	    node = (JsonJTreeNode) jTree.getModel().getRoot();
 	}
 	else {
 	    ((DefaultTreeModel) jTree.getModel()).reload(node);
-	    node = (JSONJTreeNode) selection.getLastPathComponent();
+	    node = (JsonJTreeNode) selection.getLastPathComponent();
 	}
 	if (node != null) {
 	    return node.asJsonElement().toString();
@@ -161,14 +161,14 @@ public class JSONEditPanel extends JPanel {
 		    JOptionPane.INFORMATION_MESSAGE);
 	    return;
 	}
-	JSONJTreeNode node = (JSONJTreeNode) selection.getLastPathComponent();
-	JSONJTreeNode parent = (JSONJTreeNode) node.getParent();
+	JsonJTreeNode node = (JsonJTreeNode) selection.getLastPathComponent();
+	JsonJTreeNode parent = (JsonJTreeNode) node.getParent();
 	if (parent == null) {
 	    JOptionPane.showMessageDialog(this, "It is not possible to assign a name to the root node.", "Notice",
 		    JOptionPane.INFORMATION_MESSAGE);
 	    return;
 	}
-	if (!parent.dataType.equals(JSONJTreeNode.DataType.OBJECT)) {
+	if (!parent.dataType.equals(JsonJTreeNode.DataType.OBJECT)) {
 	    JOptionPane.showMessageDialog(this, "Only object fields may be renamed.", "Notice",
 		    JOptionPane.INFORMATION_MESSAGE);
 	    return;
@@ -197,7 +197,7 @@ public class JSONEditPanel extends JPanel {
 	if (selection == null) {
 	    if (updateType == UpdateType.REPLACE) {
 		JsonElement root = new JsonParser().parse(json);
-		JSONJTreeNode rootNode = new JSONJTreeNode(null, -1, root);
+		JsonJTreeNode rootNode = new JsonJTreeNode(null, -1, root);
 		jTree.setModel(new DefaultTreeModel(rootNode));
 	    }
 	    else {
@@ -207,18 +207,18 @@ public class JSONEditPanel extends JPanel {
 	    }
 	}
 	else {
-	    JSONJTreeNode selectedNode = (JSONJTreeNode) selection.getLastPathComponent();
-	    JSONJTreeNode parent = (JSONJTreeNode) selectedNode.getParent();
+	    JsonJTreeNode selectedNode = (JsonJTreeNode) selection.getLastPathComponent();
+	    JsonJTreeNode parent = (JsonJTreeNode) selectedNode.getParent();
 	    switch (updateType) {
 	    case REPLACE: {
 		if (parent == null) {
 		    JsonElement root = new JsonParser().parse(json);
-		    JSONJTreeNode rootNode = new JSONJTreeNode(null, -1, root);
+		    JsonJTreeNode rootNode = new JsonJTreeNode(null, -1, root);
 		    jTree.setModel(new DefaultTreeModel(rootNode));
 		    return;
 		}
 		JsonElement root = new JsonParser().parse(json);
-		JSONJTreeNode replacementNode = new JSONJTreeNode(selectedNode.fieldName, selectedNode.index, root);
+		JsonJTreeNode replacementNode = new JsonJTreeNode(selectedNode.fieldName, selectedNode.index, root);
 		int index = selectedNode.getParent().getIndex(selectedNode);
 		selectedNode.removeFromParent();
 		parent.insert(replacementNode, index);
@@ -233,7 +233,7 @@ public class JSONEditPanel extends JPanel {
 		    return;
 		}
 		JsonElement root = new JsonParser().parse(json);
-		JSONJTreeNode replacementNode = new JSONJTreeNode(selectedNode.fieldName, selectedNode.index, root);
+		JsonJTreeNode replacementNode = new JsonJTreeNode(selectedNode.fieldName, selectedNode.index, root);
 		int index = selectedNode.getParent().getIndex(selectedNode);
 		if (updateType.equals(UpdateType.APPEND)) {
 		    index++;
@@ -246,7 +246,7 @@ public class JSONEditPanel extends JPanel {
 		JsonElement root = new JsonParser().parse(json);
 		String fieldName = null;
 		int arrayIndex = -1;
-		if (selectedNode.dataType.equals(JSONJTreeNode.DataType.ARRAY)) {
+		if (selectedNode.dataType.equals(JsonJTreeNode.DataType.ARRAY)) {
 		    Enumeration en = selectedNode.children();
 		    int count = 0;
 		    while (en.hasMoreElements()) {
@@ -255,7 +255,7 @@ public class JSONEditPanel extends JPanel {
 		    }
 		    arrayIndex = count;
 		}
-		else if (selectedNode.dataType.equals(JSONJTreeNode.DataType.OBJECT)) {
+		else if (selectedNode.dataType.equals(JsonJTreeNode.DataType.OBJECT)) {
 		    fieldName = "new-field";
 		}
 		else {
@@ -263,7 +263,7 @@ public class JSONEditPanel extends JPanel {
 			    JOptionPane.INFORMATION_MESSAGE);
 		    return;
 		}
-		JSONJTreeNode newNode = new JSONJTreeNode(fieldName, arrayIndex, root);
+		JsonJTreeNode newNode = new JsonJTreeNode(fieldName, arrayIndex, root);
 		selectedNode.add(newNode);
 		((DefaultTreeModel) jTree.getModel()).reload(selectedNode);
 	    }

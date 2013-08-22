@@ -42,4 +42,5 @@ public class JsonListModelAdapter extends AbstractListModel<String> {
 	return backing.get(index);
     }
 
+
 }

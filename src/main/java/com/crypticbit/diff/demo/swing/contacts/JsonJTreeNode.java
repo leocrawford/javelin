@@ -36,7 +36,7 @@ import com.google.gson.JsonSyntaxException;
  *         the License for the specific language governing permissions and limitations under the License.
  *         </p>
  */
-public class JSONJTreeNode extends DefaultMutableTreeNode {
+public class JsonJTreeNode extends DefaultMutableTreeNode {
     /**
      * Using default serial id.
      */
@@ -55,7 +55,7 @@ public class JSONJTreeNode extends DefaultMutableTreeNode {
      * @param jsonElement
      *            - element to represent
      */
-    public JSONJTreeNode(String fieldName, int index, JsonElement jsonElement) {
+    public JsonJTreeNode(String fieldName, int index, JsonElement jsonElement) {
 	this.index = index;
 	this.fieldName = fieldName;
 	if (jsonElement.isJsonArray()) {
@@ -148,7 +148,7 @@ public class JSONJTreeNode extends DefaultMutableTreeNode {
 	    sb.append("[");
 	    children = this.children();
 	    while (children.hasMoreElements()) {
-		JSONJTreeNode child = (JSONJTreeNode) children.nextElement();
+		JsonJTreeNode child = (JsonJTreeNode) children.nextElement();
 		child.buildJsonString(sb);
 		if (children.hasMoreElements()) {
 		    sb.append(",");
@@ -160,7 +160,7 @@ public class JSONJTreeNode extends DefaultMutableTreeNode {
 	    sb.append("{");
 	    children = this.children();
 	    while (children.hasMoreElements()) {
-		JSONJTreeNode child = (JSONJTreeNode) children.nextElement();
+		JsonJTreeNode child = (JsonJTreeNode) children.nextElement();
 		child.buildJsonString(sb);
 		if (children.hasMoreElements()) {
 		    sb.append(",");
@@ -183,14 +183,14 @@ public class JSONJTreeNode extends DefaultMutableTreeNode {
 	    Iterator<JsonElement> it = myJsonElement.getAsJsonArray().iterator();
 	    while (it.hasNext()) {
 		JsonElement element = it.next();
-		JSONJTreeNode childNode = new JSONJTreeNode(null, index, element);
+		JsonJTreeNode childNode = new JsonJTreeNode(null, index, element);
 		this.add(childNode);
 		index++;
 	    }
 	    break;
 	case OBJECT:
 	    for (Entry<String, JsonElement> entry : myJsonElement.getAsJsonObject().entrySet()) {
-		JSONJTreeNode childNode = new JSONJTreeNode(entry.getKey(), -1, entry.getValue());
+		JsonJTreeNode childNode = new JsonJTreeNode(entry.getKey(), -1, entry.getValue());
 		this.add(childNode);
 	    }
 	    break;

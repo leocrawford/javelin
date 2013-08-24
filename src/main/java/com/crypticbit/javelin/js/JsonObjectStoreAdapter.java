@@ -1,7 +1,10 @@
 package com.crypticbit.javelin.js;
 
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import com.crypticbit.javelin.js.lazy.IdentityReference;
 import com.crypticbit.javelin.js.lazy.LazyJsonArray;
@@ -12,9 +15,6 @@ import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.common.base.Function;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 
 public class JsonObjectStoreAdapter extends DataAccessInterface<Object>  implements StoreVisitorCallback<Object, Reference> {
@@ -27,12 +27,12 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object>  impleme
     
     @Override
     public Object arriveList(List<Reference> list) {
-	    return new LazyJsonArray(list);
+	    return new LazyJsonArray(new ArrayList(list));
     }
 
     @Override
     public Object arriveMap(Map<String, Reference> map) {
-	    return new LazyJsonMap(map);
+	    return new LazyJsonMap(new HashMap(map));
     }
 
     @Override

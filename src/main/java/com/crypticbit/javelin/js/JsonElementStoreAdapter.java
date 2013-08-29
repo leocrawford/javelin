@@ -1,6 +1,8 @@
 package com.crypticbit.javelin.js;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.crypticbit.javelin.store.GeneralPersistableResource;
@@ -8,15 +10,20 @@ import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.common.base.Function;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.LinkedTreeMap;
 
-public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> implements StoreVisitorCallback<JsonElement, JsonElement> {
+public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> implements JsonVisitorDestinationCallback<JsonElement, JsonElement, Identity> {
 
-    private StoreVisitor<JsonElement,JsonElement> sv;
+    private StoreVisitor<JsonElement,JsonElement, Identity, JsonElement> sv;
     
     JsonElementStoreAdapter(ContentAddressableStorage cas, JsonStoreAdapterFactory jsa) {
 	super(cas, jsa);
-	sv =  new StoreVisitor<>(cas, this, jsa.getGson());
+	sv =  new StoreVisitor<>(cas, this, new JsonVisitorCasAdapter(cas,
+			jsa.getGson()), jsa.getGson());
     }
 
     @Override
@@ -45,7 +52,6 @@ public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> im
 
     @Override
     public JsonElement arriveValue(Object value) {
-	System.out.println(value +"-> "+jsa.getGson().toJsonTree(value));
 	return jsa.getGson().toJsonTree(value);
     }
 
@@ -65,7 +71,7 @@ public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> im
 	    return cas.store(new GeneralPersistableResource(getGson().toJson(array)));
 	}
 	else if (element.isJsonObject()) {
-	    Map<String, Identity> map = new HashMap<>();
+	    Map<String, Identity> map = new LinkedTreeMap<>();
 	    for (Entry<String, JsonElement> e : element.getAsJsonObject().entrySet()) {
 		map.put(e.getKey(), write(e.getValue()));
 	    }

@@ -56,8 +56,8 @@ public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> im
     }
 
     @Override
-    public Function<Identity, JsonElement> getTransform() {
-	return sv.RECURSE_FUNCTION;
+    public Function<Identity, JsonElement> getTransform(VisitorContext<Identity, JsonElement> context) {
+	return context.getRecurseFunction();
     }
     
 

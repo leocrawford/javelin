@@ -14,6 +14,7 @@ import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.common.base.Function;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.LinkedTreeMap;
 
 public class JsonObjectStoreAdapter extends DataAccessInterface<Object>
 		implements JsonVisitorDestinationCallback<Object, Reference, Identity>,
@@ -22,17 +23,21 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object>
 	JsonObjectStoreAdapter(ContentAddressableStorage cas,
 			JsonStoreAdapterFactory jsa) {
 		super(cas, jsa);
-		
 	}
 
 	@Override
 	public Object arriveList(List<Reference> list) {
+		// copy so writeable
 		return new LazyJsonArray(new ArrayList<>(list));
 	}
 
 	@Override
 	public Object arriveMap(Map<String, Reference> map) {
-		return new LazyJsonMap(map);
+		// copy so writeable 
+		LinkedTreeMap<String, Reference> linkedTreeMap = new LinkedTreeMap<String,Reference>();
+		linkedTreeMap.putAll(map);
+		return new LazyJsonMap(linkedTreeMap);
+
 	}
 
 	@Override
@@ -40,43 +45,23 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object>
 		return value;
 	}
 
-
-
 	@Override
 	public Object read(Identity commitId) throws StoreException,
 			JsonSyntaxException {
-		StoreVisitor<Object, Reference, Identity, JsonElement> sv = new StoreVisitor<>(cas, this, new JsonVisitorCasAdapter(cas,
-				jsa.getGson()), jsa.getGson());
+		StoreVisitor<Object, Reference, Identity, JsonElement> sv = new StoreVisitor<>(
+				cas, this, new JsonVisitorCasAdapter(cas, jsa.getGson()),
+				jsa.getGson());
 		return sv.visit(commitId);
 	}
 
 	// FIXME if already exists
 	@Override
 	public Identity write(Object object) throws StoreException {
-		StoreVisitor<Identity, Identity, Object, Object> sv = new StoreVisitor<>(cas, new JsonVisitorCasAdapter(cas,
-				jsa.getGson()), this , jsa.getGson());
+		StoreVisitor<Identity, Identity, Object, Object> sv = new StoreVisitor<>(
+				cas, new JsonVisitorCasAdapter(cas, jsa.getGson()), this,
+				jsa.getGson());
 		return sv.visit(object);
 
-		
-		//		if (object instanceof List) {
-//			List<Identity> r = new LinkedList<>();
-//			for (Object o : (List<Object>) object) {
-//				r.add(write(o));
-//			}
-//			return cas
-//					.store(new GeneralPersistableResource(getGson().toJson(r)));
-//		} else if (object instanceof Map) {
-//			Map<String, Identity> r = new LinkedTreeMap<>();
-//			for (Map.Entry<String, Object> o : ((Map<String, Object>) object)
-//					.entrySet()) {
-//				r.put(o.getKey(), write(o.getValue()));
-//			}
-//			return cas
-//					.store(new GeneralPersistableResource(getGson().toJson(r)));
-//		} else {
-//			return cas.store(new GeneralPersistableResource(getGson().toJson(
-//					object)));
-//		}
 	}
 
 	@Override
@@ -116,11 +101,11 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object>
 	@Override
 	public Function<Identity, Reference> getTransform(
 			VisitorContext<Identity, Object> context) {
-			return new Function<Identity, Reference>() {
-				public Reference apply(Identity identity) {
-					return new IdentityReference(jsa, identity);
-				}
-			};
+		return new Function<Identity, Reference>() {
+			public Reference apply(Identity identity) {
+				return new IdentityReference(jsa, identity);
+			}
+		};
 	}
 
 }

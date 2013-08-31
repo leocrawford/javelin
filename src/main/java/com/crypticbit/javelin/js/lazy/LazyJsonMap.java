@@ -26,7 +26,7 @@ public class LazyJsonMap extends HackedTransformedEntriesMap<String, Reference, 
     
     @Override
     public Object put(String key, Object value) {
-	return getBackedValue().put(key, new ValueReference(value));
+ 	return getBackedValue().put(key, new ValueReference(value));
     }
 
    

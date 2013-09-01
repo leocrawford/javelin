@@ -1,13 +1,8 @@
 package com.crypticbit.javelin.js.convert;
 
-import com.crypticbit.javelin.store.Identity;
-import com.crypticbit.javelin.store.StoreException;
-import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 
 /**
  * walk a tree performing operations on another (or multiple) trees as we
@@ -48,26 +43,31 @@ public class JsonVisitor<T, F, I, B> implements VisitorContext<I, T> {
 	private JsonVisitorDestination<T, F, I> destination;
 	private JsonVisitorSource<I, B> source;
 
-	public JsonVisitor(
-			JsonVisitorDestination<T, F, I> destination,
+	public JsonVisitor(JsonVisitorDestination<T, F, I> destination,
 			JsonVisitorSource<I, B> source) {
 		this.destination = destination;
 		this.source = source;
 	}
 
-	public T visit(I input) throws VisitorException{
+	public T visit(I input) throws VisitorException {
 		B in = source.parse(input);
-		switch (source.getType(in)) {
-		case ARRAY:
-			return destination.writeList(Lists.transform(source.parseList(in),
-					destination.getTransform(this)));
-		case OBJECT:
-			return destination.writeMap(Maps.transformValues(
-					source.parseMap(in), destination.getTransform(this)));
-		case PRIMITIVE:
-			return destination.writeValue(source.parsePrimitive(in));
-		default:
-			return destination.writeNull();
+		try {
+			switch (source.getType(in)) {
+			case ARRAY:
+				return destination.writeList(Lists.transform(
+						source.parseList(in), destination.getTransform(this)));
+			case OBJECT:
+				return destination.writeMap(Maps.transformValues(
+						source.parseMap(in), destination.getTransform(this)));
+			case PRIMITIVE:
+				return destination.writeValue(source.parsePrimitive(in));
+			default:
+				return destination.writeNull();
+			}
+			// because guava Function doesn't allows us to throw non run-time
+			// exceptions we do this
+		} catch (HackedRuntimeException e) {
+			throw new VisitorException(e.getMessage(), e);
 		}
 	}
 
@@ -77,10 +77,9 @@ public class JsonVisitor<T, F, I, B> implements VisitorContext<I, T> {
 			public T apply(I input) {
 				try {
 					return visit(input);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					throw new Error();
+				} catch (VisitorException e) {
+					throw new HackedRuntimeException("Failed on element "
+							+ input, e);
 				}
 			}
 		};

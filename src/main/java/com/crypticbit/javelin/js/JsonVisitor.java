@@ -48,9 +48,9 @@ public class JsonVisitor<T, F, I, B> implements VisitorContext<I, T> {
 	private JsonVisitorDestination<T, F, I> destination;
 	private JsonVisitorSource<I, B> source;
 
-	JsonVisitor(ContentAddressableStorage cas,
+	JsonVisitor(
 			JsonVisitorDestination<T, F, I> destination,
-			JsonVisitorSource<I, B> source, Gson gson) {
+			JsonVisitorSource<I, B> source) {
 		this.destination = destination;
 		this.source = source;
 	}

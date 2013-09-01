@@ -25,26 +25,26 @@ public class JsonStoreAdapterFactory {
 		private JsonVisitorDestination<T, F, Identity> dest;
 
 		private CasDai(ContentAddressableStorage cas,
-				JsonStoreAdapterFactory jsa, JsonVisitorSource<Object, B> source,
+				JsonStoreAdapterFactory jsa,
+				JsonVisitorSource<Object, B> source,
 				JsonVisitorDestination<T, F, Identity> dest) {
 			super(cas, jsa);
-			this.source=source;
+			this.source = source;
 			this.dest = dest;
 		}
 
 		@Override
 		public Object read(Identity commitId) throws StoreException,
 				JsonSyntaxException {
-			JsonVisitor<T,F,Identity,JsonElement> sv = new JsonVisitor<>(
-					cas, dest, casAdapter, jsa.getGson());
+			JsonVisitor<T, F, Identity, JsonElement> sv = new JsonVisitor<>(
+					dest, casAdapter);
 			return sv.visit(commitId);
 		}
 
-		// FIXME if already exists
 		@Override
 		public Identity write(Object object) throws StoreException {
 			JsonVisitor<Identity, Identity, Object, B> sv = new JsonVisitor<Identity, Identity, Object, B>(
-					cas, casAdapter, source, jsa.getGson());
+			casAdapter, source);
 			return sv.visit(object);
 		}
 	}
@@ -77,9 +77,11 @@ public class JsonStoreAdapterFactory {
 					}).create();
 
 	JsonStoreAdapterFactory(ContentAddressableStorage cas) {
-		JsonObjectAdapter jsonObjectAdapter = new JsonObjectAdapter(this);
+		JsonVisitorObjectAdapter jsonObjectAdapter = new JsonVisitorObjectAdapter(
+				this);
 		joa = new CasDai(cas, this, jsonObjectAdapter, jsonObjectAdapter);
-		JsonElementAdapter jsonElementAdapter = new JsonElementAdapter(this);
+		JsonVisitorElementAdapter jsonElementAdapter = new JsonVisitorElementAdapter(
+				this);
 		jea = new CasDai(cas, this, jsonElementAdapter, jsonElementAdapter);
 		this.cas = cas;
 	}

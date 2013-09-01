@@ -48,7 +48,7 @@ class JsonVisitorCasAdapter implements
 	 */
 	@Override
 	public Object parsePrimitive(JsonElement element) {
-		return JsonElementAdapter
+		return JsonVisitorElementAdapter
 				.parsePrimitiveStatic((JsonPrimitive) element);
 	}
 
@@ -71,9 +71,10 @@ class JsonVisitorCasAdapter implements
 
 	@Override
 	public ElementType getType(JsonElement in) {
-		return JsonElementAdapter.getTypeStatic(in);
+		return JsonVisitorElementAdapter.getTypeStatic(in);
 	}
 
+	// FIXME if already exists
 	@Override
 	public Identity arriveList(List<Identity> list) throws StoreException {
 		return cas.store(new GeneralPersistableResource(gson.toJson(list)));

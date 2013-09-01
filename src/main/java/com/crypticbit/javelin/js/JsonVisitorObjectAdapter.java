@@ -16,12 +16,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
 
-public class JsonObjectAdapter implements
+public class JsonVisitorObjectAdapter implements
 		JsonVisitorDestination<Object, Reference, Identity>,
 		JsonVisitorSource<Object, Object> {
 
 	private JsonStoreAdapterFactory jsa;
-	JsonObjectAdapter(JsonStoreAdapterFactory jsa) {
+	JsonVisitorObjectAdapter(JsonStoreAdapterFactory jsa) {
 	this.jsa = jsa;
 	}
 

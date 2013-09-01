@@ -14,7 +14,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
 import com.crypticbit.javelin.js.Commit;
-import com.crypticbit.javelin.js.JsonCasAdapter;
+import com.crypticbit.javelin.js.DataStructure;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 import com.jgraph.layout.JGraphFacade;
@@ -26,7 +26,7 @@ public class CommitGraphPanel extends JGraph {
 
     private MergeableDirectedGraph asGraphToRoots = new MergeableDirectedGraph(DefaultEdge.class);
 
-    public CommitGraphPanel(JsonCasAdapter jca) throws StoreException, IOException, JsonSyntaxException,
+    public CommitGraphPanel(DataStructure jca) throws StoreException, IOException, JsonSyntaxException,
 	    PatchFailedException, InterruptedException {
 	
 	System.out.println(asGraphToRoots.edgeSet().size());

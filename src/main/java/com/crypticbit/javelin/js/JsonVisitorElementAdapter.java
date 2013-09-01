@@ -14,13 +14,13 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
-public class JsonElementAdapter implements
+public class JsonVisitorElementAdapter implements
 		JsonVisitorDestination<JsonElement, JsonElement, Identity>,
 		JsonVisitorSource<JsonElement, JsonElement> {
 
 	private JsonStoreAdapterFactory jsa;
 
-	JsonElementAdapter(JsonStoreAdapterFactory jsa) {
+	JsonVisitorElementAdapter(JsonStoreAdapterFactory jsa) {
 		this.jsa = jsa;
 	}
 

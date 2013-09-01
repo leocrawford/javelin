@@ -25,7 +25,7 @@ import difflib.PatchFailedException;
 
 // what is immutable? commit? element? anchors?
 // multiple anchors?
-public class JsonCasAdapter {
+public class DataStructure {
 
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.js");
 
@@ -40,7 +40,7 @@ public class JsonCasAdapter {
     private JsonStoreAdapterFactory jsonFactory;
 
     /** Create a new json data structure with a random anchor, which can be retrieved using <code>getAnchor</code> */
-    public JsonCasAdapter(CasKasStore store) {
+    public DataStructure(CasKasStore store) {
 	this.store = store;
 	anchor = new Anchor(store);
 	jsonFactory = new JsonStoreAdapterFactory(store);
@@ -48,7 +48,7 @@ public class JsonCasAdapter {
 
     }
 
-    public JsonCasAdapter(CasKasStore store, Identity anchor) {
+    public DataStructure(CasKasStore store, Identity anchor) {
 	this(store);
 	this.anchor = new Anchor(store, anchor);
     }
@@ -57,16 +57,16 @@ public class JsonCasAdapter {
      * Create a new json data structure with a specified anchor. This will usually only be used once to create the very
      * head of a data structure.
      */
-    private JsonCasAdapter(CasKasStore store, Anchor anchor) {
+    private DataStructure(CasKasStore store, Anchor anchor) {
 	this(store);
 	this.anchor = anchor;
     }
 
-    public JsonCasAdapter branch() throws StoreException {
-	return new JsonCasAdapter(store, new Anchor(store, anchor));
+    public DataStructure branch() throws StoreException {
+	return new DataStructure(store, new Anchor(store, anchor));
     }
 
-    public synchronized JsonCasAdapter checkout() throws StoreException, JsonSyntaxException {
+    public synchronized DataStructure checkout() throws StoreException, JsonSyntaxException {
 	Identity daoDigest = anchor.read();
 	commit = new Commit(commitFactory.read(daoDigest), daoDigest, jsonFactory);
 	element = commit.getElement();
@@ -76,7 +76,7 @@ public class JsonCasAdapter {
 	return this;
     }
 
-    public synchronized JsonCasAdapter commit() throws StoreException {
+    public synchronized DataStructure commit() throws StoreException {
 	Identity write = jsonFactory.getJsonElementAdapter().write(element);
 	writeIdentity(write, anchor.get());
 	return checkout();
@@ -94,7 +94,7 @@ public class JsonCasAdapter {
 	return commit.getObject();
     }
 
-    public synchronized JsonCasAdapter merge(JsonCasAdapter other) throws JsonSyntaxException, StoreException,
+    public synchronized DataStructure merge(DataStructure other) throws JsonSyntaxException, StoreException,
 	    PatchFailedException {
 	ThreeWayDiff patch = commit.createChangeSet(other.commit);
 	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(patch.apply());
@@ -106,7 +106,7 @@ public class JsonCasAdapter {
 	return element;
     }
 
-    public JsonCasAdapter write(String string) {
+    public DataStructure write(String string) {
 	// FIXME resue Gson
 	element = new Gson().fromJson(string, JsonElement.class);
 	return this;

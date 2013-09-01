@@ -8,17 +8,17 @@ import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import com.crypticbit.javelin.js.JsonCasAdapter;
+import com.crypticbit.javelin.js.DataStructure;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 
 public class NamePanel extends JPanel {
 
     private JList list;
-    private JsonCasAdapter jca;
+    private DataStructure jca;
     private JsonListModelAdapter dataModel;
 
-    public NamePanel(JsonCasAdapter jca, final JsonElementSelectionListener jsonElementSelectionListener)
+    public NamePanel(DataStructure jca, final JsonElementSelectionListener jsonElementSelectionListener)
 	    throws JsonSyntaxException, StoreException {
 	this.jca = jca;
 	this.setLayout(new BorderLayout());
@@ -45,7 +45,7 @@ public class NamePanel extends JPanel {
 	return dataModel;
     }
 
-    private JsonListModelAdapter updateModel(JsonCasAdapter jca) throws StoreException {
+    private JsonListModelAdapter updateModel(DataStructure jca) throws StoreException {
 	dataModel = new JsonListModelAdapter(jca, "people", "name");
 	return dataModel;
     }

@@ -10,7 +10,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
 import com.crypticbit.javelin.js.Commit;
-import com.crypticbit.javelin.js.JsonCasAdapter;
+import com.crypticbit.javelin.js.DataStructure;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -22,7 +22,7 @@ public class Main extends JFrame {
     private String lastPath = null;
     private NamePanel namePanel;
     private CommitGraphPanel commitGraphPanel;
-    private JsonCasAdapter jsonStore;
+    private DataStructure jsonStore;
 
     public Main() throws StoreException, JsonSyntaxException, PatchFailedException, IOException, InterruptedException {
 	super("Contacts");
@@ -31,7 +31,7 @@ public class Main extends JFrame {
 	JSplitPane commitAndEditJSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 	content.add(navAndViewJSplit);
 
-	jsonStore = new JsonCasAdapter(new StorageFactory().createMemoryCas());
+	jsonStore = new DataStructure(new StorageFactory().createMemoryCas());
 	jsonStore.write("{people:[{name:\"Leo\"},{name:\"John\"},{name:\"Caroline\"}]}").commit().commit();
 
 	final ContactEditPanel contactEditPanel = new ContactEditPanel();

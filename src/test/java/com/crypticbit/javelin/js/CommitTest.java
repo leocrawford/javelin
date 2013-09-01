@@ -31,7 +31,7 @@ public class CommitTest extends TestUtils {
 
     // FIXME - test production of graph that contains a merge
 
-    private JsonCasAdapter jca1, jca2, jca3, jca4;
+    private DataStructure jca1, jca2, jca3, jca4;
 
     public CommitTest() throws StoreException, IOException {
 	String c1 = "[\"a\"]";
@@ -42,7 +42,7 @@ public class CommitTest extends TestUtils {
 	String c6 = "[\"a\",\"b\",\"c2\",\"d\",[\"f\"],\"f\"]";
 	String c7 = "[\"a\",\"b1\",\"c2\",\"d\",[\"f\"],\"g\"]";
 
-	jca1 = new JsonCasAdapter(new StorageFactory().createMemoryCas());
+	jca1 = new DataStructure(new StorageFactory().createMemoryCas());
 	jca1.write(c1).commit().write(c2).commit();
 	jca2 = jca1.branch();
 	jca1.write(c3).commit();

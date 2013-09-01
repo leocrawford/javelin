@@ -31,9 +31,9 @@ public class JsonCasAdapterTest {
 
 	enableLog();
 	CasKasStore memoryStore = new StorageFactory().createMemoryCas();
-	JsonCasAdapter jca = new JsonCasAdapter(memoryStore);
+	DataStructure jca = new DataStructure(memoryStore);
 	jca.write(JSON_EXAMPLEa).commit();
-	JsonCasAdapter jca2 = jca.branch();
+	DataStructure jca2 = jca.branch();
 
 	jca.write(JSON_EXAMPLE_2a).commit();
 	jca2.write(JSON_EXAMPLE_3a).commit();
@@ -63,7 +63,7 @@ public class JsonCasAdapterTest {
     @Test
     public void testBasicReadWrite() throws IOException, StoreException {
 	enableLog();
-	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
+	DataStructure jca = new DataStructure(new StorageFactory().createMemoryCas());
 	jca.write(JSON_EXAMPLE);
 	jca.commit();
 	jca.checkout();
@@ -73,7 +73,7 @@ public class JsonCasAdapterTest {
     @Test
     public void testCommitForComplexMultipleReadWrite() throws IOException, StoreException {
 	// enableLog();
-	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
+	DataStructure jca = new DataStructure(new StorageFactory().createMemoryCas());
 	jca.write(JSON_EXAMPLE).commit().getCommit();
 	Commit c2 = jca.write(JSON_EXAMPLE_2).write(JSON_EXAMPLE_3).commit().getCommit();
 
@@ -90,7 +90,7 @@ public class JsonCasAdapterTest {
     @Test
     public void testCommitForMultipleReadWrite() throws IOException, StoreException {
 	// enableLog();
-	JsonCasAdapter jca = new JsonCasAdapter(new StorageFactory().createMemoryCas());
+	DataStructure jca = new DataStructure(new StorageFactory().createMemoryCas());
 	Commit c1 = jca.write(JSON_EXAMPLE).commit().getCommit();
 	Commit c2 = jca.write(JSON_EXAMPLE_2).commit().getCommit();
 	Commit c3 = jca.write(JSON_EXAMPLE_3).commit().getCommit();
@@ -108,12 +108,12 @@ public class JsonCasAdapterTest {
     @Test
     public void testConcurrentWriteUsingTwoObjects() throws IOException, StoreException {
 	CasKasStore store = new StorageFactory().createMemoryCas();
-	JsonCasAdapter jca = new JsonCasAdapter(store);
+	DataStructure jca = new DataStructure(store);
 	jca.write(JSON_EXAMPLE);
 	jca.commit();
 	jca.write(JSON_EXAMPLE_2);
 
-	JsonCasAdapter jca2 = new JsonCasAdapter(store, jca.getAnchor());
+	DataStructure jca2 = new DataStructure(store, jca.getAnchor());
 	jca2.checkout();
 	jca2.write(JSON_EXAMPLE_3);
 
@@ -134,12 +134,12 @@ public class JsonCasAdapterTest {
     @Test
     public void testReadWriteUsingTwoObjects() throws IOException, StoreException {
 	CasKasStore store = new StorageFactory().createMemoryCas();
-	JsonCasAdapter jca = new JsonCasAdapter(store);
+	DataStructure jca = new DataStructure(store);
 	jca.write(JSON_EXAMPLE);
 	jca.commit();
 	byte[] id = jca.getAnchor().getDigestAsByte();
 
-	JsonCasAdapter jca2 = new JsonCasAdapter(store, new Digest(id));
+	DataStructure jca2 = new DataStructure(store, new Digest(id));
 	jca2.checkout();
 	Assert.assertEquals(jca.read(), jca2.read());
     }

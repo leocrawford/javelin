@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.crypticbit.javelin.diff.ThreeWayDiff;
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.CasKasStore;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
@@ -25,6 +26,7 @@ import difflib.PatchFailedException;
 
 // what is immutable? commit? element? anchors?
 // multiple anchors?
+// FIXME tidy up exceptions
 public class DataStructure {
 
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.js");
@@ -66,7 +68,7 @@ public class DataStructure {
 	return new DataStructure(store, new Anchor(store, anchor));
     }
 
-    public synchronized DataStructure checkout() throws StoreException, JsonSyntaxException {
+    public synchronized DataStructure checkout() throws StoreException, JsonSyntaxException, VisitorException {
 	Identity daoDigest = anchor.read();
 	commit = new Commit(commitFactory.read(daoDigest), daoDigest, jsonFactory);
 	element = commit.getElement();
@@ -76,7 +78,7 @@ public class DataStructure {
 	return this;
     }
 
-    public synchronized DataStructure commit() throws StoreException {
+    public synchronized DataStructure commit() throws StoreException, VisitorException {
 	Identity write = jsonFactory.getJsonElementAdapter().write(element);
 	writeIdentity(write, anchor.get());
 	return checkout();
@@ -90,12 +92,12 @@ public class DataStructure {
 	return commit;
     }
 
-    public Object lazyRead() throws JsonSyntaxException, StoreException {
+    public Object lazyRead() throws JsonSyntaxException, StoreException, VisitorException {
 	return commit.getObject();
     }
 
     public synchronized DataStructure merge(DataStructure other) throws JsonSyntaxException, StoreException,
-	    PatchFailedException {
+	    PatchFailedException, VisitorException {
 	ThreeWayDiff patch = commit.createChangeSet(other.commit);
 	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(patch.apply());
 	writeIdentity(valueIdentity, anchor.get(), other.anchor.get());
@@ -112,7 +114,7 @@ public class DataStructure {
 	return this;
     }
 
-    public void write(String path, String json) throws JsonSyntaxException, StoreException {
+    public void write(String path, String json) throws JsonSyntaxException, StoreException, VisitorException {
 	HackedJsonPath compiledPath = new HackedJsonPath(path, new Filter[] {});
 	// code copied from jsonpath
 	// FIXME reuse JSON
@@ -145,7 +147,7 @@ public class DataStructure {
 	checkout();
     }
 
-    private void writeIdentity(Identity valueIdentity, Identity... parents) throws StoreException {
+    private void writeIdentity(Identity valueIdentity, Identity... parents) throws StoreException, VisitorException {
 	CommitDao tempCommit = new CommitDao(valueIdentity, new Date(), "auser", parents);
 	Identity tempDigest = commitFactory.write(tempCommit);
 	anchor.write(tempDigest);

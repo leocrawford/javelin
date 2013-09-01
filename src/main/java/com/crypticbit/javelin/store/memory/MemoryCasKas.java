@@ -82,4 +82,9 @@ public class MemoryCasKas implements CasKasStore {
 	return casMap.toString();
     }
 
+	@Override
+	public String getName() {
+return "In Memory Store";
+	}
+
 }

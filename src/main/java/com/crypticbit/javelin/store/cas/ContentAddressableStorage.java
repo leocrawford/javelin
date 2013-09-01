@@ -17,4 +17,6 @@ public interface ContentAddressableStorage extends AddressableStorage {
      * Store the data against against its digest, and return that digest
      */
     Identity store(PersistableResource po) throws StoreException;
+
+	String getName();
 }

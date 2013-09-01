@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import com.crypticbit.javelin.js.DataAccessInterface;
 import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.DigestFactory;
@@ -26,7 +27,7 @@ public class JsonVisitorObjectAdapterTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException {
+    public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, VisitorException {
 
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new MemoryCasKas(new DigestFactory()));
 

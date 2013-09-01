@@ -8,16 +8,18 @@ import java.util.logging.Level;
 
 import org.junit.Test;
 
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.DigestFactory;
 import com.crypticbit.javelin.store.memory.MemoryCasKas;
+import com.google.gson.JsonSyntaxException;
 
 public class JsonSimpleClassAdapterTest extends TestUtils {
 
     @Test
-    public void test() throws StoreException, IOException {
+    public void test() throws StoreException, IOException, JsonSyntaxException, VisitorException {
 	enableLog("com.crypticbit.javelin.js", Level.FINEST);
 
 	DataAccessInterface<CommitDao> a = new JsonStoreAdapterFactory(new MemoryCasKas(new DigestFactory()))

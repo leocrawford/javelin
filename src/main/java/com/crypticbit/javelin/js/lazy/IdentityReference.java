@@ -1,6 +1,7 @@
 package com.crypticbit.javelin.js.lazy;
 
 import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -18,13 +19,13 @@ public class IdentityReference implements Reference {
     }
 
     @Override
-    public Object getValue() {
+    public Object getValue()  {
 	if (!loaded) {
 	    try {
 		value = dereferencedCasAccessInterface.getJsonObjectAdapter().read(identity);
 		loaded = true;
 	    }
-	    catch (JsonSyntaxException | StoreException e) {
+	    catch (JsonSyntaxException | StoreException | VisitorException e) {
 		e.printStackTrace();
 		throw new Error();
 		// FIXME

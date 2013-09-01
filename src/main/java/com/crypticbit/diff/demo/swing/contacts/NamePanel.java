@@ -9,6 +9,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import com.crypticbit.javelin.js.DataStructure;
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 
@@ -19,7 +20,7 @@ public class NamePanel extends JPanel {
     private JsonListModelAdapter dataModel;
 
     public NamePanel(DataStructure jca, final JsonElementSelectionListener jsonElementSelectionListener)
-	    throws JsonSyntaxException, StoreException {
+	    throws JsonSyntaxException, StoreException, VisitorException {
 	this.jca = jca;
 	this.setLayout(new BorderLayout());
 	JsonListModelAdapter dataModel = updateModel(jca);
@@ -45,7 +46,7 @@ public class NamePanel extends JPanel {
 	return dataModel;
     }
 
-    private JsonListModelAdapter updateModel(DataStructure jca) throws StoreException {
+    private JsonListModelAdapter updateModel(DataStructure jca) throws StoreException, JsonSyntaxException, VisitorException {
 	dataModel = new JsonListModelAdapter(jca, "people", "name");
 	return dataModel;
     }
@@ -54,7 +55,7 @@ public class NamePanel extends JPanel {
 	try {
 	    list.setModel(updateModel(jca));
 	}
-	catch (StoreException e) {
+	catch (StoreException | JsonSyntaxException | VisitorException e) {
 	    // FIXME
 	    throw new Error(e);
 	}

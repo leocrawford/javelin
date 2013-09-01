@@ -26,7 +26,7 @@ public class JsonVisitorElementAdapter implements
 	}
 
 	@Override
-	public JsonElement arriveList(List<JsonElement> list) {
+	public JsonElement writeList(List<JsonElement> list) {
 		JsonArray r = new JsonArray();
 		for (JsonElement e : list) {
 			r.add(e);
@@ -35,7 +35,7 @@ public class JsonVisitorElementAdapter implements
 	}
 
 	@Override
-	public JsonElement arriveMap(Map<String, JsonElement> map) {
+	public JsonElement writeMap(Map<String, JsonElement> map) {
 		JsonObject o = new JsonObject();
 		for (Entry<String, JsonElement> e : map.entrySet()) {
 			o.add(e.getKey(), e.getValue());
@@ -44,7 +44,7 @@ public class JsonVisitorElementAdapter implements
 	}
 
 	@Override
-	public JsonElement arriveValue(Object value) {
+	public JsonElement writeValue(Object value) {
 		return jsa.getGson().toJsonTree(value);
 	}
 
@@ -75,8 +75,7 @@ public class JsonVisitorElementAdapter implements
 	}
 
 	@Override
-	public JsonElement parse(JsonElement in) throws JsonSyntaxException,
-			StoreException {
+	public JsonElement parse(JsonElement in) {
 		return in;
 	}
 
@@ -113,6 +112,11 @@ public class JsonVisitorElementAdapter implements
 		return jsa.getGson().fromJson(in,
 				new TypeToken<Map<String, JsonElement>>() {
 				}.getType());
+	}
+
+	@Override
+	public JsonElement writeNull()  {
+		return writeValue(null);
 	}
 
 }

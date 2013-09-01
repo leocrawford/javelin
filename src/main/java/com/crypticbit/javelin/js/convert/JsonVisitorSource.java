@@ -36,7 +36,7 @@ public interface JsonVisitorSource<I, B> {
 
 	public abstract ElementType getType(B in);
 
-	public abstract B parse(I in) throws JsonSyntaxException, StoreException;
+	public abstract B parse(I in) throws VisitorException;
 
 	public abstract Object parsePrimitive(B in);
 

@@ -1,5 +1,6 @@
 package com.crypticbit.javelin.js;
 
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
@@ -20,8 +21,8 @@ public abstract class DataAccessInterface<T> {
 	return jsa.getGson();
     }
 
-    public abstract T read(Identity commitId) throws StoreException, JsonSyntaxException;
+    public abstract T read(Identity commitId) throws StoreException, JsonSyntaxException, VisitorException;
 
-    public abstract Identity write(T commit) throws StoreException;
+    public abstract Identity write(T commit) throws StoreException, VisitorException;
 
 }

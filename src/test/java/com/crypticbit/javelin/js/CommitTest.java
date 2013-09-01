@@ -19,6 +19,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.junit.Test;
 
 import com.crypticbit.javelin.diff.ThreeWayDiff;
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -33,7 +34,7 @@ public class CommitTest extends TestUtils {
 
     private DataStructure jca1, jca2, jca3, jca4;
 
-    public CommitTest() throws StoreException, IOException {
+    public CommitTest() throws StoreException, IOException, VisitorException {
 	String c1 = "[\"a\"]";
 	String c2 = "[\"a\",\"b\"]";
 	String c3 = "[\"a\",\"b\",\"c1\"]";
@@ -54,7 +55,7 @@ public class CommitTest extends TestUtils {
     }
 
     @Test
-    public void testCreateChangeSet() throws JsonSyntaxException, StoreException, PatchFailedException, IOException {
+    public void testCreateChangeSet() throws JsonSyntaxException, StoreException, PatchFailedException, IOException, VisitorException {
 	ThreeWayDiff patch = jca1.getCommit().createChangeSet(jca4.getCommit());
 	// System.out.println("X-"+patch.apply());
 	jca1.merge(jca4);
@@ -71,7 +72,7 @@ public class CommitTest extends TestUtils {
     // }
     
     @Test
-    public void testNavigate() throws JsonSyntaxException, StoreException {
+    public void testNavigate() throws JsonSyntaxException, StoreException, VisitorException {
 	String c8 = "{\"a\":\"b\",\"c\":{\"d\":\"e\"},\"f\":[\"g\",1,2,3,{\"k\":true,\"l\":false}]}";
 	jca4.write(c8).commit();
 	
@@ -80,14 +81,14 @@ public class CommitTest extends TestUtils {
     }
 
     @Test
-    public void testGetAsGraph() throws StoreException, IOException {
+    public void testGetAsGraph() throws StoreException, IOException, JsonSyntaxException, VisitorException {
 	assertEquals(3, jca1.getCommit().getAsGraphToRoot().vertexSet().size());
 	assertEquals(3, jca2.getCommit().getAsGraphToRoot().vertexSet().size());
 	assertEquals(4, jca3.getCommit().getAsGraphToRoot().vertexSet().size());
 	assertEquals(4, jca4.getCommit().getAsGraphToRoot().vertexSet().size());
     }
 
-    private void show() throws JsonSyntaxException, StoreException, PatchFailedException, IOException {
+    private void show() throws JsonSyntaxException, StoreException, PatchFailedException, IOException, VisitorException {
 	enableLog("com.crypticbit.javelin.js", Level.FINEST);
 	jca1.merge(jca4);
 
@@ -114,7 +115,10 @@ public class CommitTest extends TestUtils {
 		    catch (StoreException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		    }
+		    } catch (VisitorException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 
 	    }
@@ -137,7 +141,7 @@ public class CommitTest extends TestUtils {
     }
 
     public static void main(String args[]) throws StoreException, IOException, JsonSyntaxException,
-	    PatchFailedException {
+	    PatchFailedException, VisitorException {
 	new CommitTest().show();
 
     }

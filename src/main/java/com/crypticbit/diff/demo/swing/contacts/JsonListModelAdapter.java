@@ -3,6 +3,7 @@ package com.crypticbit.diff.demo.swing.contacts;
 import javax.swing.AbstractListModel;
 
 import com.crypticbit.javelin.js.DataStructure;
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.js.lazy.LazyJsonArray;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -17,14 +18,14 @@ public class JsonListModelAdapter extends AbstractListModel<String> {
     private LazyJsonArray backing;
     private JsonPath label;
     
-    JsonListModelAdapter(DataStructure jca, String path, String label) throws JsonSyntaxException, StoreException {
+    JsonListModelAdapter(DataStructure jca, String path, String label) throws JsonSyntaxException, StoreException, VisitorException {
 	this.jca = jca;
 	this.path = path;
 	this.label = new JsonPath(label,new Filter[]{});
 	backing = findBacking();
     }
     
-    private LazyJsonArray findBacking() throws JsonSyntaxException, StoreException {
+    private LazyJsonArray findBacking() throws JsonSyntaxException, StoreException, VisitorException {
 	return (LazyJsonArray) jca.getCommit().navigate(path);
     }
 

@@ -27,13 +27,13 @@ public class JsonVisitorObjectAdapter implements
 	}
 
 	@Override
-	public Object arriveList(List<Reference> list) {
+	public Object writeList(List<Reference> list) {
 		// copy so writeable
 		return new LazyJsonArray(new ArrayList<>(list));
 	}
 
 	@Override
-	public Object arriveMap(Map<String, Reference> map) {
+	public Object writeMap(Map<String, Reference> map) {
 		// copy so writeable
 		LinkedTreeMap<String, Reference> linkedTreeMap = new LinkedTreeMap<String, Reference>();
 		linkedTreeMap.putAll(map);
@@ -42,7 +42,7 @@ public class JsonVisitorObjectAdapter implements
 	}
 
 	@Override
-	public Object arriveValue(Object value) {
+	public Object writeValue(Object value) {
 		return value;
 	}
 
@@ -61,7 +61,7 @@ public class JsonVisitorObjectAdapter implements
 	}
 
 	@Override
-	public Object parse(Object in) throws JsonSyntaxException, StoreException {
+	public Object parse(Object in)  {
 		return in;
 	}
 
@@ -88,6 +88,11 @@ public class JsonVisitorObjectAdapter implements
 				return new IdentityReference(jsa, identity);
 			}
 		};
+	}
+
+	@Override
+	public Object writeNull()  {
+		return null;
 	}
 
 }

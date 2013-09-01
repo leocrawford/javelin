@@ -35,9 +35,12 @@ public class JsonVisitorCasAdapter implements
 	 * .store.Identity)
 	 */
 	@Override
-	public JsonElement parse(Identity digest) throws JsonSyntaxException,
-			StoreException {
-		return new JsonParser().parse(cas.get(digest).getAsString());
+	public JsonElement parse(Identity digest) throws VisitorException {
+		try {
+			return new JsonParser().parse(cas.get(digest).getAsString());
+		} catch (JsonSyntaxException | StoreException e) {
+			throw new VisitorException("Unable to read value from location "+digest+" in store "+cas.getName(),e);
+		}
 	}
 
 	/*
@@ -76,24 +79,39 @@ public class JsonVisitorCasAdapter implements
 
 	// FIXME if already exists
 	@Override
-	public Identity arriveList(List<Identity> list) throws StoreException {
-		return cas.store(new GeneralPersistableResource(gson.toJson(list)));
+	public Identity writeList(List<Identity> list) throws VisitorException {
+		return write(list);
+	}
+
+	Identity write(Object value) throws VisitorException {
+		try {
+			return cas
+					.store(new GeneralPersistableResource(gson.toJson(value)));
+		} catch (StoreException e) {
+			throw new VisitorException("Unable to write to CAS store "
+					+ cas.getName(), e);
+		}
 	}
 
 	@Override
-	public Identity arriveMap(Map<String, Identity> map) throws StoreException {
-		return cas.store(new GeneralPersistableResource(gson.toJson(map)));
+	public Identity writeMap(Map<String, Identity> map) throws VisitorException {
+		return write(map);
 	}
 
 	@Override
-	public Identity arriveValue(Object value) throws StoreException {
-		return cas.store(new GeneralPersistableResource(gson.toJson(value)));
+	public Identity writeValue(Object value) throws VisitorException {
+		return write(value);
 	}
 
 	@Override
 	public Function<Object, Identity> getTransform(
 			VisitorContext<Object, Identity> context) {
 		return context.getRecurseFunction();
+	}
+
+	@Override
+	public Identity writeNull() throws VisitorException {
+		return write(null);
 	}
 
 }

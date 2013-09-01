@@ -15,6 +15,7 @@ import org.jgrapht.graph.ListenableDirectedGraph;
 
 import com.crypticbit.javelin.js.Commit;
 import com.crypticbit.javelin.js.DataStructure;
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 import com.jgraph.layout.JGraphFacade;
@@ -27,7 +28,7 @@ public class CommitGraphPanel extends JGraph {
     private MergeableDirectedGraph asGraphToRoots = new MergeableDirectedGraph(DefaultEdge.class);
 
     public CommitGraphPanel(DataStructure jca) throws StoreException, IOException, JsonSyntaxException,
-	    PatchFailedException, InterruptedException {
+	    PatchFailedException, InterruptedException, VisitorException {
 	
 	System.out.println(asGraphToRoots.edgeSet().size());
 	
@@ -50,7 +51,7 @@ public class CommitGraphPanel extends JGraph {
 	});
     }
 
-    public void show(Commit[] commits) throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+    public void show(Commit[] commits) throws JsonSyntaxException, UnsupportedEncodingException, StoreException, VisitorException {
 	System.out.println(Commit.getAsGraphToRoots(commits));
 	asGraphToRoots.merge(Commit.getAsGraphToRoots(commits));
 	final JGraphFacade graphFacade = new JGraphFacade(this);

@@ -11,6 +11,7 @@ import javax.swing.JSplitPane;
 
 import com.crypticbit.javelin.js.Commit;
 import com.crypticbit.javelin.js.DataStructure;
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -24,7 +25,7 @@ public class Main extends JFrame {
     private CommitGraphPanel commitGraphPanel;
     private DataStructure jsonStore;
 
-    public Main() throws StoreException, JsonSyntaxException, PatchFailedException, IOException, InterruptedException {
+    public Main() throws StoreException, JsonSyntaxException, PatchFailedException, IOException, InterruptedException, VisitorException {
 	super("Contacts");
 	Container content = getContentPane();
 	JSplitPane navAndViewJSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -75,7 +76,7 @@ public class Main extends JFrame {
 
     }
 
-    private void commitChange() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+    private void commitChange() throws JsonSyntaxException, UnsupportedEncodingException, StoreException, VisitorException {
 	namePanel.refresh();
 	commitGraphPanel.show(new Commit[]{jsonStore.getCommit()});
     }

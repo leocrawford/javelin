@@ -20,7 +20,7 @@ import com.google.gson.JsonSyntaxException;
  * <li>The source visitor navigates to the start and "loads" it, returning an
  * element of type B
  * <li>The source visitor then parses element of type <B> to return a List<I>,
- * Map<String,I> or <I>f
+ * Map<String,I> or I
  * <li>The destination visitor then gets <code>getTransform</code> applied to
  * convert the Collection<I> to Collection<F> (I use collection loosely)
  * <li>Finally the relevant visitType method is called and an element of
@@ -55,19 +55,19 @@ public class JsonVisitor<T, F, I, B> implements VisitorContext<I, T> {
 		this.source = source;
 	}
 
-	public T visit(I input) throws JsonSyntaxException, StoreException {
+	public T visit(I input) throws VisitorException{
 		B in = source.parse(input);
 		switch (source.getType(in)) {
 		case ARRAY:
-			return destination.arriveList(Lists.transform(source.parseList(in),
+			return destination.writeList(Lists.transform(source.parseList(in),
 					destination.getTransform(this)));
 		case OBJECT:
-			return destination.arriveMap(Maps.transformValues(
+			return destination.writeMap(Maps.transformValues(
 					source.parseMap(in), destination.getTransform(this)));
 		case PRIMITIVE:
-			return destination.arriveValue(source.parsePrimitive(in));
+			return destination.writeValue(source.parsePrimitive(in));
 		default:
-			return destination.arriveValue(null);
+			return destination.writeNull();
 		}
 	}
 

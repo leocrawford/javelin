@@ -19,6 +19,7 @@ import org.jgrapht.graph.ListenableDirectedGraph;
 import com.crypticbit.diff.demo.swing.JSONEditPanel.UpdateType;
 import com.crypticbit.javelin.js.Commit;
 import com.crypticbit.javelin.js.DataStructure;
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -34,7 +35,7 @@ public class CommitBuilder extends JFrame {
     private SmartJGraph commitPanel;
 
     public CommitBuilder() throws StoreException, IOException, JsonSyntaxException, PatchFailedException,
-	    InterruptedException {
+	    InterruptedException, VisitorException {
 	addDummyData();
 
 	commitPanel = new SmartJGraph();
@@ -56,7 +57,7 @@ public class CommitBuilder extends JFrame {
 		    try {
 			jsonPanel.setJson(c.getElement().toString(), UpdateType.REPLACE);
 		    }
-		    catch (JsonSyntaxException | StoreException e1) {
+		    catch (JsonSyntaxException | StoreException | VisitorException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		    }
@@ -76,7 +77,7 @@ public class CommitBuilder extends JFrame {
 	demo();
     }
 
-    private void addDummyData() throws StoreException, IOException {
+    private void addDummyData() throws StoreException, IOException, VisitorException {
 	String c1 = "[\"a\"]";
 	String c2 = "[\"a\",\"b\"]";
 	String c3 = "[\"a\",\"b\",\"c1\"]";
@@ -97,7 +98,7 @@ public class CommitBuilder extends JFrame {
     }
 
     private void demo() throws JsonSyntaxException, StoreException, PatchFailedException, IOException,
-	    InterruptedException {
+	    InterruptedException, VisitorException {
 	Thread.sleep(4000);
 
 	jca1.merge(jca4);
@@ -112,7 +113,7 @@ public class CommitBuilder extends JFrame {
     }
 
     public static void main(String args[]) throws JsonSyntaxException, PatchFailedException, StoreException,
-	    IOException, InterruptedException {
+	    IOException, InterruptedException, VisitorException {
 	new CommitBuilder();
     }
 
@@ -148,7 +149,7 @@ public class CommitBuilder extends JFrame {
 
 	}
 
-	public void merge(Commit[] commits) throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+	public void merge(Commit[] commits) throws JsonSyntaxException, UnsupportedEncodingException, StoreException, VisitorException {
 	    asGraphToRoots.merge(Commit.getAsGraphToRoots(commits));
 	    final JGraphFacade graphFacade = new JGraphFacade(this);
 	    JGraphTreeLayout lay = new JGraphTreeLayout();

@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.*;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.JsonParser;
@@ -24,7 +25,7 @@ public class DataStructureTest {
     private static final String JSON_EXAMPLE_3 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,5]]";
 
     @Test
-    public void testBasicBranch() throws IOException, StoreException, JsonSyntaxException, PatchFailedException {
+    public void testBasicBranch() throws IOException, StoreException, JsonSyntaxException, PatchFailedException, VisitorException {
 	String JSON_EXAMPLEa = "[\"foo\",{\"a\":1,\"b\":TRUE}]";
 	String JSON_EXAMPLE_2a = "[\"foo\",{\"a\":2,\"b\":FALSE}]";
 	String JSON_EXAMPLE_3a = "[\"a\",{\"a\":1,\"b\":TRUE,\"c\":2.1}]";
@@ -61,7 +62,7 @@ public class DataStructureTest {
     }
 
     @Test
-    public void testBasicReadWrite() throws IOException, StoreException {
+    public void testBasicReadWrite() throws IOException, StoreException, JsonSyntaxException, VisitorException {
 	enableLog();
 	DataStructure jca = new DataStructure(new StorageFactory().createMemoryCas());
 	jca.write(JSON_EXAMPLE);
@@ -71,7 +72,7 @@ public class DataStructureTest {
     }
 
     @Test
-    public void testCommitForComplexMultipleReadWrite() throws IOException, StoreException {
+    public void testCommitForComplexMultipleReadWrite() throws IOException, StoreException, JsonSyntaxException, VisitorException {
 	// enableLog();
 	DataStructure jca = new DataStructure(new StorageFactory().createMemoryCas());
 	jca.write(JSON_EXAMPLE).commit().getCommit();
@@ -88,7 +89,7 @@ public class DataStructureTest {
     }
 
     @Test
-    public void testCommitForMultipleReadWrite() throws IOException, StoreException {
+    public void testCommitForMultipleReadWrite() throws IOException, StoreException, VisitorException {
 	// enableLog();
 	DataStructure jca = new DataStructure(new StorageFactory().createMemoryCas());
 	Commit c1 = jca.write(JSON_EXAMPLE).commit().getCommit();
@@ -106,7 +107,7 @@ public class DataStructureTest {
     }
 
     @Test
-    public void testConcurrentWriteUsingTwoObjects() throws IOException, StoreException {
+    public void testConcurrentWriteUsingTwoObjects() throws IOException, StoreException, VisitorException {
 	CasKasStore store = new StorageFactory().createMemoryCas();
 	DataStructure jca = new DataStructure(store);
 	jca.write(JSON_EXAMPLE);
@@ -132,7 +133,7 @@ public class DataStructureTest {
     }
 
     @Test
-    public void testReadWriteUsingTwoObjects() throws IOException, StoreException {
+    public void testReadWriteUsingTwoObjects() throws IOException, StoreException, JsonSyntaxException, VisitorException {
 	CasKasStore store = new StorageFactory().createMemoryCas();
 	DataStructure jca = new DataStructure(store);
 	jca.write(JSON_EXAMPLE);

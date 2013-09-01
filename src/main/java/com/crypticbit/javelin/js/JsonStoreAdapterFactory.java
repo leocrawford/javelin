@@ -8,6 +8,7 @@ import com.crypticbit.javelin.js.convert.JsonVisitorDestination;
 import com.crypticbit.javelin.js.convert.JsonVisitorElementAdapter;
 import com.crypticbit.javelin.js.convert.JsonVisitorObjectAdapter;
 import com.crypticbit.javelin.js.convert.JsonVisitorSource;
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
@@ -39,15 +40,14 @@ public class JsonStoreAdapterFactory {
 		}
 
 		@Override
-		public Object read(Identity commitId) throws StoreException,
-				JsonSyntaxException {
+		public Object read(Identity commitId) throws VisitorException {
 			JsonVisitor<T, F, Identity, JsonElement> sv = new JsonVisitor<>(
 					dest, casAdapter);
 			return sv.visit(commitId);
 		}
 
 		@Override
-		public Identity write(Object object) throws StoreException {
+		public Identity write(Object object) throws VisitorException{
 			JsonVisitor<Identity, Identity, Object, B> sv = new JsonVisitor<Identity, Identity, Object, B>(
 			casAdapter, source);
 			return sv.visit(object);

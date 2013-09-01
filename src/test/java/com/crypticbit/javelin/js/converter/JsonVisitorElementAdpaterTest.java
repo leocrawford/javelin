@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import com.crypticbit.javelin.js.DataAccessInterface;
 import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.DigestFactory;
@@ -23,7 +24,7 @@ public class JsonVisitorElementAdpaterTest {
     private static final Gson GSON = new Gson();
 
     @Test
-    public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException {
+    public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, VisitorException {
 
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new MemoryCasKas(new DigestFactory()));
 
@@ -57,7 +58,7 @@ public class JsonVisitorElementAdpaterTest {
     }
     
     @Test
-    public void testConvertPrimitive() throws JsonSyntaxException, StoreException {
+    public void testConvertPrimitive() throws JsonSyntaxException, StoreException, VisitorException {
     	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new MemoryCasKas(new DigestFactory()));
     	DataAccessInterface<JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
 

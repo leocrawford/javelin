@@ -15,6 +15,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 
 import com.crypticbit.javelin.diff.Snapshot;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
+import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.common.base.Supplier;
@@ -53,7 +54,7 @@ public class Commit implements Comparable<Commit> {
 	return daoDigest.compareTo(o.daoDigest);
     }
 
-    public ThreeWayDiff createChangeSet(Commit other) throws JsonSyntaxException, StoreException {
+    public ThreeWayDiff createChangeSet(Commit other) throws JsonSyntaxException, StoreException, VisitorException {
 
 	Graph<Commit, DefaultEdge> x = getAsGraphToRoots(new Commit[] { this, other });
 	Commit lca = new TarjanLowestCommonAncestor<Commit, DefaultEdge>(x).calculate(findRoot(), this, other);
@@ -77,8 +78,9 @@ public class Commit implements Comparable<Commit> {
     /**
      * Generate a graph from this node to root. This allows us to treat the commit tree like a graph, and use standard
      * graph operations rather than coding our own
+     * @throws VisitorException 
      */
-    public DirectedGraph<Commit, DefaultEdge> getAsGraphToRoot() throws JsonSyntaxException, StoreException {
+    public DirectedGraph<Commit, DefaultEdge> getAsGraphToRoot() throws JsonSyntaxException, StoreException, VisitorException {
 	// FIXME - we should consider caching results
 
 	DirectedGraph<Commit, DefaultEdge> thisAndParentsAsGraph = new SimpleDirectedGraph<Commit, DefaultEdge>(
@@ -101,22 +103,22 @@ public class Commit implements Comparable<Commit> {
 	return dao.getWhen();
     }
 
-    public JsonElement getElement() throws JsonSyntaxException, StoreException {
+    public JsonElement getElement() throws JsonSyntaxException, StoreException, VisitorException {
 	return jsonFactory.getJsonElementAdapter().read(dao.getHead());
     }
 
-    public Object getObject() throws JsonSyntaxException, StoreException {
+    public Object getObject() throws JsonSyntaxException, StoreException, VisitorException {
 	return jsonFactory.getJsonObjectAdapter().read(dao.getHead());
     }
 
-    public Object navigate(String path) throws JsonSyntaxException, StoreException {
+    public Object navigate(String path) throws JsonSyntaxException, StoreException, VisitorException {
 	JsonPath compiledPath = new JsonPath(path, new Filter[] {});
 	return compiledPath.read(getObject());
     }
 
 
 
-    public Set<Commit> getParents() throws JsonSyntaxException, StoreException {
+    public Set<Commit> getParents() throws JsonSyntaxException, StoreException, VisitorException {
 	Set<Commit> parents = new TreeSet<>();
 	DataAccessInterface<CommitDao> simpleObjectAdapter = jsonFactory.getSimpleObjectAdapter(CommitDao.class);
 	for (Identity parent : dao.getParents()) {
@@ -126,7 +128,7 @@ public class Commit implements Comparable<Commit> {
 	return parents;
     }
 
-    public List<Commit> getShortestHistory() throws JsonSyntaxException, StoreException {
+    public List<Commit> getShortestHistory() throws JsonSyntaxException, StoreException, VisitorException {
 
 	List<Commit> shortest = null;
 	for (Commit c : getParents()) {
@@ -171,14 +173,15 @@ public class Commit implements Comparable<Commit> {
      * @throws StoreException
      * @throws UnsupportedEncodingException
      * @throws JsonSyntaxException
+     * @throws VisitorException 
      */
-    protected Commit findRoot() throws JsonSyntaxException, StoreException {
+    protected Commit findRoot() throws JsonSyntaxException, StoreException, VisitorException {
 	List<Commit> shortestHistory = getShortestHistory();
 	return shortestHistory.get(shortestHistory.size() - 1);
     }
 
     private void addCommitToTreeMap(Graph<Commit, DefaultEdge> x, ThreeWayDiff<Object> twd,
-	    Collection<GraphPath<Commit, DefaultEdge>> paths) throws StoreException {
+	    Collection<GraphPath<Commit, DefaultEdge>> paths) throws StoreException, JsonSyntaxException, VisitorException {
 	Multimap<Date, Snapshot<Object>> multimap = Multimaps.newListMultimap(Maps
 		.<Date, Collection<Snapshot<Object>>> newTreeMap(), new Supplier<List<Snapshot<Object>>>() {
 	    @Override
@@ -201,7 +204,7 @@ public class Commit implements Comparable<Commit> {
     }
 
     public static DirectedGraph<Commit, DefaultEdge> getAsGraphToRoots(Commit[] commits) throws JsonSyntaxException,
-	    StoreException {
+	    StoreException, VisitorException {
 	DirectedGraph<Commit, DefaultEdge> result = null;
 	for (Commit c : commits) {
 	    if (result == null) {

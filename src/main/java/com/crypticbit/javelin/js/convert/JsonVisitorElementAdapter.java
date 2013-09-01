@@ -11,6 +11,7 @@ import com.google.common.base.Function;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -45,7 +46,10 @@ public class JsonVisitorElementAdapter implements
 
 	@Override
 	public JsonElement writeValue(Object value) {
-		return jsa.getGson().toJsonTree(value);
+		// Hack to get unit tests to pass. Did fail because a converting from
+		// JsonElement to Object and back gave a different type for same value
+		return new JsonParser().parse(jsa.getGson().toJson(value));
+		// return jsa.getGson().toJsonTree(value);
 	}
 
 	@Override
@@ -115,7 +119,7 @@ public class JsonVisitorElementAdapter implements
 	}
 
 	@Override
-	public JsonElement writeNull()  {
+	public JsonElement writeNull() {
 		return writeValue(null);
 	}
 

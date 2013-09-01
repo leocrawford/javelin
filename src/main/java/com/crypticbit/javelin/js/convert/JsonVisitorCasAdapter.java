@@ -26,6 +26,8 @@ public class JsonVisitorCasAdapter implements
 		this.cas = cas;
 		this.gson = gson;
 	}
+	
+	
 
 	/*
 	 * (non-Javadoc)
@@ -71,18 +73,19 @@ public class JsonVisitorCasAdapter implements
 		return gson.fromJson(in, new TypeToken<Map<String, Identity>>() {
 		}.getType());
 	}
-
+	
+	
 	@Override
 	public ElementType getType(JsonElement in) {
 		return JsonVisitorElementAdapter.getTypeStatic(in);
 	}
 
-	// FIXME if already exists
 	@Override
 	public Identity writeList(List<Identity> list) throws VisitorException {
 		return write(list);
 	}
 
+	// FIXME if already exists
 	Identity write(Object value) throws VisitorException {
 		try {
 			return cas

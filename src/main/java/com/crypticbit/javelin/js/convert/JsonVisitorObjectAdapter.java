@@ -10,11 +10,7 @@ import com.crypticbit.javelin.js.lazy.LazyJsonArray;
 import com.crypticbit.javelin.js.lazy.LazyJsonMap;
 import com.crypticbit.javelin.js.lazy.Reference;
 import com.crypticbit.javelin.store.Identity;
-import com.crypticbit.javelin.store.StoreException;
-import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.common.base.Function;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
 
 public class JsonVisitorObjectAdapter implements
@@ -70,11 +66,13 @@ public class JsonVisitorObjectAdapter implements
 		return in;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Object> parseList(Object in) {
 		return (List<Object>) in;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> parseMap(Object in) {
 		return (Map<String, Object>) in;

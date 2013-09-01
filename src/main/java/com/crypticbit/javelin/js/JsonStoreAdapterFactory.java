@@ -81,7 +81,7 @@ public class JsonStoreAdapterFactory {
 						}
 					}).create();
 
-	JsonStoreAdapterFactory(ContentAddressableStorage cas) {
+	public JsonStoreAdapterFactory(ContentAddressableStorage cas) {
 		JsonVisitorObjectAdapter jsonObjectAdapter = new JsonVisitorObjectAdapter(
 				this);
 		joa = new CasDai(cas, this, jsonObjectAdapter, jsonObjectAdapter);

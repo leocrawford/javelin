@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js;
+package com.crypticbit.javelin.js.converter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -7,6 +7,8 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.crypticbit.javelin.js.DataAccessInterface;
+import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.DigestFactory;
@@ -16,7 +18,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 
-public class JsonElementStoreAdpaterTest {
+public class JsonVisitorElementAdpaterTest {
 
     private static final Gson GSON = new Gson();
 
@@ -39,7 +41,7 @@ public class JsonElementStoreAdpaterTest {
 	assertTrue(jsonElementAdapter.read(nullIdentity).isJsonNull());
 	assertTrue(jsonElementAdapter.read(integerIdentity).getAsJsonPrimitive().getAsJsonPrimitive().isNumber());
 	assertEquals(100, jsonElementAdapter.read(integerIdentity).getAsJsonPrimitive().getAsInt());
-	assertTrue(jsonElementAdapter.read(floatIdentity).getAsJsonPrimitive().getAsJsonPrimitive().isNumber());
+	assertTrue(jsonElementAdapter.read(floatIdentity).getAsJsonPrimitive().isNumber());
 	assertEquals(2.1f, jsonElementAdapter.read(floatIdentity).getAsJsonPrimitive().getAsFloat(), 0.001);
 	assertTrue(jsonElementAdapter.read(booleanIdentity).getAsJsonPrimitive().isBoolean());
 	assertEquals(true, jsonElementAdapter.read(booleanIdentity).getAsJsonPrimitive().getAsBoolean());
@@ -52,6 +54,19 @@ public class JsonElementStoreAdpaterTest {
 	assertEquals(3, jsonElementAdapter.read(mapIdentity).getAsJsonObject().entrySet().size());
 	assertTrue(jsonElementAdapter.read(mapIdentity).getAsJsonObject().get("b").isJsonNull());
 
+    }
+    
+    @Test
+    public void testConvertPrimitive() throws JsonSyntaxException, StoreException {
+    	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new MemoryCasKas(new DigestFactory()));
+    	DataAccessInterface<JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
+
+    	final String jsonFloat = "2.1";
+		final JsonElement json = GSON.fromJson(jsonFloat, JsonElement.class);
+		Identity floatIdentity = jsonElementAdapter.write(json);
+    	assertEquals(json,jsonElementAdapter.read(floatIdentity));
+
+    	
     }
 
 }

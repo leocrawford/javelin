@@ -17,7 +17,7 @@ import com.google.gson.JsonSyntaxException;
 
 import difflib.PatchFailedException;
 
-public class JsonCasAdapterTest {
+public class DataStructureTest {
 
     private static final String JSON_EXAMPLE = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]";
     private static final String JSON_EXAMPLE_2 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,4]]";

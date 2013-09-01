@@ -17,7 +17,7 @@ import com.google.gson.reflect.TypeToken;
 
 class JsonVisitorCasAdapter implements
 		JsonVisitorSource<Identity, JsonElement>,
-		JsonVisitorDestinationCallback<Identity, Identity, Object> {
+		JsonVisitorDestination<Identity, Identity, Object> {
 
 	private ContentAddressableStorage cas;
 	private Gson gson;

@@ -71,11 +71,11 @@ public class StoreVisitor<T, F, I, B>  implements VisitorContext<I,T> {
 	
 
 
-	private JsonVisitorDestinationCallback<T, F, I> destination;
+	private JsonVisitorDestination<T, F, I> destination;
 	private JsonVisitorSource<I, B> source;
 
 	StoreVisitor(ContentAddressableStorage cas,
-			JsonVisitorDestinationCallback<T, F, I> destination,
+			JsonVisitorDestination<T, F, I> destination,
 			JsonVisitorSource<I, B> source, Gson gson) {
 		this.destination = destination;
 		this.source = source;

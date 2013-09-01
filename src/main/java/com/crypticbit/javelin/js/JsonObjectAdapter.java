@@ -16,13 +16,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
 
-public class JsonObjectStoreAdapter extends DataAccessInterface<Object>
-		implements JsonVisitorDestinationCallback<Object, Reference, Identity>,
+public class JsonObjectAdapter implements
+		JsonVisitorDestination<Object, Reference, Identity>,
 		JsonVisitorSource<Object, Object> {
 
-	JsonObjectStoreAdapter(ContentAddressableStorage cas,
-			JsonStoreAdapterFactory jsa) {
-		super(cas, jsa);
+	private JsonStoreAdapterFactory jsa;
+	JsonObjectAdapter(JsonStoreAdapterFactory jsa) {
+	this.jsa = jsa;
 	}
 
 	@Override
@@ -33,8 +33,8 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object>
 
 	@Override
 	public Object arriveMap(Map<String, Reference> map) {
-		// copy so writeable 
-		LinkedTreeMap<String, Reference> linkedTreeMap = new LinkedTreeMap<String,Reference>();
+		// copy so writeable
+		LinkedTreeMap<String, Reference> linkedTreeMap = new LinkedTreeMap<String, Reference>();
 		linkedTreeMap.putAll(map);
 		return new LazyJsonMap(linkedTreeMap);
 
@@ -43,25 +43,6 @@ public class JsonObjectStoreAdapter extends DataAccessInterface<Object>
 	@Override
 	public Object arriveValue(Object value) {
 		return value;
-	}
-
-	@Override
-	public Object read(Identity commitId) throws StoreException,
-			JsonSyntaxException {
-		StoreVisitor<Object, Reference, Identity, JsonElement> sv = new StoreVisitor<>(
-				cas, this, new JsonVisitorCasAdapter(cas, jsa.getGson()),
-				jsa.getGson());
-		return sv.visit(commitId);
-	}
-
-	// FIXME if already exists
-	@Override
-	public Identity write(Object object) throws StoreException {
-		StoreVisitor<Identity, Identity, Object, Object> sv = new StoreVisitor<>(
-				cas, new JsonVisitorCasAdapter(cas, jsa.getGson()), this,
-				jsa.getGson());
-		return sv.visit(object);
-
 	}
 
 	@Override

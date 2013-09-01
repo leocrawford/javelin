@@ -16,7 +16,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
 
-public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> implements JsonVisitorDestinationCallback<JsonElement, JsonElement, Identity> {
+public class JsonElementStoreAdapter extends DataAccessInterface<JsonElement> implements JsonVisitorDestination<JsonElement, JsonElement, Identity> {
 
     private StoreVisitor<JsonElement,JsonElement, Identity, JsonElement> sv;
     

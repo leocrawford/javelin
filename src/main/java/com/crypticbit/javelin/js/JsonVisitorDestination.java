@@ -26,7 +26,7 @@ import com.google.common.base.Function;
  *            the type of the collections contents before transformation
  * 
  */
-public interface JsonVisitorDestinationCallback<T, F, I> {
+public interface JsonVisitorDestination<T, F, I> {
 
 	public T arriveList(List<F> list) throws StoreException;
 

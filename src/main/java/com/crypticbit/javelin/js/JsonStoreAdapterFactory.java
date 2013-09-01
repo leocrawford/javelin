@@ -35,7 +35,7 @@ public class JsonStoreAdapterFactory {
 		@Override
 		public Object read(Identity commitId) throws StoreException,
 				JsonSyntaxException {
-			StoreVisitor<T,F,Identity,JsonElement> sv = new StoreVisitor<>(
+			JsonVisitor<T,F,Identity,JsonElement> sv = new JsonVisitor<>(
 					cas, dest, casAdapter, jsa.getGson());
 			return sv.visit(commitId);
 		}
@@ -43,7 +43,7 @@ public class JsonStoreAdapterFactory {
 		// FIXME if already exists
 		@Override
 		public Identity write(Object object) throws StoreException {
-			StoreVisitor<Identity, Identity, Object, B> sv = new StoreVisitor<Identity, Identity, Object, B>(
+			JsonVisitor<Identity, Identity, Object, B> sv = new JsonVisitor<Identity, Identity, Object, B>(
 					cas, casAdapter, source, jsa.getGson());
 			return sv.visit(object);
 		}
@@ -77,9 +77,10 @@ public class JsonStoreAdapterFactory {
 					}).create();
 
 	JsonStoreAdapterFactory(ContentAddressableStorage cas) {
-		jea = new JsonElementStoreAdapter(cas, this);
 		JsonObjectAdapter jsonObjectAdapter = new JsonObjectAdapter(this);
 		joa = new CasDai(cas, this, jsonObjectAdapter, jsonObjectAdapter);
+		JsonElementAdapter jsonElementAdapter = new JsonElementAdapter(this);
+		jea = new CasDai(cas, this, jsonElementAdapter, jsonElementAdapter);
 		this.cas = cas;
 	}
 

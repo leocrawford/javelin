@@ -23,7 +23,8 @@ import com.google.gson.JsonSyntaxException;
  * Map<String,I> or <I>f
  * <li>The destination visitor then gets <code>getTransform</code> applied to
  * convert the Collection<I> to Collection<F> (I use collection loosely)
- * <li>Finally the relevant visitType method is called and an element of <code><T> returned</code>
+ * <li>Finally the relevant visitType method is called and an element of
+ * <code><T> returned</code>
  * </ol>
  * 
  * @author Leo
@@ -42,8 +43,33 @@ import com.google.gson.JsonSyntaxException;
  *            processed (source)
  * 
  */
-public class StoreVisitor<T, F, I, B>  implements VisitorContext<I,T> {
+public class JsonVisitor<T, F, I, B> implements VisitorContext<I, T> {
 
+	private JsonVisitorDestination<T, F, I> destination;
+	private JsonVisitorSource<I, B> source;
+
+	JsonVisitor(ContentAddressableStorage cas,
+			JsonVisitorDestination<T, F, I> destination,
+			JsonVisitorSource<I, B> source, Gson gson) {
+		this.destination = destination;
+		this.source = source;
+	}
+
+	public T visit(I input) throws JsonSyntaxException, StoreException {
+		B in = source.parse(input);
+		switch (source.getType(in)) {
+		case ARRAY:
+			return destination.arriveList(Lists.transform(source.parseList(in),
+					destination.getTransform(this)));
+		case OBJECT:
+			return destination.arriveMap(Maps.transformValues(
+					source.parseMap(in), destination.getTransform(this)));
+		case PRIMITIVE:
+			return destination.arriveValue(source.parsePrimitive(in));
+		default:
+			return destination.arriveValue(null);
+		}
+	}
 
 	@Override
 	public Function<I, T> getRecurseFunction() {
@@ -61,41 +87,12 @@ public class StoreVisitor<T, F, I, B>  implements VisitorContext<I,T> {
 	}
 
 	@Override
-	public Function<T,T> getHaltFunction() {
+	public Function<T, T> getHaltFunction() {
 		return new Function<T, T>() {
 			public T apply(T input) {
 				return input;
 			}
 		};
 	}
-	
-
-
-	private JsonVisitorDestination<T, F, I> destination;
-	private JsonVisitorSource<I, B> source;
-
-	StoreVisitor(ContentAddressableStorage cas,
-			JsonVisitorDestination<T, F, I> destination,
-			JsonVisitorSource<I, B> source, Gson gson) {
-		this.destination = destination;
-		this.source = source;
-	}
-
-	public T visit(I digest) throws JsonSyntaxException, StoreException {
-		B in = source.parse(digest);
-		switch (source.getType(in)) {
-		case ARRAY:
-			return destination.arriveList(Lists.transform(source.parseList(in),
-					destination.getTransform(this)));
-		case OBJECT:
-			return destination.arriveMap(Maps.transformValues(
-					source.parseMap(in), destination.getTransform(this)));
-		case PRIMITIVE:
-			return destination.arriveValue(source.parsePrimitive(in));
-		default:
-			return destination.arriveValue(null);
-		}
-	}
-
 
 }

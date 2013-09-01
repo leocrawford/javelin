@@ -48,21 +48,8 @@ class JsonVisitorCasAdapter implements
 	 */
 	@Override
 	public Object parsePrimitive(JsonElement element) {
-		JsonPrimitive primitive = (JsonPrimitive) element;
-		if (primitive.isBoolean()) {
-			return primitive.getAsBoolean();
-		}
-		if (primitive.isNumber()) {
-			if (!primitive.getAsString().contains(".")) {
-				return primitive.getAsInt();
-			} else {
-				return primitive.getAsFloat();
-			}
-		}
-		if (primitive.isString()) {
-			return primitive.getAsString();
-		}
-		throw new InternalError("illegal Json Type found: " + primitive);
+		return JsonElementAdapter
+				.parsePrimitiveStatic((JsonPrimitive) element);
 	}
 
 	/*
@@ -84,16 +71,7 @@ class JsonVisitorCasAdapter implements
 
 	@Override
 	public ElementType getType(JsonElement in) {
-		if (in.isJsonArray())
-			return ElementType.ARRAY;
-		else if (in.isJsonObject())
-			return ElementType.OBJECT;
-		else if (in.isJsonPrimitive())
-			return ElementType.PRIMITIVE;
-		else if (in.isJsonNull())
-			return ElementType.NULL;
-		else
-			throw new IllegalStateException();
+		return JsonElementAdapter.getTypeStatic(in);
 	}
 
 	@Override

@@ -2,7 +2,12 @@ package com.crypticbit.javelin.js;
 
 import java.io.IOException;
 
-import com.crypticbit.javelin.js.lazy.Reference;
+import com.crypticbit.javelin.js.convert.JsonVisitor;
+import com.crypticbit.javelin.js.convert.JsonVisitorCasAdapter;
+import com.crypticbit.javelin.js.convert.JsonVisitorDestination;
+import com.crypticbit.javelin.js.convert.JsonVisitorElementAdapter;
+import com.crypticbit.javelin.js.convert.JsonVisitorObjectAdapter;
+import com.crypticbit.javelin.js.convert.JsonVisitorSource;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;

@@ -1,9 +1,10 @@
-package com.crypticbit.javelin.js;
+package com.crypticbit.javelin.js.convert;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.js.lazy.IdentityReference;
 import com.crypticbit.javelin.js.lazy.LazyJsonArray;
 import com.crypticbit.javelin.js.lazy.LazyJsonMap;
@@ -21,7 +22,7 @@ public class JsonVisitorObjectAdapter implements
 		JsonVisitorSource<Object, Object> {
 
 	private JsonStoreAdapterFactory jsa;
-	JsonVisitorObjectAdapter(JsonStoreAdapterFactory jsa) {
+	public JsonVisitorObjectAdapter(JsonStoreAdapterFactory jsa) {
 	this.jsa = jsa;
 	}
 
@@ -46,7 +47,7 @@ public class JsonVisitorObjectAdapter implements
 	}
 
 	@Override
-	public com.crypticbit.javelin.js.JsonVisitorSource.ElementType getType(
+	public com.crypticbit.javelin.js.convert.JsonVisitorSource.ElementType getType(
 			Object in) {
 		if (in == null)
 			return ElementType.NULL;

@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js;
+package com.crypticbit.javelin.js.convert;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,7 @@ import com.google.gson.JsonSyntaxException;
  *            processed
  * 
  */
-interface JsonVisitorSource<I, B> {
+public interface JsonVisitorSource<I, B> {
 
 	public enum ElementType {
 		PRIMITIVE, OBJECT, ARRAY, NULL

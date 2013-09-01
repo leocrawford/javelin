@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js;
+package com.crypticbit.javelin.js.convert;
 
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
@@ -48,7 +48,7 @@ public class JsonVisitor<T, F, I, B> implements VisitorContext<I, T> {
 	private JsonVisitorDestination<T, F, I> destination;
 	private JsonVisitorSource<I, B> source;
 
-	JsonVisitor(
+	public JsonVisitor(
 			JsonVisitorDestination<T, F, I> destination,
 			JsonVisitorSource<I, B> source) {
 		this.destination = destination;

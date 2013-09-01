@@ -1,9 +1,10 @@
-package com.crypticbit.javelin.js;
+package com.crypticbit.javelin.js.convert;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.common.base.Function;
@@ -20,7 +21,7 @@ public class JsonVisitorElementAdapter implements
 
 	private JsonStoreAdapterFactory jsa;
 
-	JsonVisitorElementAdapter(JsonStoreAdapterFactory jsa) {
+	public JsonVisitorElementAdapter(JsonStoreAdapterFactory jsa) {
 		this.jsa = jsa;
 	}
 
@@ -54,12 +55,12 @@ public class JsonVisitorElementAdapter implements
 	}
 
 	@Override
-	public com.crypticbit.javelin.js.JsonVisitorSource.ElementType getType(
+	public com.crypticbit.javelin.js.convert.JsonVisitorSource.ElementType getType(
 			JsonElement in) {
 		return getTypeStatic(in);
 	}
 
-	static com.crypticbit.javelin.js.JsonVisitorSource.ElementType getTypeStatic(
+	static com.crypticbit.javelin.js.convert.JsonVisitorSource.ElementType getTypeStatic(
 			JsonElement in) {
 		if (in.isJsonArray())
 			return ElementType.ARRAY;

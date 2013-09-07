@@ -1,6 +1,6 @@
 package com.crypticbit.javelin.js;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
@@ -16,12 +16,12 @@ public class JsonStoreAdapterFactoryTest {
 
 		final CasKasStore cas = new StorageFactory().createMemoryCas();
 		DataStructure ds = new DataStructure(cas);
-		ds.write("[0,1,2,3]").commit();
+		ds.write("[0,1,{2:3,4:\"a\"},4,null]").commit();
 
 		JsonStoreAdapterFactory adapter = new JsonStoreAdapterFactory(cas);
 
-		System.out.println(adapter.getKeyAdapter().visit(
-				ds.getCommit().getIdentity()));
+		assertEquals(8,adapter.getKeyAdapter().visit(
+				ds.getCommit().getIdentity()).size());
 
 	}
 

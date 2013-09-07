@@ -36,7 +36,7 @@ public class JsonListModelAdapter extends AbstractListModel<String> {
 
     @Override
     public String getElementAt(int index) {
-	return label.read(getJsonElementAt(index));
+	return label.read(getJsonElementAt(index)).toString();
     }
     
     public Object getJsonElementAt(int index) {

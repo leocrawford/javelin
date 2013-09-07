@@ -1,10 +1,17 @@
 package com.crypticbit.javelin.js;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.js.convert.VisitorException;
@@ -156,4 +163,18 @@ public class DataStructure {
 	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
 	}
     }
+
+	public void exportAll(OutputStream outputStream) throws JsonSyntaxException, StoreException, VisitorException, IOException {
+		DirectedGraph<Commit, DefaultEdge> x = getCommit().getAsGraphToRoot();
+		Set<Identity> result = new HashSet<>();
+		for(DefaultEdge e : x.edgeSet()) {
+			result.addAll(x.getEdgeSource(e).getAllIdentities());
+			result.addAll(x.getEdgeTarget(e).getAllIdentities());
+		}
+		for(Identity i: result) {
+			outputStream.write(i.getDigestAsByte());
+			outputStream.write(store.get(i).getBytes());
+		}
+		
+	}
 }

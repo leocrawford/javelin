@@ -1,5 +1,6 @@
 package com.crypticbit.javelin.js;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -16,6 +17,7 @@ import org.jgrapht.graph.DefaultEdge;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.CasKasStore;
+import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
@@ -175,6 +177,14 @@ public class DataStructure {
 			outputStream.write(i.getDigestAsByte());
 			outputStream.write(store.get(i).getBytes());
 		}
+		
+	}
+
+	public void importAll(FileInputStream inputStream) {
+	while(true) {
+//		Identity x = new Digest(inputStream.r)
+//		store.store(po)
+	}
 		
 	}
 }

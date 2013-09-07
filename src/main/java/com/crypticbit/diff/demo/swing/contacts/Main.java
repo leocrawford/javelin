@@ -4,12 +4,13 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import javax.swing.AbstractAction;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -49,6 +50,21 @@ public class Main extends JFrame {
 
 					jsonStore.exportAll(new FileOutputStream(f));
 					System.out.println("Exported to: " + f);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+			}
+		}));
+		menu.add(new JMenuItem(new AbstractAction("Import") {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					File f = new JFileChooser().getSelectedFile();
+
+					jsonStore.importAll(new FileInputStream(f));
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

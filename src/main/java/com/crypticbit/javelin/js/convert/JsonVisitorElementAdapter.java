@@ -27,7 +27,7 @@ public class JsonVisitorElementAdapter implements
 	}
 
 	@Override
-	public JsonElement writeList(List<JsonElement> list) {
+	public JsonElement writeList(Identity source, List<JsonElement> list) {
 		JsonArray r = new JsonArray();
 		for (JsonElement e : list) {
 			r.add(e);
@@ -36,7 +36,7 @@ public class JsonVisitorElementAdapter implements
 	}
 
 	@Override
-	public JsonElement writeMap(Map<String, JsonElement> map) {
+	public JsonElement writeMap(Identity source, Map<String, JsonElement> map) {
 		JsonObject o = new JsonObject();
 		for (Entry<String, JsonElement> e : map.entrySet()) {
 			o.add(e.getKey(), e.getValue());
@@ -45,7 +45,7 @@ public class JsonVisitorElementAdapter implements
 	}
 
 	@Override
-	public JsonElement writeValue(Object value) {
+	public JsonElement writeValue(Identity source, Object value) {
 		// Hack to get unit tests to pass. Did fail because a converting from
 		// JsonElement to Object and back gave a different type for same value
 		return new JsonParser().parse(jsa.getGson().toJson(value));
@@ -119,8 +119,8 @@ public class JsonVisitorElementAdapter implements
 	}
 
 	@Override
-	public JsonElement writeNull() {
-		return writeValue(null);
+	public JsonElement writeNull(Identity source) {
+		return writeValue(source, null);
 	}
 
 }

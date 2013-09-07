@@ -28,13 +28,13 @@ import com.google.common.base.Function;
  */
 public interface JsonVisitorDestination<T, F, I> {
 
-	public T writeList(List<F> list) throws VisitorException;
+	public T writeList(I source, List<F> list) throws VisitorException;
 
-	public T writeMap(Map<String, F> map) throws VisitorException;
+	public T writeMap(I source, Map<String, F> map) throws VisitorException;
 
-	public T writeValue(Object value) throws VisitorException;
+	public T writeValue(I source, Object value) throws VisitorException;
 
-	public T writeNull() throws VisitorException;
+	public T writeNull(I source) throws VisitorException;
 
 	
 	public Function<I, F> getTransform(VisitorContext<I, T> context) throws VisitorException;

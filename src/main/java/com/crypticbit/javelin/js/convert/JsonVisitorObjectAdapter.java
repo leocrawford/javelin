@@ -23,13 +23,13 @@ public class JsonVisitorObjectAdapter implements
 	}
 
 	@Override
-	public Object writeList(List<Reference> list) {
+	public Object writeList(Identity source, List<Reference> list) {
 		// copy so writeable
 		return new LazyJsonArray(new ArrayList<>(list));
 	}
 
 	@Override
-	public Object writeMap(Map<String, Reference> map) {
+	public Object writeMap(Identity source, Map<String, Reference> map) {
 		// copy so writeable
 		LinkedTreeMap<String, Reference> linkedTreeMap = new LinkedTreeMap<String, Reference>();
 		linkedTreeMap.putAll(map);
@@ -38,7 +38,7 @@ public class JsonVisitorObjectAdapter implements
 	}
 
 	@Override
-	public Object writeValue(Object value) {
+	public Object writeValue(Identity source, Object value) {
 		return value;
 	}
 
@@ -89,7 +89,7 @@ public class JsonVisitorObjectAdapter implements
 	}
 
 	@Override
-	public Object writeNull()  {
+	public Object writeNull(Identity source)  {
 		return null;
 	}
 

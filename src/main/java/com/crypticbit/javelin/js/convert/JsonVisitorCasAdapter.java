@@ -81,7 +81,7 @@ public class JsonVisitorCasAdapter implements
 	}
 
 	@Override
-	public Identity writeList(List<Identity> list) throws VisitorException {
+	public Identity writeList(Object source, List<Identity> list) throws VisitorException {
 		return write(list);
 	}
 
@@ -97,12 +97,12 @@ public class JsonVisitorCasAdapter implements
 	}
 
 	@Override
-	public Identity writeMap(Map<String, Identity> map) throws VisitorException {
+	public Identity writeMap(Object source, Map<String, Identity> map) throws VisitorException {
 		return write(map);
 	}
 
 	@Override
-	public Identity writeValue(Object value) throws VisitorException {
+	public Identity writeValue(Object source, Object value) throws VisitorException {
 		return write(value);
 	}
 
@@ -113,7 +113,7 @@ public class JsonVisitorCasAdapter implements
 	}
 
 	@Override
-	public Identity writeNull() throws VisitorException {
+	public Identity writeNull(Object source) throws VisitorException {
 		return write(null);
 	}
 

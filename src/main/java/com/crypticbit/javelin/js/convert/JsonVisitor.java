@@ -54,15 +54,15 @@ public class JsonVisitor<T, F, I, B> implements VisitorContext<I, T> {
 		try {
 			switch (source.getType(in)) {
 			case ARRAY:
-				return destination.writeList(Lists.transform(
+				return destination.writeList(input,Lists.transform(
 						source.parseList(in), destination.getTransform(this)));
 			case OBJECT:
-				return destination.writeMap(Maps.transformValues(
+				return destination.writeMap(input,Maps.transformValues(
 						source.parseMap(in), destination.getTransform(this)));
 			case PRIMITIVE:
-				return destination.writeValue(source.parsePrimitive(in));
+				return destination.writeValue(input,source.parsePrimitive(in));
 			default:
-				return destination.writeNull();
+				return destination.writeNull(input);
 			}
 			// because guava Function doesn't allows us to throw non run-time
 			// exceptions we do this
@@ -87,7 +87,7 @@ public class JsonVisitor<T, F, I, B> implements VisitorContext<I, T> {
 
 	@Override
 	public Function<T, T> getHaltFunction() {
-		return new Function<T, T>() {
+		return new Function<T, T>() { 
 			public T apply(T input) {
 				return input;
 			}

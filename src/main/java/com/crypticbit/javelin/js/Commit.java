@@ -1,8 +1,13 @@
 package com.crypticbit.javelin.js;
 
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
@@ -23,17 +28,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.jayway.jsonpath.Filter;
-import com.jayway.jsonpath.HackedJsonPath;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.internal.PathToken;
-import com.jayway.jsonpath.internal.PathTokenizer;
-import com.jayway.jsonpath.internal.filter.PathTokenFilter;
-import com.jayway.jsonpath.spi.JsonProvider;
-import com.jayway.jsonpath.spi.JsonProviderFactory;
 
 public class Commit implements Comparable<Commit> {
 
@@ -216,5 +214,9 @@ public class Commit implements Comparable<Commit> {
 	}
 	return result;
     }
+
+	public Identity getIdentity() {
+		return dao.getHead();
+	}
 
 }

@@ -1,22 +1,22 @@
 package com.crypticbit.javelin.js;
 
 import java.io.IOException;
+import java.util.Set;
 
 import com.crypticbit.javelin.js.convert.JsonVisitor;
 import com.crypticbit.javelin.js.convert.JsonVisitorCasAdapter;
 import com.crypticbit.javelin.js.convert.JsonVisitorDestination;
 import com.crypticbit.javelin.js.convert.JsonVisitorElementAdapter;
+import com.crypticbit.javelin.js.convert.JsonVisitorKeyAdapter;
 import com.crypticbit.javelin.js.convert.JsonVisitorObjectAdapter;
 import com.crypticbit.javelin.js.convert.JsonVisitorSource;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
-import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -103,6 +103,13 @@ public class JsonStoreAdapterFactory {
 		return joa;
 	}
 
+	public JsonVisitor<Set<Identity>, Set<Identity>, Identity,JsonElement> getKeyAdapter() {
+		JsonVisitorKeyAdapter jsonKeyAdapter = new JsonVisitorKeyAdapter();
+		return new JsonVisitor<Set<Identity>, Set<Identity>, Identity,JsonElement>(jsonKeyAdapter, new JsonVisitorCasAdapter(cas,
+				gson));
+
+	}
+	
 	public <T> DataAccessInterface<T> getSimpleObjectAdapter(Class<T> clazz) {
 		return new JsonSimpleClassAdapter<T>(cas, clazz, this);
 	}

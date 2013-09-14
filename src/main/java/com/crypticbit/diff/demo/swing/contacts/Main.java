@@ -62,7 +62,9 @@ public class Main extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					File f = new JFileChooser().getSelectedFile();
+				    JFileChooser chooser = new JFileChooser();
+				    chooser.showOpenDialog(Main.this);
+					File f = chooser.getSelectedFile();
 
 					jsonStore.importAll(new FileInputStream(f));
 				} catch (Exception e1) {

@@ -1,7 +1,9 @@
 package com.crypticbit.javelin.store;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Random;
 
 import com.google.common.io.BaseEncoding;
@@ -11,31 +13,31 @@ import com.google.common.io.BaseEncoding;
  * 
  * @author leo
  */
-public class Digest implements Identity {
+public class Digest implements Identity, Serializable {
 
-    private ByteBuffer digest;
+    private byte[] digest;
 
     /** Random digest */
     public Digest() {
-	digest = ByteBuffer.wrap(createRandomData(64));
+	digest = createRandomData(64);
     }
 
     public Digest(byte[] digestAsByte) {
-	this.digest = ByteBuffer.wrap(digestAsByte);
+	this.digest = digestAsByte;
     }
 
     public Digest(MessageDigest messageDigest) {
-	digest = ByteBuffer.wrap(messageDigest.digest());
+	digest = messageDigest.digest();
     }
 
     public Digest(String string) {
-	this.digest = ByteBuffer.wrap(BaseEncoding.base32Hex().decode(string));
+	this.digest = BaseEncoding.base32Hex().decode(string);
     }
 
     @Override
     public int compareTo(Identity o) {
 	if (o instanceof Digest) {
-	    return digest.compareTo(((Digest) o).digest);
+	    return ByteBuffer.wrap(digest).compareTo(ByteBuffer.wrap(((Digest) o).digest));
 	}
 	else {
 	    return this.getClass().getName().compareTo(o.getClass().getName());
@@ -45,7 +47,7 @@ public class Digest implements Identity {
     @Override
     public boolean equals(Object compare) {
 	if (compare instanceof Digest) {
-	    return digest.equals(((Digest) compare).digest);
+	    return Arrays.equals(digest, ((Digest) compare).digest);
 	}
 	else {
 	    return false;
@@ -54,7 +56,7 @@ public class Digest implements Identity {
 
     @Override
     public byte[] getDigestAsByte() {
-	return digest.array();
+	return digest;
     }
 
     @Override
@@ -77,4 +79,5 @@ public class Digest implements Identity {
 	new Random().nextBytes(b);
 	return b;
     }
+
 }

@@ -1,13 +1,8 @@
 package com.crypticbit.javelin.js;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,9 +12,9 @@ import org.jgrapht.graph.DefaultEdge;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.CasKasStore;
-import com.crypticbit.javelin.store.Digest;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
+import com.crypticbit.javelin.store.cas.PersistableResource;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
@@ -166,25 +161,31 @@ public class DataStructure {
 	}
     }
 
-	public void exportAll(OutputStream outputStream) throws JsonSyntaxException, StoreException, VisitorException, IOException {
-		DirectedGraph<Commit, DefaultEdge> x = getCommit().getAsGraphToRoot();
-		Set<Identity> result = new HashSet<>();
-		for(DefaultEdge e : x.edgeSet()) {
-			result.addAll(x.getEdgeSource(e).getAllIdentities());
-			result.addAll(x.getEdgeTarget(e).getAllIdentities());
-		}
-		for(Identity i: result) {
-			outputStream.write(i.getDigestAsByte());
-			outputStream.write(store.get(i).getBytes());
-		}
-		
+    public void exportAll(OutputStream outputStream) throws JsonSyntaxException, StoreException, VisitorException,
+	    IOException {
+	ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+	DirectedGraph<Commit, DefaultEdge> x = getCommit().getAsGraphToRoot();
+	Set<Identity> temp = new HashSet<>();
+	for (DefaultEdge e : x.edgeSet()) {
+	    temp.addAll(x.getEdgeSource(e).getAllIdentities());
+	    temp.addAll(x.getEdgeTarget(e).getAllIdentities());
+	}
+	Map<Identity, PersistableResource> result = new HashMap<>();
+	for (Identity i : temp) {
+	    result.put(i, store.get(i));
+	}
+	oos.writeObject(result);
+
+    }
+
+    public void importAll(FileInputStream inputStream) throws IOException, ClassNotFoundException, StoreException {
+	ObjectInputStream ois = new ObjectInputStream(inputStream);
+	Map<Identity, PersistableResource> result = (Map<Identity, PersistableResource>) ois.readObject();
+	for (Entry<Identity, PersistableResource> x : result.entrySet()) {
+	    Identity idOfValueWrittenToStore = store.store(x.getValue());
+	    if (!idOfValueWrittenToStore.equals(x.getKey()))
+		throw new IllegalStateException("The entry " + x.getKey() + " produced a new key on store to local");
 	}
 
-	public void importAll(FileInputStream inputStream) {
-	while(true) {
-//		Identity x = new Digest(inputStream.r)
-//		store.store(po)
-	}
-		
-	}
+    }
 }

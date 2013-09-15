@@ -65,6 +65,9 @@ public class Commit implements Comparable<Commit> {
 		pathsToValues.add(getShortestPath(x, lca, this));
 		pathsToValues.add(getShortestPath(x, lca, other));
 
+		System.out.println("aa"+lca);
+		System.out.println("aa"+lca.getObject());
+		
 		ThreeWayDiff twd = new ThreeWayDiff(lca.getObject());
 		addCommitToTreeMap(x, twd, pathsToValues);
 		return twd;

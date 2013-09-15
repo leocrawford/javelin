@@ -66,7 +66,7 @@ public class Digest implements Identity, Serializable {
 
     @Override
     public int hashCode() {
-	return digest.hashCode();
+	return ByteBuffer.wrap(digest).hashCode();
     }
 
     @Override

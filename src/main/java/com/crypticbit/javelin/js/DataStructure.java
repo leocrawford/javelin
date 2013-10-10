@@ -35,7 +35,7 @@ public class DataStructure {
 
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.js");
 
-    private Anchor anchor;
+    private Anchor selectedAnchor;
     /** The current head of the Json data structure */
     private JsonElement element;
     /** The last known head of the actual data structure, set after a read or write operation */
@@ -48,7 +48,7 @@ public class DataStructure {
     /** Create a new json data structure with a random anchor, which can be retrieved using <code>getAnchor</code> */
     public DataStructure(CasKasStore store) {
 	this.store = store;
-	anchor = new Anchor(store);
+	selectedAnchor = new Anchor(store);
 	jsonFactory = new JsonStoreAdapterFactory(store);
 	commitFactory = jsonFactory.getSimpleObjectAdapter(CommitDao.class);
 
@@ -56,7 +56,7 @@ public class DataStructure {
 
     public DataStructure(CasKasStore store, Identity anchor) {
 	this(store);
-	this.anchor = new Anchor(store, anchor);
+	this.selectedAnchor = new Anchor(store, anchor);
     }
 
     /**
@@ -65,15 +65,15 @@ public class DataStructure {
      */
     private DataStructure(CasKasStore store, Anchor anchor) {
 	this(store);
-	this.anchor = anchor;
+	this.selectedAnchor = anchor;
     }
 
     public DataStructure branch() throws StoreException {
-	return new DataStructure(store, new Anchor(store, anchor));
+	return new DataStructure(store, new Anchor(store, selectedAnchor));
     }
 
     public synchronized DataStructure checkout() throws StoreException, JsonSyntaxException, VisitorException {
-	Identity daoDigest = anchor.read();
+	Identity daoDigest = selectedAnchor.read();
 	commit = new Commit(commitFactory.read(daoDigest), daoDigest, jsonFactory);
 	element = commit.getElement();
 	if (LOG.isLoggable(Level.FINER)) {
@@ -84,12 +84,12 @@ public class DataStructure {
 
     public synchronized DataStructure commit() throws StoreException, VisitorException {
 	Identity write = jsonFactory.getJsonElementAdapter().write(element);
-	writeIdentity(write, anchor.get());
+	writeIdentity(write, selectedAnchor.get());
 	return checkout();
     }
 
     public Identity getAnchor() {
-	return anchor.getDigest();
+	return selectedAnchor.getDigest();
     }
 
     public Commit getCommit() {
@@ -104,7 +104,7 @@ public class DataStructure {
 	    PatchFailedException, VisitorException {
 	ThreeWayDiff patch = commit.createChangeSet(other.commit);
 	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(patch.apply());
-	writeIdentity(valueIdentity, anchor.get(), other.anchor.get());
+	writeIdentity(valueIdentity, selectedAnchor.get(), other.selectedAnchor.get());
 	return checkout();
     }
 
@@ -147,14 +147,15 @@ public class DataStructure {
 	}
 
 	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(originalResult);
-	writeIdentity(valueIdentity, anchor.get());
+	writeIdentity(valueIdentity, selectedAnchor.get());
 	checkout();
     }
 
     private void writeIdentity(Identity valueIdentity, Identity... parents) throws StoreException, VisitorException {
+	// FIXME hardcoded user
 	CommitDao tempCommit = new CommitDao(valueIdentity, new Date(), "auser", parents);
 	Identity tempDigest = commitFactory.write(tempCommit);
-	anchor.write(tempDigest);
+	selectedAnchor.write(tempDigest);
 	commit = new Commit(tempCommit, tempDigest, jsonFactory);
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Updating id -> " + tempDigest);

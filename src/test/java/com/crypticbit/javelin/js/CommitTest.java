@@ -83,19 +83,18 @@ public class CommitTest extends TestUtils {
     @Test
     public void testGetAsGraph() throws StoreException, IOException, JsonSyntaxException, VisitorException {
 	assertEquals(3, jca1.getCommit().getAsGraphToRoot().vertexSet().size());
-	assertEquals(3, jca2.getCommit().getAsGraphToRoot().vertexSet().size());
+assertEquals(3, jca2.getCommit().getAsGraphToRoot().vertexSet().size());
 	assertEquals(4, jca3.getCommit().getAsGraphToRoot().vertexSet().size());
 	assertEquals(4, jca4.getCommit().getAsGraphToRoot().vertexSet().size());
     }
 
-    private void show() throws JsonSyntaxException, StoreException, PatchFailedException, IOException, VisitorException {
+    private void show(Commit... commits) throws JsonSyntaxException, StoreException, PatchFailedException, IOException, VisitorException {
 	enableLog("com.crypticbit.javelin.js", Level.FINEST);
-	jca1.merge(jca4);
+//	jca1.merge(jca4);
 
-	System.out.println("Jc1C=" + jca1.getCommit());
 
 	JGraphModelAdapter<Commit, DefaultEdge> model = new JGraphModelAdapter<Commit, DefaultEdge>(Commit
-		.getAsGraphToRoots(new Commit[] { jca4.getCommit(), jca1.getCommit() }));
+		.getAsGraphToRoots(commits));
 
 	JGraph jgraph = new JGraph(model);
 

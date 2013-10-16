@@ -7,6 +7,7 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -114,7 +115,7 @@ public class DataStructureTest {
 	jca.commit();
 	jca.write(JSON_EXAMPLE_2);
 
-	DataStructure jca2 = new DataStructure(store, jca.getAnchor());
+	DataStructure jca2 = new DataStructure(store, jca.getLabels(),"HEAD");
 	jca2.checkout();
 	jca2.write(JSON_EXAMPLE_3);
 
@@ -138,9 +139,10 @@ public class DataStructureTest {
 	DataStructure jca = new DataStructure(store);
 	jca.write(JSON_EXAMPLE);
 	jca.commit();
-	byte[] id = jca.getAnchor().getDigestAsByte();
+	// FIXME
+	byte[] labels = SerializationUtils.serialize(jca.getLabels());
 
-	DataStructure jca2 = new DataStructure(store, new Digest(id));
+	DataStructure jca2 = new DataStructure(store, (LabelsDao) SerializationUtils.deserialize(labels),"HEAD");
 	jca2.checkout();
 	Assert.assertEquals(jca.read(), jca2.read());
     }

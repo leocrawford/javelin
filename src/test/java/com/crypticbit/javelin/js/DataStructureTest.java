@@ -24,7 +24,10 @@ public class DataStructureTest {
     private static final String JSON_EXAMPLE = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]";
     private static final String JSON_EXAMPLE_2 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,4]]";
     private static final String JSON_EXAMPLE_3 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,5]]";
+    private static final String JSON_EXAMPLE_4 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,7]]";
+    private static final String JSON_EXAMPLE_5 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,7,8]]";
 
+    
     @Test
     public void testBasicBranch() throws IOException, StoreException, JsonSyntaxException, PatchFailedException, VisitorException {
 	String JSON_EXAMPLEa = "[\"foo\",{\"a\":1,\"b\":TRUE}]";
@@ -146,6 +149,24 @@ public class DataStructureTest {
 	jca2.checkout();
 	Assert.assertEquals(jca.read(), jca2.read());
     }
+    
+    @Test
+    public void testMultiplBranches() throws StoreException, VisitorException {
+    	CasKasStore store = new StorageFactory().createMemoryCas();
+    	DataStructure d1 = new DataStructure(store).write(JSON_EXAMPLE).commit();
+    	DataStructure d2 = d1.branch();
+    	d1.write(JSON_EXAMPLE_2).commit().saveLabel("Branch1");
+    	d2.write(JSON_EXAMPLE_3).commit().saveLabel("Branch2");
+    	DataStructure d3 = d2.branch();
+    	d3.write(JSON_EXAMPLE_4).commit().saveLabel("Branch3");
+    	d2.write(JSON_EXAMPLE_5).commit();
+    	    	
+    	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_2),new DataStructure(store,d1.getLabels(),"Branch1").checkout().read());
+    	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_5),new DataStructure(store,d1.getLabels(),"Branch2").checkout().read());
+    	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_4),new DataStructure(store,d1.getLabels(),"Branch3").checkout().read());
+    	
+    }
+    
 
     private void dump(ContentAddressableStorage cas) throws StoreException {
 	for (Identity d : cas.list()) {

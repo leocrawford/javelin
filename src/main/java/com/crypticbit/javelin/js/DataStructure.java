@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -56,9 +57,9 @@ public class DataStructure {
     public DataStructure(CasKasStore store) throws StoreException, VisitorException {
 	setup(store);
 	labelsAnchor = new ExtendedAnchor<LabelsDao>(jsonFactory, LabelsDao.class);
-	labelsAnchor.writeEndPoint(store, new LabelsDao());
-	selectedAnchor = labelsAnchor.getEndPoint().addAnchor("HEAD", jsonFactory);
-	labelsAnchor.writeEndPoint(store, labelsAnchor.getEndPoint());
+	LabelsDao labels = new LabelsDao();
+	selectedAnchor = labels.addAnchor("HEAD", jsonFactory);
+	labelsAnchor.writeEndPoint(store, labels);
 
     }
 
@@ -70,16 +71,16 @@ public class DataStructure {
      * @throws StoreException
      * @throws JsonSyntaxException
      */
-    DataStructure(CasKasStore store, ExtendedAnchor<LabelsDao> labels, String label) throws JsonSyntaxException,
+    DataStructure(CasKasStore store, Identity labelsAddress, String label) throws JsonSyntaxException,
 	    StoreException, VisitorException, Error {
 	setup(store);
-	this.labelsAnchor = labels;
-	if (labels.readEndPoint(store).hasAnchor(label)) {
-	    this.selectedAnchor = labels.getEndPoint().getAnchor(label, jsonFactory);
+	this.labelsAnchor = new ExtendedAnchor<LabelsDao>(labelsAddress, jsonFactory, LabelsDao.class);
+	if (labelsAnchor.readEndPoint(store).hasAnchor(label)) {
+	    this.selectedAnchor = labelsAnchor.getEndPoint().getAnchor(label, jsonFactory);
 	}
 	else {
 	    // FIXME exception handling, and thought about changing to unknown branch
-	    throw new Error("Labels don't exist: " + labels.getEndPoint());
+	    throw new Error("Labels don't exist: " + labelsAnchor.getEndPoint());
 	    // this.selectedAnchor = labels.addAnchor(label);
 	}
     }
@@ -90,7 +91,7 @@ public class DataStructure {
      */
 
     /**
-     * Create a new
+     * Create a new branch. Same DS
      */
     private DataStructure(DataStructure parent) throws StoreException {
 	setup(parent.store);
@@ -150,9 +151,8 @@ public class DataStructure {
      * public Identity getAnchor() { return selectedAnchor.getDigest(); }
      */
 
-    // FIXME
-    public ExtendedAnchor<LabelsDao> getLabels() {
-	return labelsAnchor;
+        public  Identity getLabelsAddress() {
+	return labelsAnchor.getAddress();
     }
 
     public void importAll(FileInputStream inputStream) throws IOException, ClassNotFoundException, StoreException {

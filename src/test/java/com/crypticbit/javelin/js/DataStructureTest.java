@@ -122,7 +122,7 @@ public class DataStructureTest {
 	jca.commit();
 	jca.write(JSON_EXAMPLE_2);
 
-	DataStructure jca2 = new DataStructure(store, jca.getLabels(), "HEAD");
+	DataStructure jca2 = new DataStructure(store, jca.getLabelsAddress(), "HEAD");
 	jca2.checkout();
 	jca2.write(JSON_EXAMPLE_3);
 
@@ -151,11 +151,11 @@ public class DataStructureTest {
 	d3.write(JSON_EXAMPLE_4).commit().saveLabel("Branch3");
 	d2.write(JSON_EXAMPLE_5).commit();
 
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_2), new DataStructure(store, d1.getLabels(), "Branch1")
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_2), new DataStructure(store, d1.getLabelsAddress(), "Branch1")
 		.checkout().read());
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_5), new DataStructure(store, d1.getLabels(), "Branch2")
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_5), new DataStructure(store, d1.getLabelsAddress(), "Branch2")
 		.checkout().read());
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_4), new DataStructure(store, d1.getLabels(), "Branch3")
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_4), new DataStructure(store, d1.getLabelsAddress(), "Branch3")
 		.checkout().read());
 
     }
@@ -167,13 +167,9 @@ public class DataStructureTest {
 	DataStructure jca = new DataStructure(store);
 	jca.write(JSON_EXAMPLE);
 	jca.commit();
-	byte[] labelsAddress = SerializationUtils.serialize(jca.getLabels().getAddress());
+	byte[] labelsAddress = SerializationUtils.serialize(jca.getLabelsAddress());
 
-	// clunky
-	ExtendedAnchor<LabelsDao> deSerLabels = new ExtendedAnchor<LabelsDao>((Identity) SerializationUtils
-		.deserialize(labelsAddress), new JsonStoreAdapterFactory(store), LabelsDao.class);
-
-	DataStructure jca2 = new DataStructure(store, deSerLabels, "HEAD");
+	DataStructure jca2 = new DataStructure(store, (Identity) SerializationUtils.deserialize(labelsAddress), "HEAD");
 	jca2.checkout();
 	Assert.assertEquals(jca.read(), jca2.read());
     }

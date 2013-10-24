@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 public class ThreeWayDiff<T> {
 
     // FIXME - will this work if an element changes type?
-    
+
     private T commonAncestor;
     private List<Snapshot<T>> list = new LinkedList<>();
     private DifferFactory applicatorFactory;

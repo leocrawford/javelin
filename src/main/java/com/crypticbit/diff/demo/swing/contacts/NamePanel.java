@@ -34,21 +34,13 @@ public class NamePanel extends JPanel {
 	    public void valueChanged(ListSelectionEvent e) {
 		if (!e.getValueIsAdjusting()) {
 		    int selectedIndex = list.getSelectedIndex();
-		    if (selectedIndex >= 0)
+		    if (selectedIndex >= 0) {
 			jsonElementSelectionListener.jsonElementSelected("people[" + selectedIndex + "]", getModel()
 				.getJsonElementAt(selectedIndex));
+		    }
 		}
 	    }
 	});
-    }
-
-    private JsonListModelAdapter getModel() {
-	return dataModel;
-    }
-
-    private JsonListModelAdapter updateModel(DataStructure jca) throws StoreException, JsonSyntaxException, VisitorException {
-	dataModel = new JsonListModelAdapter(jca, "people", "name");
-	return dataModel;
     }
 
     public void refresh() {
@@ -59,5 +51,15 @@ public class NamePanel extends JPanel {
 	    // FIXME
 	    throw new Error(e);
 	}
+    }
+
+    private JsonListModelAdapter getModel() {
+	return dataModel;
+    }
+
+    private JsonListModelAdapter updateModel(DataStructure jca) throws StoreException, JsonSyntaxException,
+	    VisitorException {
+	dataModel = new JsonListModelAdapter(jca, "people", "name");
+	return dataModel;
     }
 }

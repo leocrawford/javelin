@@ -33,223 +33,211 @@ import difflib.PatchFailedException;
 // FIXME tidy up exceptions
 public class DataStructure {
 
-	private static final Logger LOG = Logger
-			.getLogger("com.crypticbit.javelin.js");
+    private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.js");
 
-	/** The current head of the Json data structure */
-	private ExtendedAnchor<CommitDao> selectedAnchor;
-	private ExtendedAnchor<LabelsDao> labelsAnchor;
-	private JsonElement element;
-	/**
-	 * The last known head of the actual data structure, set after a read or
-	 * write operation
-	 */
-	private Commit commit;
-	/** The underlying data store */
-	private CasKasStore store;
-	private JsonStoreAdapterFactory jsonFactory;
+    /** The current head of the Json data structure */
+    private ExtendedAnchor<CommitDao> selectedAnchor;
+    private ExtendedAnchor<LabelsDao> labelsAnchor;
+    private JsonElement element;
+    /**
+     * The last known head of the actual data structure, set after a read or write operation
+     */
+    private Commit commit;
+    /** The underlying data store */
+    private CasKasStore store;
+    private JsonStoreAdapterFactory jsonFactory;
 
-	/**
-	 * Create a new json data structure with a random anchor, which can be
-	 * retrieved using <code>getAnchor</code>
-	 * @throws VisitorException 
-	 * @throws StoreException 
-	 */
-	public DataStructure(CasKasStore store) throws StoreException, VisitorException {
-	    setup(store);
-		labelsAnchor = new ExtendedAnchor<LabelsDao>(jsonFactory, LabelsDao.class);
-	    labelsAnchor.writeEndPoint(store, new LabelsDao());
-	    selectedAnchor = labelsAnchor.getEndPoint().addAnchor("HEAD",jsonFactory);
-	    labelsAnchor.writeEndPoint(store,labelsAnchor.getEndPoint());
-	
+    /**
+     * Create a new json data structure with a random anchor, which can be retrieved using <code>getAnchor</code>
+     * 
+     * @throws VisitorException
+     * @throws StoreException
+     */
+    public DataStructure(CasKasStore store) throws StoreException, VisitorException {
+	setup(store);
+	labelsAnchor = new ExtendedAnchor<LabelsDao>(jsonFactory, LabelsDao.class);
+	labelsAnchor.writeEndPoint(store, new LabelsDao());
+	selectedAnchor = labelsAnchor.getEndPoint().addAnchor("HEAD", jsonFactory);
+	labelsAnchor.writeEndPoint(store, labelsAnchor.getEndPoint());
+
+    }
+
+    /**
+     * Create a new json data structure - by selecting a label from an existing ds by name
+     * 
+     * @throws Error
+     * @throws VisitorException
+     * @throws StoreException
+     * @throws JsonSyntaxException
+     */
+    DataStructure(CasKasStore store, ExtendedAnchor<LabelsDao> labels, String label) throws JsonSyntaxException,
+	    StoreException, VisitorException, Error {
+	setup(store);
+	this.labelsAnchor = labels;
+	if (labels.readEndPoint(store).hasAnchor(label)) {
+	    this.selectedAnchor = labels.getEndPoint().getAnchor(label, jsonFactory);
 	}
-	
-	private void setup(CasKasStore store) {
-		this.store = store;    
-		jsonFactory = new JsonStoreAdapterFactory(store);
+	else {
+	    // FIXME exception handling, and thought about changing to unknown branch
+	    throw new Error("Labels don't exist: " + labels.getEndPoint());
+	    // this.selectedAnchor = labels.addAnchor(label);
 	}
-	
+    }
 
-	/*
-	 * public DataStructure(CasKasStore store, Identity identity) { this(store);
-	 * this.selectedAnchor = new Anchor(identity); }
-	 */
+    /*
+     * public DataStructure(CasKasStore store, Identity identity) { this(store); this.selectedAnchor = new
+     * Anchor(identity); }
+     */
 
-	/**
-	 * Create a new json data structure - by selecting a label from an existing ds by name
-	 * @throws Error 
-	 * @throws VisitorException 
-	 * @throws StoreException 
-	 * @throws JsonSyntaxException 
-	 */
-	 DataStructure(CasKasStore store, ExtendedAnchor<LabelsDao> labels, String label) throws JsonSyntaxException, StoreException, VisitorException, Error {
-		setup(store);
-		this.labelsAnchor = labels;
-		if (labels.readEndPoint(store).hasAnchor(label))
-			this.selectedAnchor = labels.getEndPoint().getAnchor(label, jsonFactory);
-		else
-			// FIXME exception handling, and thought about changing to unknown branch
-			throw new Error("Labels don't exist: "+labels.getEndPoint());
-//			this.selectedAnchor = labels.addAnchor(label);
-	} 
-	
-	 /** 
-	  * Create a new 
-	  
-	  */
-	private DataStructure(DataStructure parent) throws StoreException {
-		setup(parent.store);
-		this.labelsAnchor = parent.labelsAnchor;
-		this.selectedAnchor = new ExtendedAnchor<>(store, parent.selectedAnchor, jsonFactory, CommitDao.class);
-		
+    /**
+     * Create a new
+     */
+    private DataStructure(DataStructure parent) throws StoreException {
+	setup(parent.store);
+	this.labelsAnchor = parent.labelsAnchor;
+	this.selectedAnchor = new ExtendedAnchor<>(store, parent.selectedAnchor, jsonFactory, CommitDao.class);
+
+    }
+
+    public DataStructure branch() throws StoreException {
+	return new DataStructure(this);
+    }
+
+    // FIXME - what about persisting shared labels? Would they be betetr stored
+    // as our own mergable data structure?
+    /*
+     * public DataStructure branch(String newLabel) throws StoreException { return new DataStructure(store, labels,
+     * newLabel); }
+     */
+
+    public synchronized DataStructure checkout() throws StoreException, JsonSyntaxException, VisitorException {
+	commit = new Commit(selectedAnchor.readEndPoint(store), selectedAnchor.get(), jsonFactory);
+	element = commit.getElement();
+	if (LOG.isLoggable(Level.FINER)) {
+	    LOG.log(Level.FINER, "Reading commit: " + commit);
 	}
+	return this;
+    }
 
-	// FIXME - what about persisting shared labels? Would they be betetr stored
-	// as our own mergable data structure?
-	/* public DataStructure branch(String newLabel) throws StoreException {
-		return new DataStructure(store, labels, newLabel);
-	} */
+    public synchronized DataStructure commit() throws StoreException, VisitorException {
+	Identity write = jsonFactory.getJsonElementAdapter().write(element);
+	writeIdentity(write, selectedAnchor.get());
+	return checkout();
+    }
 
-	public DataStructure branch() throws StoreException {
-		return new DataStructure(this);
+    public void exportAll(OutputStream outputStream) throws JsonSyntaxException, StoreException, VisitorException,
+	    IOException {
+	ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+	DirectedGraph<Commit, DefaultEdge> x = getCommit().getAsGraphToRoot();
+	Set<Identity> temp = new HashSet<>();
+	for (DefaultEdge e : x.edgeSet()) {
+	    temp.addAll(x.getEdgeSource(e).getAllIdentities());
+	    temp.addAll(x.getEdgeTarget(e).getAllIdentities());
 	}
-
-	public void saveLabel(String label) throws StoreException, VisitorException {
-	    labelsAnchor.readEndPoint(store).addAnchor(label,this.selectedAnchor);
-	    labelsAnchor.writeEndPoint(store, labelsAnchor.getEndPoint());
+	Map<Identity, PersistableResource> result = new HashMap<>();
+	for (Identity i : temp) {
+	    result.put(i, store.get(i));
 	}
-	
-	
-	public synchronized DataStructure checkout() throws StoreException,
-			JsonSyntaxException, VisitorException {
-		commit = new Commit(selectedAnchor.readEndPoint(store), selectedAnchor.get(),
-				jsonFactory);
-		element = commit.getElement();
-		if (LOG.isLoggable(Level.FINER)) {
-			LOG.log(Level.FINER, "Reading commit: " + commit);
-		}
-		return this;
-	}
+	oos.writeObject(result);
 
-	public synchronized DataStructure commit() throws StoreException,
-			VisitorException {
-		Identity write = jsonFactory.getJsonElementAdapter().write(element);
-		writeIdentity(write, selectedAnchor.get());
-		return checkout();
-	}
+    }
 
-	/*
-	 * public Identity getAnchor() { return selectedAnchor.getDigest(); }
-	 */
+    public Commit getCommit() {
+	return commit;
+    }
 
-		// FIXME
-	public ExtendedAnchor<LabelsDao> getLabels() {
-		return labelsAnchor;
-	}
+    /*
+     * public Identity getAnchor() { return selectedAnchor.getDigest(); }
+     */
 
-	public Commit getCommit() {
-		return commit;
-	}
+    // FIXME
+    public ExtendedAnchor<LabelsDao> getLabels() {
+	return labelsAnchor;
+    }
 
-	public Object lazyRead() throws JsonSyntaxException, StoreException,
-			VisitorException {
-		return commit.getObject();
-	}
-
-	public synchronized DataStructure merge(DataStructure other)
-			throws JsonSyntaxException, StoreException, PatchFailedException,
-			VisitorException {
-		ThreeWayDiff patch = commit.createChangeSet(other.commit);
-		Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(
-				patch.apply());
-		writeIdentity(valueIdentity, selectedAnchor.get(),
-				other.selectedAnchor.get());
-		return checkout();
+    public void importAll(FileInputStream inputStream) throws IOException, ClassNotFoundException, StoreException {
+	ObjectInputStream ois = new ObjectInputStream(inputStream);
+	Map<Identity, PersistableResource> result = (Map<Identity, PersistableResource>) ois.readObject();
+	for (Entry<Identity, PersistableResource> x : result.entrySet()) {
+	    Identity idOfValueWrittenToStore = store.store(x.getValue());
+	    if (!idOfValueWrittenToStore.equals(x.getKey())) {
+		throw new IllegalStateException("The entry " + x.getKey() + " produced a new key on store to local");
+	    }
 	}
 
-	public JsonElement read() {
-		return element;
+    }
+
+    public Object lazyRead() throws JsonSyntaxException, StoreException, VisitorException {
+	return commit.getObject();
+    }
+
+    public synchronized DataStructure merge(DataStructure other) throws JsonSyntaxException, StoreException,
+	    PatchFailedException, VisitorException {
+	ThreeWayDiff patch = commit.createChangeSet(other.commit);
+	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(patch.apply());
+	writeIdentity(valueIdentity, selectedAnchor.get(), other.selectedAnchor.get());
+	return checkout();
+    }
+
+    public JsonElement read() {
+	return element;
+    }
+
+    public void saveLabel(String label) throws StoreException, VisitorException {
+	labelsAnchor.readEndPoint(store).addAnchor(label, this.selectedAnchor);
+	labelsAnchor.writeEndPoint(store, labelsAnchor.getEndPoint());
+    }
+
+    public DataStructure write(String string) {
+	// FIXME resue Gson
+	element = new Gson().fromJson(string, JsonElement.class);
+	return this;
+    }
+
+    public void write(String path, String json) throws JsonSyntaxException, StoreException, VisitorException {
+	HackedJsonPath compiledPath = new HackedJsonPath(path, new Filter[] {});
+	// code copied from jsonpath
+	// FIXME reuse JSON
+	// FIXME should this be in JCA?
+	Object jsonObject = new Gson().fromJson(json, Object.class);
+	System.out.println(jsonObject.getClass());
+	if (!(jsonObject instanceof Map) && !(jsonObject instanceof List)) {
+	    throw new IllegalArgumentException("Invalid container object");
+	}
+	JsonProvider jsonProvider = JsonProviderFactory.createProvider();
+	Object originalResult, result;
+	originalResult = result = lazyRead();
+
+	PathTokenizer tokenizer = compiledPath.getTokenizer();
+	PathToken lastToken = tokenizer.removeLastPathToken();
+	for (PathToken pathToken : tokenizer) {
+	    PathTokenFilter filter = pathToken.getFilter();
+	    result = filter.filter(result, jsonProvider);
 	}
 
-	public DataStructure write(String string) {
-		// FIXME resue Gson
-		element = new Gson().fromJson(string, JsonElement.class);
-		return this;
+	if (lastToken.isArrayIndexToken()) {
+	    ((List) result).set(lastToken.getArrayIndex(), jsonObject);
+	}
+	else {
+	    ((Map) result).put(lastToken.getFragment(), jsonObject);
 	}
 
-	public void write(String path, String json) throws JsonSyntaxException,
-			StoreException, VisitorException {
-		HackedJsonPath compiledPath = new HackedJsonPath(path, new Filter[] {});
-		// code copied from jsonpath
-		// FIXME reuse JSON
-		// FIXME should this be in JCA?
-		Object jsonObject = new Gson().fromJson(json, Object.class);
-		System.out.println(jsonObject.getClass());
-		if (!(jsonObject instanceof Map) && !(jsonObject instanceof List)) {
-			throw new IllegalArgumentException("Invalid container object");
-		}
-		JsonProvider jsonProvider = JsonProviderFactory.createProvider();
-		Object originalResult, result;
-		originalResult = result = lazyRead();
+	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(originalResult);
+	writeIdentity(valueIdentity, selectedAnchor.get());
+	checkout();
+    }
 
-		PathTokenizer tokenizer = compiledPath.getTokenizer();
-		PathToken lastToken = tokenizer.removeLastPathToken();
-		for (PathToken pathToken : tokenizer) {
-			PathTokenFilter filter = pathToken.getFilter();
-			result = filter.filter(result, jsonProvider);
-		}
+    private void setup(CasKasStore store) {
+	this.store = store;
+	jsonFactory = new JsonStoreAdapterFactory(store);
+    }
 
-		if (lastToken.isArrayIndexToken()) {
-			((List) result).set(lastToken.getArrayIndex(), jsonObject);
-		} else {
-			((Map) result).put(lastToken.getFragment(), jsonObject);
-		}
-
-		Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(
-				originalResult);
-		writeIdentity(valueIdentity, selectedAnchor.get());
-		checkout();
+    private void writeIdentity(Identity valueIdentity, Identity... parents) throws StoreException, VisitorException {
+	// FIXME hardcoded user
+	commit = new Commit(selectedAnchor.writeEndPoint(store, new CommitDao(valueIdentity, new Date(), "auser",
+		parents)), selectedAnchor.get(), jsonFactory);
+	if (LOG.isLoggable(Level.FINEST)) {
+	    LOG.log(Level.FINEST, "Updating id -> " + selectedAnchor.get());
 	}
-
-	private void writeIdentity(Identity valueIdentity, Identity... parents)
-			throws StoreException, VisitorException {
-		// FIXME hardcoded user
-		commit = new Commit(selectedAnchor.writeEndPoint(store, new CommitDao(valueIdentity, new Date(),
-			"auser", parents)), selectedAnchor.get(), jsonFactory);
-		if (LOG.isLoggable(Level.FINEST)) {
-			LOG.log(Level.FINEST, "Updating id -> " + selectedAnchor.get());
-		}
-	}
-
-	public void exportAll(OutputStream outputStream)
-			throws JsonSyntaxException, StoreException, VisitorException,
-			IOException {
-		ObjectOutputStream oos = new ObjectOutputStream(outputStream);
-		DirectedGraph<Commit, DefaultEdge> x = getCommit().getAsGraphToRoot();
-		Set<Identity> temp = new HashSet<>();
-		for (DefaultEdge e : x.edgeSet()) {
-			temp.addAll(x.getEdgeSource(e).getAllIdentities());
-			temp.addAll(x.getEdgeTarget(e).getAllIdentities());
-		}
-		Map<Identity, PersistableResource> result = new HashMap<>();
-		for (Identity i : temp) {
-			result.put(i, store.get(i));
-		}
-		oos.writeObject(result);
-
-	}
-
-	public void importAll(FileInputStream inputStream) throws IOException,
-			ClassNotFoundException, StoreException {
-		ObjectInputStream ois = new ObjectInputStream(inputStream);
-		Map<Identity, PersistableResource> result = (Map<Identity, PersistableResource>) ois
-				.readObject();
-		for (Entry<Identity, PersistableResource> x : result.entrySet()) {
-			Identity idOfValueWrittenToStore = store.store(x.getValue());
-			if (!idOfValueWrittenToStore.equals(x.getKey()))
-				throw new IllegalStateException("The entry " + x.getKey()
-						+ " produced a new key on store to local");
-		}
-
-	}
+    }
 }

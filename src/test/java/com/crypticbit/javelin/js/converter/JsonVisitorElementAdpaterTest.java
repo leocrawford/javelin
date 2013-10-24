@@ -15,13 +15,24 @@ import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.store.cas.DigestFactory;
 import com.crypticbit.javelin.store.memory.MemoryCasKas;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 
 public class JsonVisitorElementAdpaterTest {
 
     private static final Gson GSON = new Gson();
+
+    @Test
+    public void testConvertPrimitive() throws JsonSyntaxException, StoreException, VisitorException {
+	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new MemoryCasKas(new DigestFactory()));
+	DataAccessInterface<JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
+
+	final String jsonFloat = "2.1";
+	final JsonElement json = GSON.fromJson(jsonFloat, JsonElement.class);
+	Identity floatIdentity = jsonElementAdapter.write(json);
+	assertEquals(json, jsonElementAdapter.read(floatIdentity));
+
+    }
 
     @Test
     public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, VisitorException {
@@ -55,19 +66,6 @@ public class JsonVisitorElementAdpaterTest {
 	assertEquals(3, jsonElementAdapter.read(mapIdentity).getAsJsonObject().entrySet().size());
 	assertTrue(jsonElementAdapter.read(mapIdentity).getAsJsonObject().get("b").isJsonNull());
 
-    }
-    
-    @Test
-    public void testConvertPrimitive() throws JsonSyntaxException, StoreException, VisitorException {
-    	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new MemoryCasKas(new DigestFactory()));
-    	DataAccessInterface<JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
-
-    	final String jsonFloat = "2.1";
-		final JsonElement json = GSON.fromJson(jsonFloat, JsonElement.class);
-		Identity floatIdentity = jsonElementAdapter.write(json);
-    	assertEquals(json,jsonElementAdapter.read(floatIdentity));
-
-    	
     }
 
 }

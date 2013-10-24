@@ -19,7 +19,7 @@ public class IdentityReference implements Reference {
     }
 
     @Override
-    public Object getValue()  {
+    public Object getValue() {
 	if (!loaded) {
 	    try {
 		value = dereferencedCasAccessInterface.getJsonObjectAdapter().read(identity);

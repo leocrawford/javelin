@@ -17,16 +17,22 @@ public class JsonListModelAdapter extends AbstractListModel<String> {
     private String path;
     private LazyJsonArray backing;
     private JsonPath label;
-    
-    JsonListModelAdapter(DataStructure jca, String path, String label) throws JsonSyntaxException, StoreException, VisitorException {
+
+    JsonListModelAdapter(DataStructure jca, String path, String label) throws JsonSyntaxException, StoreException,
+	    VisitorException {
 	this.jca = jca;
 	this.path = path;
-	this.label = new JsonPath(label,new Filter[]{});
+	this.label = new JsonPath(label, new Filter[] {});
 	backing = findBacking();
     }
-    
-    private LazyJsonArray findBacking() throws JsonSyntaxException, StoreException, VisitorException {
-	return (LazyJsonArray) jca.getCommit().navigate(path);
+
+    @Override
+    public String getElementAt(int index) {
+	return label.read(getJsonElementAt(index)).toString();
+    }
+
+    public Object getJsonElementAt(int index) {
+	return backing.get(index);
     }
 
     @Override
@@ -34,14 +40,8 @@ public class JsonListModelAdapter extends AbstractListModel<String> {
 	return backing.size();
     }
 
-    @Override
-    public String getElementAt(int index) {
-	return label.read(getJsonElementAt(index)).toString();
+    private LazyJsonArray findBacking() throws JsonSyntaxException, StoreException, VisitorException {
+	return (LazyJsonArray) jca.getCommit().navigate(path);
     }
-    
-    public Object getJsonElementAt(int index) {
-	return backing.get(index);
-    }
-
 
 }

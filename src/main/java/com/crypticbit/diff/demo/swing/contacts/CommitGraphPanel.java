@@ -29,9 +29,9 @@ public class CommitGraphPanel extends JGraph {
 
     public CommitGraphPanel(DataStructure jca) throws StoreException, IOException, JsonSyntaxException,
 	    PatchFailedException, InterruptedException, VisitorException {
-	
+
 	System.out.println(asGraphToRoots.edgeSet().size());
-	
+
 	show(new Commit[] { jca.getCommit() });
 	setModel(new JGraphModelAdapter<Commit, DefaultEdge>(asGraphToRoots));
 
@@ -51,7 +51,8 @@ public class CommitGraphPanel extends JGraph {
 	});
     }
 
-    public void show(Commit[] commits) throws JsonSyntaxException, UnsupportedEncodingException, StoreException, VisitorException {
+    public void show(Commit[] commits) throws JsonSyntaxException, UnsupportedEncodingException, StoreException,
+	    VisitorException {
 	System.out.println(Commit.getAsGraphToRoots(commits));
 	asGraphToRoots.merge(Commit.getAsGraphToRoots(commits));
 	final JGraphFacade graphFacade = new JGraphFacade(this);

@@ -10,7 +10,7 @@ public class HackedTransformedEntriesMap<K, V1, V2> extends TransformedEntriesMa
     protected HackedTransformedEntriesMap(Map<K, V1> backingMap, EntryTransformer<? super K, ? super V1, V2> transformer) {
 	super(backingMap, transformer);
     }
-    
+
     public Map<K, V1> getBackedValue() {
 	return this.fromMap;
     }

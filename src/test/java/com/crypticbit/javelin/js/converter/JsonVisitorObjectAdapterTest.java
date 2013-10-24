@@ -63,12 +63,11 @@ public class JsonVisitorObjectAdapterTest {
 
 	Map<String, Object> x = (Map<String, Object>) jsonObjectAdapter.read(mapIdentity);
 	x.remove("a");
-	x.put("b","B");
+	x.put("b", "B");
 	jsonObjectAdapter.write(x);
 	assertEquals(2, x.size());
-	assertEquals("B",x.get("b"));
-	
-	
+	assertEquals("B", x.get("b"));
+
     }
 
 }

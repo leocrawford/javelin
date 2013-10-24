@@ -10,8 +10,9 @@ public class LabelsDao implements Serializable {
 
     private Map<String, Identity> labels = new HashMap<>();
 
-    public ExtendedAnchor<CommitDao> getAnchor(String name, JsonStoreAdapterFactory jsonStore) {
-	return new ExtendedAnchor<>(labels.get(name), jsonStore, CommitDao.class);
+    public void addAnchor(String label, ExtendedAnchor<CommitDao> anchor) {
+	labels.put(label, anchor.getAddress());
+
     }
 
     public ExtendedAnchor<CommitDao> addAnchor(String label, JsonStoreAdapterFactory jsonStore) {
@@ -20,15 +21,15 @@ public class LabelsDao implements Serializable {
 	return result;
     }
 
+    public ExtendedAnchor<CommitDao> getAnchor(String name, JsonStoreAdapterFactory jsonStore) {
+	return new ExtendedAnchor<>(labels.get(name), jsonStore, CommitDao.class);
+    }
+
     public boolean hasAnchor(String label) {
 	return labels.containsKey(label);
     }
 
-    public void addAnchor(String label, ExtendedAnchor<CommitDao> anchor) {
-	labels.put(label, anchor.getAddress());
-
-    }
-
+    @Override
     public String toString() {
 	return labels.toString();
     }

@@ -13,10 +13,10 @@ public interface ContentAddressableStorage extends AddressableStorage {
     /** Get the digest factory used to generate digests */
     DigestFactory getDigestFactory();
 
+    String getName();
+
     /**
      * Store the data against against its digest, and return that digest
      */
     Identity store(PersistableResource po) throws StoreException;
-
-	String getName();
 }

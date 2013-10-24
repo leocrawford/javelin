@@ -51,6 +51,8 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
     private Map<JsonEditPanel.AllowedOps, JButton> treeChangeButtons = new HashMap<JsonEditPanel.AllowedOps, JButton>();
     private int currentIndex = 0;
 
+    List<JsonChangeListener> changeListeners = new LinkedList<>();
+
     /**
      * Constructs the JSONEditFrame. If a parent is specified this component will behave like a dialog, otherwise it
      * will behave like a main application. This affects the default close operation and whether or not the OK,CANCEL
@@ -206,6 +208,10 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 	updateButtonStates();
     }
 
+    public void addJsonChangeListener(JsonChangeListener cl) {
+	this.changeListeners.add(cl);
+    }
+
     /**
      * Allows the caller to get the JSON from the Tree View.
      * 
@@ -213,6 +219,11 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
      */
     public String getJson() {
 	return treeView[currentIndex].getJson();
+    }
+
+    public void setJson(String string) {
+
+	treeView[0].setJson(string, JsonEditPanel.UpdateType.REPLACE);
     }
 
     @Override
@@ -247,7 +258,7 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 		entry.getValue().setEnabled(false);
 	    }
 	}
-    }
+    };
 
     public enum Direction {
 	INSERT("Insert", "Insert a node using json in text area to create the node before the selected node."), APPEND(
@@ -319,15 +330,10 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 		break;
 	    }
 
-	 
-	    for (JsonChangeListener c : changeListeners)
+	    for (JsonChangeListener c : changeListeners) {
 		c.notify(jEditPanel[currentIndex].getJson());
+	    }
 	}
-    }
-    
-    List<JsonChangeListener> changeListeners = new LinkedList<>();;
-    public void addJsonChangeListener(JsonChangeListener cl) {
-	this.changeListeners.add(cl);
     }
 
     private static class OkCancelAction extends AbstractAction {
@@ -351,11 +357,6 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 	public void actionPerformed(ActionEvent arg0) {
 	    listener.onFrameAction(action, frame);
 	}
-    }
-
-    public void setJson(String string) {
-
-	treeView[0].setJson(string, JsonEditPanel.UpdateType.REPLACE);
     };
 
 }

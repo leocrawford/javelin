@@ -149,7 +149,8 @@ public class CommitBuilder extends JFrame {
 
 	}
 
-	public void merge(Commit[] commits) throws JsonSyntaxException, UnsupportedEncodingException, StoreException, VisitorException {
+	public void merge(Commit[] commits) throws JsonSyntaxException, UnsupportedEncodingException, StoreException,
+		VisitorException {
 	    asGraphToRoots.merge(Commit.getAsGraphToRoots(commits));
 	    final JGraphFacade graphFacade = new JGraphFacade(this);
 	    JGraphTreeLayout lay = new JGraphTreeLayout();

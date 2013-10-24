@@ -1,32 +1,14 @@
 package com.crypticbit.javelin.js;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.Set;
-import java.util.TreeSet;
 
-import javax.swing.JFrame;
-
-import org.jgraph.JGraph;
-import org.jgraph.event.GraphSelectionEvent;
-import org.jgraph.event.GraphSelectionListener;
-import org.jgraph.graph.DefaultGraphCell;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.TarjanLowestCommonAncestor;
-import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.HackedDirectedGraphUnion;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -45,10 +27,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
-import com.jgraph.layout.JGraphFacade;
-import com.jgraph.layout.hierarchical.JGraphHierarchicalLayout;
-
-import difflib.PatchFailedException;
 
 public class Commit implements Comparable<Commit> {
 

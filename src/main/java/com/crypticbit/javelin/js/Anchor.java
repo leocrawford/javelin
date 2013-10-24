@@ -25,7 +25,7 @@ public class Anchor implements Serializable {
 	}
 
 	Anchor(KeyAddressableStorage kas, Anchor clone) throws StoreException {
-		address = new Digest();
+		this();
 		write(kas, clone.read(kas));
 	}
 

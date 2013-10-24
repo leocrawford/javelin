@@ -142,10 +142,12 @@ public class DataStructureTest {
 	DataStructure jca = new DataStructure(store);
 	jca.write(JSON_EXAMPLE);
 	jca.commit();
-	// FIXME
-	byte[] labels = SerializationUtils.serialize(jca.getLabels());
+	byte[] labelsAddress = SerializationUtils.serialize(jca.getLabels().getAddress());
 
-	DataStructure jca2 = new DataStructure(store, (LabelsDao) SerializationUtils.deserialize(labels),"HEAD");
+	// clunky
+	ExtendedAnchor<LabelsDao> deSerLabels = new ExtendedAnchor<LabelsDao>((Identity) SerializationUtils.deserialize(labelsAddress), new JsonStoreAdapterFactory(store),LabelsDao.class);
+
+	DataStructure jca2 = new DataStructure(store,  deSerLabels,"HEAD");
 	jca2.checkout();
 	Assert.assertEquals(jca.read(), jca2.read());
     }
@@ -175,7 +177,7 @@ public class DataStructureTest {
     }
 
     private void enableLog() {
-	Logger LOG = Logger.getLogger("com.crypticbit.javelin.diff");
+	Logger LOG = Logger.getLogger("com.crypticbit.javelin");
 	ConsoleHandler handler = new ConsoleHandler();
 	handler.setLevel(Level.FINEST);
 	LOG.addHandler(handler);

@@ -37,8 +37,8 @@ public class DataStructure {
 			.getLogger("com.crypticbit.javelin.js");
 
 	/** The current head of the Json data structure */
-	private Anchor selectedAnchor;
-	private LabelsDao labels;
+	private ExtendedAnchor<CommitDao> selectedAnchor;
+	private ExtendedAnchor<LabelsDao> labelsAnchor;
 	private JsonElement element;
 	/**
 	 * The last known head of the actual data structure, set after a read or
@@ -47,21 +47,28 @@ public class DataStructure {
 	private Commit commit;
 	/** The underlying data store */
 	private CasKasStore store;
-	private DataAccessInterface<CommitDao> commitFactory;
 	private JsonStoreAdapterFactory jsonFactory;
 
 	/**
 	 * Create a new json data structure with a random anchor, which can be
 	 * retrieved using <code>getAnchor</code>
+	 * @throws VisitorException 
+	 * @throws StoreException 
 	 */
-	public DataStructure(CasKasStore store) {
-		this.store = store;
-		labels = new LabelsDao();
-		selectedAnchor = labels.addAnchor("HEAD");
-		jsonFactory = new JsonStoreAdapterFactory(store);
-		commitFactory = jsonFactory.getSimpleObjectAdapter(CommitDao.class);
-
+	public DataStructure(CasKasStore store) throws StoreException, VisitorException {
+	    setup(store);
+		labelsAnchor = new ExtendedAnchor<LabelsDao>(jsonFactory, LabelsDao.class);
+	    labelsAnchor.writeEndPoint(store, new LabelsDao());
+	    selectedAnchor = labelsAnchor.getEndPoint().addAnchor("HEAD",jsonFactory);
+	    labelsAnchor.writeEndPoint(store,labelsAnchor.getEndPoint());
+	
 	}
+	
+	private void setup(CasKasStore store) {
+		this.store = store;    
+		jsonFactory = new JsonStoreAdapterFactory(store);
+	}
+	
 
 	/*
 	 * public DataStructure(CasKasStore store, Identity identity) { this(store);
@@ -69,24 +76,31 @@ public class DataStructure {
 	 */
 
 	/**
-	 * Create a new json data structure with a specified anchor. This will
-	 * usually only be used once to create the very head of a data structure.
+	 * Create a new json data structure - by selecting a label from an existing ds by name
+	 * @throws Error 
+	 * @throws VisitorException 
+	 * @throws StoreException 
+	 * @throws JsonSyntaxException 
 	 */
-	 DataStructure(CasKasStore store, LabelsDao labels, String label) {
-		this(store);
-		this.labels = labels;
-		if (labels.hasAnchor(label))
-			this.selectedAnchor = labels.getAnchor(label);
+	 DataStructure(CasKasStore store, ExtendedAnchor<LabelsDao> labels, String label) throws JsonSyntaxException, StoreException, VisitorException, Error {
+		setup(store);
+		this.labelsAnchor = labels;
+		if (labels.readEndPoint(store).hasAnchor(label))
+			this.selectedAnchor = labels.getEndPoint().getAnchor(label, jsonFactory);
 		else
 			// FIXME exception handling, and thought about changing to unknown branch
-			throw new Error("Labels don't exist");
+			throw new Error("Labels don't exist: "+labels.getEndPoint());
 //			this.selectedAnchor = labels.addAnchor(label);
 	} 
 	
-	DataStructure(CasKasStore store, LabelsDao labels, Anchor selAnchor) throws StoreException {
-		this(store);
-		this.labels = labels;
-		this.selectedAnchor = new Anchor(store, selAnchor);
+	 /** 
+	  * Create a new 
+	  
+	  */
+	private DataStructure(DataStructure parent) throws StoreException {
+		setup(parent.store);
+		this.labelsAnchor = parent.labelsAnchor;
+		this.selectedAnchor = new ExtendedAnchor<>(store, parent.selectedAnchor, jsonFactory, CommitDao.class);
 		
 	}
 
@@ -97,18 +111,18 @@ public class DataStructure {
 	} */
 
 	public DataStructure branch() throws StoreException {
-		return new DataStructure(store, labels, selectedAnchor);
+		return new DataStructure(this);
 	}
 
-	public void saveLabel(String label) {
-		labels.addAnchor(label,this.selectedAnchor);
+	public void saveLabel(String label) throws StoreException, VisitorException {
+	    labelsAnchor.readEndPoint(store).addAnchor(label,this.selectedAnchor);
+	    labelsAnchor.writeEndPoint(store, labelsAnchor.getEndPoint());
 	}
 	
 	
 	public synchronized DataStructure checkout() throws StoreException,
 			JsonSyntaxException, VisitorException {
-		Identity daoDigest = selectedAnchor.read(store);
-		commit = new Commit(commitFactory.read(daoDigest), daoDigest,
+		commit = new Commit(selectedAnchor.readEndPoint(store), selectedAnchor.get(),
 				jsonFactory);
 		element = commit.getElement();
 		if (LOG.isLoggable(Level.FINER)) {
@@ -128,8 +142,9 @@ public class DataStructure {
 	 * public Identity getAnchor() { return selectedAnchor.getDigest(); }
 	 */
 
-	public LabelsDao getLabels() {
-		return labels;
+		// FIXME
+	public ExtendedAnchor<LabelsDao> getLabels() {
+		return labelsAnchor;
 	}
 
 	public Commit getCommit() {
@@ -199,13 +214,10 @@ public class DataStructure {
 	private void writeIdentity(Identity valueIdentity, Identity... parents)
 			throws StoreException, VisitorException {
 		// FIXME hardcoded user
-		CommitDao tempCommit = new CommitDao(valueIdentity, new Date(),
-				"auser", parents);
-		Identity tempDigest = commitFactory.write(tempCommit);
-		selectedAnchor.write(store, tempDigest);
-		commit = new Commit(tempCommit, tempDigest, jsonFactory);
+		commit = new Commit(selectedAnchor.writeEndPoint(store, new CommitDao(valueIdentity, new Date(),
+			"auser", parents)), selectedAnchor.get(), jsonFactory);
 		if (LOG.isLoggable(Level.FINEST)) {
-			LOG.log(Level.FINEST, "Updating id -> " + tempDigest);
+			LOG.log(Level.FINEST, "Updating id -> " + selectedAnchor.get());
 		}
 	}
 

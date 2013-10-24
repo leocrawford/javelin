@@ -1,6 +1,8 @@
 package com.crypticbit.javelin.store;
 
-public interface Identity extends Comparable<Identity> {
+import java.io.Serializable;
+
+public interface Identity extends Comparable<Identity>, Serializable {
 
     public byte[] getDigestAsByte();
 

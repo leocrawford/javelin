@@ -32,7 +32,7 @@ public class Anchor implements Serializable {
     }
 
     /** Same as read() but returns cached/last value */
-    public Identity get() {
+    public Identity getDestination() {
 	return destination;
     }
 

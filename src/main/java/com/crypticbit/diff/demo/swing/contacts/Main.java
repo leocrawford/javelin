@@ -7,9 +7,13 @@ import java.io.*;
 
 import javax.swing.*;
 
+import org.apache.commons.lang.SerializationUtils;
+
 import com.crypticbit.javelin.js.Commit;
 import com.crypticbit.javelin.js.DataStructure;
 import com.crypticbit.javelin.js.convert.VisitorException;
+import com.crypticbit.javelin.store.Digest;
+import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -37,7 +41,7 @@ public class Main extends JFrame {
 		    File f = File.createTempFile(jsonStore.getCommit().getUser(), "commit");
 
 		    jsonStore.exportAll(new FileOutputStream(f));
-		    System.out.println("Exported to: " + f);
+		    System.out.println("Exported to: " + f+". Use "+jsonStore.getLabelsAddress().getDigestAsString() +" to recall");
 		}
 		catch (Exception e1) {
 		    // TODO Auto-generated catch block
@@ -55,7 +59,16 @@ public class Main extends JFrame {
 		    chooser.showOpenDialog(Main.this);
 		    File f = chooser.getSelectedFile();
 
-		    jsonStore.importAll(new FileInputStream(f));
+		    String s = (String)JOptionPane.showInputDialog(
+			    Main.this,
+	                    "Choose Identity to merge:\n",
+	                    "Customized Dialog",
+	                    JOptionPane.PLAIN_MESSAGE,
+	                    null,
+	                    null,
+	                    "");
+		    
+		    jsonStore.importAll(new FileInputStream(f),new Digest(s));
 		}
 		catch (Exception e1) {
 		    // TODO Auto-generated catch block

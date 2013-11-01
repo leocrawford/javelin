@@ -155,16 +155,26 @@ public class DataStructure {
 	return labelsAnchor.getAddress();
     }
 
-    public void importAll(FileInputStream inputStream) throws IOException, ClassNotFoundException, StoreException {
+    public void importAll(InputStream inputStream, Identity labelsAddress) throws IOException, ClassNotFoundException, StoreException, JsonSyntaxException, VisitorException {
 	ObjectInputStream ois = new ObjectInputStream(inputStream);
 	Map<Identity, PersistableResource> result = (Map<Identity, PersistableResource>) ois.readObject();
 	for (Entry<Identity, PersistableResource> x : result.entrySet()) {
+	    System.out.println("Writing: "+x.getValue());
 	    Identity idOfValueWrittenToStore = store.store(x.getValue());
 	    if (!idOfValueWrittenToStore.equals(x.getKey())) {
 		throw new IllegalStateException("The entry " + x.getKey() + " produced a new key on store to local");
 	    }
 	}
 
+	ExtendedAnchor<LabelsDao> importedLabels = new ExtendedAnchor<>(labelsAddress, jsonFactory, LabelsDao.class);
+	LabelsDao temp = labelsAnchor.readEndPoint(store);
+	for(String label : importedLabels.readEndPoint(store).getLabels()) {
+	    if(temp.hasAnchor(label))
+		temp.getAnchor(label, jsonFactory).writeEndPoint(store, importedLabels.readEndPoint(store).getAnchor(label, jsonFactory).getEndPoint());
+	    else
+		temp.addAnchor(label,importedLabels.readEndPoint(store).getAnchor(label, jsonFactory));
+	}
+	
     }
 
     public Object lazyRead() throws JsonSyntaxException, StoreException, VisitorException {

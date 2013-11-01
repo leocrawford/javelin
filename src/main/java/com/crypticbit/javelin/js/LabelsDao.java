@@ -3,6 +3,7 @@ package com.crypticbit.javelin.js;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.crypticbit.javelin.store.Identity;
 
@@ -27,6 +28,10 @@ public class LabelsDao implements Serializable {
 
     public boolean hasAnchor(String label) {
 	return labels.containsKey(label);
+    }
+    
+    public Set<String> getLabels() {
+	return labels.keySet();
     }
 
     @Override

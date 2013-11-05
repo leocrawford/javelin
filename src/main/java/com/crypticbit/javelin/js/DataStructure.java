@@ -142,7 +142,7 @@ public class DataStructure {
 	    Identity commitAddress = labels.getAnchor(label, jsonFactory).getAddress();
 	    tempKas.add(commitAddress);
 	    CommitDao commitDao = labels.getAnchor(label, jsonFactory).readEndPoint(store);
-	    Identity destination = labels.getAnchor(label, jsonFactory)
+	    Identity destination = labels.getAnchor(label, jsonFactory).read(store);
 	    System.out.println("dest="+destination+","+commitDao);
 	    Commit c = new Commit(commitDao, destination, jsonFactory);
 	    DirectedGraph<Commit, DefaultEdge> x = c.getAsGraphToRoot();
@@ -232,7 +232,7 @@ public class DataStructure {
 	    if (temp.hasAnchor(label)) {
 		System.out.println("Sorting label "+label);
 		temp.getAnchor(label, jsonFactory).writeEndPoint(store,
-			importedLabels.readEndPoint(store).getAnchor(label, jsonFactory).getEndPoint());
+			importedLabels.readEndPoint(store).getAnchor(label, jsonFactory).readEndPoint(store));
 	    }    else
 		temp.addAnchor(label, importedLabels.readEndPoint(store).getAnchor(label, jsonFactory));
 	}

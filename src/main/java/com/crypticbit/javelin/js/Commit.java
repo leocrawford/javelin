@@ -71,7 +71,7 @@ public class Commit implements Comparable<Commit> {
 
     public Set<Identity> getAllIdentities() throws VisitorException {
 	Set<Identity> result = jsonFactory.getKeyAdapter().visit(getHead());
-//	result.add(this.daoDigest);
+	result.add(this.daoDigest);
 	return result;
     }
 

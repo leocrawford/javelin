@@ -2,6 +2,8 @@ package com.crypticbit.javelin.js;
 
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -173,6 +175,26 @@ public class DataStructureTest {
 	jca2.checkout();
 	Assert.assertEquals(jca.read(), jca2.read());
     }
+    
+    @Test
+    public void testImportExport() throws IOException, StoreException, JsonSyntaxException,
+    VisitorException, ClassNotFoundException {
+	DataStructure ds1 = new DataStructure(new StorageFactory().createMemoryCas());
+	DataStructure ds2 = new DataStructure(new StorageFactory().createMemoryCas());
+
+	
+	ds1.write(JSON_EXAMPLE);
+	ds1.commit();
+	
+	
+	
+	  ByteArrayOutputStream out = new ByteArrayOutputStream();
+	  ds1.exportAll(out);
+	 ds2.importAll(new ByteArrayInputStream(out.toByteArray()));
+	  ds2.checkout();	
+	
+	Assert.assertEquals(ds1.read(), ds2.read());
+}
 
     private void dump(ContentAddressableStorage cas) throws StoreException {
 	for (Identity d : cas.list()) {

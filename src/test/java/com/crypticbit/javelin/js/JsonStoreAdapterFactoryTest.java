@@ -20,7 +20,7 @@ public class JsonStoreAdapterFactoryTest {
 
 	JsonStoreAdapterFactory adapter = new JsonStoreAdapterFactory(cas);
 
-	assertEquals(8, adapter.getKeyAdapter().visit(ds.getCommit().getIdentity()).size());
+	assertEquals(8, adapter.getKeyAdapter().visit(ds.getCommit().getHead()).size());
 
     }
 

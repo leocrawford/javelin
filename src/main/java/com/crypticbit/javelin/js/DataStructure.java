@@ -123,32 +123,55 @@ public class DataStructure {
 
     public synchronized DataStructure commit() throws StoreException, VisitorException {
 	Identity write = jsonFactory.getJsonElementAdapter().write(element);
-	writeIdentity(write, selectedAnchor.getDestination());
+	createCommit(write, selectedAnchor.getDestination());
 	return checkout();
     }
 
     public void exportAll(OutputStream outputStream) throws JsonSyntaxException, StoreException, VisitorException,
 	    IOException {
+	
 	ObjectOutputStream oos = new ObjectOutputStream(outputStream);
 	Set<Identity> tempCas = new HashSet<>();
 	Set<Identity> tempKas = new HashSet<>();
+	
+	oos.writeObject(labelsAnchor.getAddress());
+	
 	LabelsDao labels = labelsAnchor.readEndPoint(store);
 	for (String label : labels.getLabels()) {
+	    System.out.println("Processing label "+label);
 	    Identity commitAddress = labels.getAnchor(label, jsonFactory).getAddress();
 	    tempKas.add(commitAddress);
 	    CommitDao commitDao = labels.getAnchor(label, jsonFactory).readEndPoint(store);
-	    Commit c = new Commit(commitDao, commitAddress, jsonFactory);
+	    Identity destination = labels.getAnchor(label, jsonFactory)
+	    System.out.println("dest="+destination+","+commitDao);
+	    Commit c = new Commit(commitDao, destination, jsonFactory);
 	    DirectedGraph<Commit, DefaultEdge> x = c.getAsGraphToRoot();
 
-	    for (DefaultEdge e : x.edgeSet()) {
-		tempCas.addAll(x.getEdgeSource(e).getAllIdentities());
-		tempCas.addAll(x.getEdgeTarget(e).getAllIdentities());
+	    for (Commit v :  x.vertexSet()) {
+		tempCas.addAll(v.getAllIdentities());
+		System.out.println("Commit="+v.getIdentity2()+","+v.toString()+","+store.get(v.getIdentity2()));
 	    }
+	    
+	   
 	}
 	tempKas.add(labelsAnchor.getAddress());
-
-	System.out.println(tempCas);
-	System.out.println(tempKas);
+	tempCas.add(labelsAnchor.getDestination());
+	
+	System.out.println("cas: "+tempCas);
+	System.out.println("kas: "+tempKas);
+	
+	System.out.println("all: "+store.list());
+	
+	Set<Identity> missing = new HashSet(store.list());
+	missing.removeAll(tempCas);
+	missing.removeAll(tempKas);
+	
+	
+	for(Identity i : missing) {
+	    System.out.println(i+"="+store.get(i));
+	    
+	}
+	
 	Map<Identity, PersistableResource> casRresult = new HashMap<>();
 	for (Identity i : tempCas) {
 	    casRresult.put(i, store.get(i));
@@ -175,10 +198,12 @@ public class DataStructure {
 	return labelsAnchor.getAddress();
     }
 
-    public void importAll(InputStream inputStream, Identity labelsAddress) throws IOException, ClassNotFoundException,
+    public void importAll(InputStream inputStream) throws IOException, ClassNotFoundException,
 	    StoreException, JsonSyntaxException, VisitorException {
 	ObjectInputStream ois = new ObjectInputStream(inputStream);
 
+	Identity labelsAddress = (Identity) ois.readObject();
+	
 	Map<Identity, PersistableResource> casResult = (Map<Identity, PersistableResource>) ois.readObject();
 	for (Entry<Identity, PersistableResource> x : casResult.entrySet()) {
 	    System.out.println("Wrote cas: "+x.getKey());
@@ -193,20 +218,22 @@ public class DataStructure {
 	for (Entry<Identity, PersistableResource> x : kasResult.entrySet()) {
 	    System.out.println("Wrote kas: "+x.getKey());
 	    // FIXME - what should I check against?
+	    // FIXME store.get(x.getKey()).getBytes()) very cumbersome
 	    if(store.check(x.getKey()))
 		store.store(x.getKey(),new Digest(store.get(x.getKey()).getBytes()),new Digest(x.getValue().getBytes()));
 	    else
 		store.store(x.getKey(),null,new Digest(x.getValue().getBytes()));
-	    	System.out.println("Got :"+store.get(x.getKey()));
+	    	System.out.println("Got :"+new Digest(store.get(x.getKey()).getBytes()));
 	}
 
 	ExtendedAnchor<LabelsDao> importedLabels = new ExtendedAnchor<>(labelsAddress, jsonFactory, LabelsDao.class);
 	LabelsDao temp = labelsAnchor.readEndPoint(store);
 	for (String label : importedLabels.readEndPoint(store).getLabels()) {
-	    if (temp.hasAnchor(label))
+	    if (temp.hasAnchor(label)) {
+		System.out.println("Sorting label "+label);
 		temp.getAnchor(label, jsonFactory).writeEndPoint(store,
 			importedLabels.readEndPoint(store).getAnchor(label, jsonFactory).getEndPoint());
-	    else
+	    }    else
 		temp.addAnchor(label, importedLabels.readEndPoint(store).getAnchor(label, jsonFactory));
 	}
 
@@ -220,7 +247,7 @@ public class DataStructure {
 	    PatchFailedException, VisitorException {
 	ThreeWayDiff patch = commit.createChangeSet(other.commit);
 	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(patch.apply());
-	writeIdentity(valueIdentity, selectedAnchor.getDestination(), other.selectedAnchor.getDestination());
+	createCommit(valueIdentity, selectedAnchor.getDestination(), other.selectedAnchor.getDestination());
 	return checkout();
     }
 
@@ -268,7 +295,7 @@ public class DataStructure {
 	}
 
 	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(originalResult);
-	writeIdentity(valueIdentity, selectedAnchor.getDestination());
+	createCommit(valueIdentity, selectedAnchor.getDestination());
 	checkout();
     }
 
@@ -277,7 +304,7 @@ public class DataStructure {
 	jsonFactory = new JsonStoreAdapterFactory(store);
     }
 
-    private void writeIdentity(Identity valueIdentity, Identity... parents) throws StoreException, VisitorException {
+    private void createCommit(Identity valueIdentity, Identity... parents) throws StoreException, VisitorException {
 	// FIXME hardcoded user
 	commit = new Commit(selectedAnchor.writeEndPoint(store, new CommitDao(valueIdentity, new Date(), "auser",
 		parents)), selectedAnchor.getDestination(), jsonFactory);

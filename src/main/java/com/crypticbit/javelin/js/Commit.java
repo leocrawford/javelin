@@ -70,8 +70,8 @@ public class Commit implements Comparable<Commit> {
     }
 
     public Set<Identity> getAllIdentities() throws VisitorException {
-	Set<Identity> result = jsonFactory.getKeyAdapter().visit(getIdentity());
-	result.add(getIdentity());
+	Set<Identity> result = jsonFactory.getKeyAdapter().visit(getHead());
+//	result.add(this.daoDigest);
 	return result;
     }
 
@@ -109,8 +109,12 @@ public class Commit implements Comparable<Commit> {
 	return jsonFactory.getJsonElementAdapter().read(dao.getHead());
     }
 
-    public Identity getIdentity() {
+    public Identity getHead() {
 	return dao.getHead();
+    }
+    
+    public Identity getIdentity2() {
+	return daoDigest;
     }
 
     public Object getObject() throws JsonSyntaxException, StoreException, VisitorException {

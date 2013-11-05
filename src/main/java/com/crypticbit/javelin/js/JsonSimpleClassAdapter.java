@@ -31,7 +31,7 @@ public class JsonSimpleClassAdapter<T> extends DataAccessInterface<T> {
     @Override
     public Identity write(T value) throws StoreException {
 	if (value == null)
-	    throw new Error();
+	    throw new Error("Writing null");
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Write " + clazz + ": " + value + " as " + getGson().toJson(value));
 	}

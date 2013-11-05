@@ -41,7 +41,7 @@ public class Main extends JFrame {
 		    File f = File.createTempFile(jsonStore.getCommit().getUser(), "commit");
 
 		    jsonStore.exportAll(new FileOutputStream(f));
-		    System.out.println("Exported to: " + f+". Use "+jsonStore.getLabelsAddress().getDigestAsString() +" to recall");
+		    System.out.println("Exported to: " + f+".");
 		}
 		catch (Exception e1) {
 		    // TODO Auto-generated catch block
@@ -59,16 +59,8 @@ public class Main extends JFrame {
 		    chooser.showOpenDialog(Main.this);
 		    File f = chooser.getSelectedFile();
 
-		    String s = (String)JOptionPane.showInputDialog(
-			    Main.this,
-	                    "Choose Identity to merge:\n",
-	                    "Customized Dialog",
-	                    JOptionPane.PLAIN_MESSAGE,
-	                    null,
-	                    null,
-	                    "");
-		    
-		    jsonStore.importAll(new FileInputStream(f),new Digest(s));
+	    
+		    jsonStore.importAll(new FileInputStream(f));
 		}
 		catch (Exception e1) {
 		    // TODO Auto-generated catch block

@@ -1,24 +1,18 @@
 package com.crypticbit.diff.demo.swing.contacts;
 
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.io.*;
-
-import javax.swing.*;
-
-import org.apache.commons.lang.SerializationUtils;
-
 import com.crypticbit.javelin.js.Commit;
 import com.crypticbit.javelin.js.DataStructure;
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.Digest;
-import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
-
 import difflib.PatchFailedException;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.io.*;
+import java.net.Socket;
 
 public class Main extends JFrame {
 
@@ -27,101 +21,160 @@ public class Main extends JFrame {
     private CommitGraphPanel commitGraphPanel;
     private DataStructure jsonStore;
 
+
+
     public Main() throws StoreException, JsonSyntaxException, PatchFailedException, IOException, InterruptedException,
-	    VisitorException {
-	super("Contacts");
+            VisitorException {
+        super("Contacts");
 
-	JMenuBar menuBar = new JMenuBar();
-	JMenu menu = new JMenu("File");
-	menu.add(new JMenuItem(new AbstractAction("Export") {
+        final Server.StreamCallback exported = new Server.StreamCallback() {
+            @Override
+            public void callback(InputStream is) {
+                try {
+                    jsonStore.importAll(is);
+                    jsonStore.checkout();
+                    commitChange();
+                    System.out.println(jsonStore.read());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 
-	    @Override
-	    public void actionPerformed(ActionEvent e) {
-		try {
-		    File f = File.createTempFile(jsonStore.getCommit().getUser(), "commit");
+            @Override
+            public void callback(OutputStream os) {
+                try {
+                    jsonStore.exportAll(os);
+                    System.out.println("Exported");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
 
-		    jsonStore.exportAll(new FileOutputStream(f));
-		    System.out.println("Exported to: " + f+".");
-		}
-		catch (Exception e1) {
-		    // TODO Auto-generated catch block
-		    e1.printStackTrace();
-		}
 
-	    }
-	}));
-	menu.add(new JMenuItem(new AbstractAction("Import") {
 
-	    @Override
-	    public void actionPerformed(ActionEvent e) {
-		try {
-		    JFileChooser chooser = new JFileChooser();
-		    chooser.showOpenDialog(Main.this);
-		    File f = chooser.getSelectedFile();
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menu = new JMenu("File");
+        menu.add(new JMenuItem(new AbstractAction("Export") {
 
-	    
-		    jsonStore.importAll(new FileInputStream(f));
-		    jsonStore.checkout();
-		    commitChange();
-		    System.out.println(jsonStore.read());
-		    
-		}
-		catch (Exception e1) {
-		    // TODO Auto-generated catch block
-		    e1.printStackTrace();
-		}
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    File f = File.createTempFile(jsonStore.getCommit().getUser(), "commit");
 
-	    }
-	}));
-	menuBar.add(menu);
-	setJMenuBar(menuBar);
+                    jsonStore.exportAll(new FileOutputStream(f));
+                    System.out.println("Exported to: " + f + ".");
+                } catch (Exception e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
 
-	Container content = getContentPane();
-	JSplitPane navAndViewJSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-	JSplitPane commitAndEditJSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-	content.add(navAndViewJSplit);
+            }
+        }));
+        menu.add(new JMenuItem(new AbstractAction("Import") {
 
-	jsonStore = new DataStructure(new StorageFactory().createMemoryCas());
-	jsonStore.write("{people:[{name:\"Leo\"},{name:\"John\"},{name:\"Caroline\"}]}").commit().commit();
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    JFileChooser chooser = new JFileChooser();
+                    chooser.showOpenDialog(Main.this);
+                    File f = chooser.getSelectedFile();
 
-	final ContactEditPanel contactEditPanel = new ContactEditPanel();
-	namePanel = new NamePanel(jsonStore, new JsonElementSelectionListener() {
 
-	    @Override
-	    public void jsonElementSelected(String path, Object element) {
-		System.out.println(path + "->" + element + "," + element.getClass());
-		lastPath = path;
-		contactEditPanel.setJson(element.toString());
+                    jsonStore.importAll(new FileInputStream(f));
+                    jsonStore.checkout();
+                    commitChange();
+                    System.out.println(jsonStore.read());
 
-	    }
-	});
-	contactEditPanel.addJsonChangeListener(new JsonChangeListener() {
+                } catch (Exception e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
 
-	    @Override
-	    public void notify(String json) {
-		try {
-		    jsonStore.write(lastPath, json);
-		    commitChange();
-		}
-		catch (Exception e) {
-		    // TODO Auto-generated catch block
-		    e.printStackTrace();
-		}
-	    }
+            }
+        }));
 
-	});
 
-	navAndViewJSplit.add(namePanel);
-	navAndViewJSplit.add(commitAndEditJSplit);
-	commitAndEditJSplit.add(contactEditPanel);
-	commitGraphPanel = new CommitGraphPanel(jsonStore);
-	commitAndEditJSplit.add(new JScrollPane(commitGraphPanel));
+        menu.add(new JMenuItem(new AbstractAction("Start Listening") {
+            Server server = null;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (server == null)
+                {
+                    server = new Server(exported);
 
-	setPreferredSize(new Dimension(680, 480));
-	pack();
-	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	setLocationRelativeTo(null);
-	setVisible(true);
+                putValue(Action.NAME, "Stop Listening ("+server.getPort()+")");
+                }         else
+                {
+                       server.halt();
+                    server = null;
+                    putValue(Action.NAME, "Start Listening");
+                }
+            }
+        }));
+
+        menu.add(new JMenuItem(new AbstractAction("Sync") {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                      Socket socket = new Socket("127.0.0.1",8000);
+                        exported.callback(socket.getOutputStream());
+
+                } catch (Exception ee) {
+                    ee.printStackTrace();
+                }
+            }
+
+        }));
+
+
+        menuBar.add(menu);
+        setJMenuBar(menuBar);
+
+        Container content = getContentPane();
+        JSplitPane navAndViewJSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        JSplitPane commitAndEditJSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        content.add(navAndViewJSplit);
+
+        jsonStore = new DataStructure(new StorageFactory().createMemoryCas());
+        jsonStore.write("{people:[{name:\"Leo\"},{name:\"John\"},{name:\"Caroline\"}]}").commit().commit();
+
+        final ContactEditPanel contactEditPanel = new ContactEditPanel();
+        namePanel = new NamePanel(jsonStore, new JsonElementSelectionListener() {
+
+            @Override
+            public void jsonElementSelected(String path, Object element) {
+                System.out.println(path + "->" + element + "," + element.getClass());
+                lastPath = path;
+                contactEditPanel.setJson(element.toString());
+
+            }
+        });
+        contactEditPanel.addJsonChangeListener(new JsonChangeListener() {
+
+            @Override
+            public void notify(String json) {
+                try {
+                    jsonStore.write(lastPath, json);
+                    commitChange();
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+
+        });
+
+        navAndViewJSplit.add(namePanel);
+        navAndViewJSplit.add(commitAndEditJSplit);
+        commitAndEditJSplit.add(contactEditPanel);
+        commitGraphPanel = new CommitGraphPanel(jsonStore);
+        commitAndEditJSplit.add(new JScrollPane(commitGraphPanel));
+
+        setPreferredSize(new Dimension(680, 480));
+        pack();
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setVisible(true);
 
     }
 
@@ -129,14 +182,14 @@ public class Main extends JFrame {
      * Call this when finished using this frame.
      */
     public void closeWindow() {
-	setVisible(false);
-	dispose();
+        setVisible(false);
+        dispose();
     }
 
     private void commitChange() throws JsonSyntaxException, UnsupportedEncodingException, StoreException,
-	    VisitorException {
-	namePanel.refresh();
-	commitGraphPanel.show(new Commit[] { jsonStore.getCommit() });
+            VisitorException {
+        namePanel.refresh();
+        commitGraphPanel.show(new Commit[]{jsonStore.getCommit()});
     }
 
     /**
@@ -144,7 +197,7 @@ public class Main extends JFrame {
      * @throws StoreException
      */
     public static void main(String[] args) throws Exception {
-	new Main();
+        new Main();
 
     }
 

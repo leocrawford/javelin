@@ -102,7 +102,8 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 	    treeView[loop].setJson("", JsonEditPanel.UpdateType.REPLACE);
 	    treeView[loop].setAlignmentX(LEFT_ALIGNMENT);
 	    treeView[loop].addTreeSelectionListener(this);
-	    centerPanel.add(treeView[loop]);
+        treeView[loop].setPreferredSize(new Dimension(400,200));
+        centerPanel.add(treeView[loop]);
 	    newCentrePane.add(centerPanel, BorderLayout.CENTER);
 	}
 
@@ -128,7 +129,7 @@ public class ContactEditPanel extends JPanel implements TreeSelectionListener {
 	scrollWrapper.setLayout(new BoxLayout(scrollWrapper, BoxLayout.X_AXIS));
 	jsonTextArea = new JTextArea();
 	jsonTextArea.setText("");
-	jsonTextArea.setPreferredSize(new Dimension(600, 100));
+//	jsonTextArea.setPreferredSize(new Dimension(600, 100));
 	JScrollPane textScroller = new JScrollPane(jsonTextArea);
 	textScroller.setAlignmentX(LEFT_ALIGNMENT);
 	taPanel.add(textScroller);

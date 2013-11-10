@@ -61,6 +61,10 @@ public class Main extends JFrame {
 
 	    
 		    jsonStore.importAll(new FileInputStream(f));
+		    jsonStore.checkout();
+		    commitChange();
+		    System.out.println(jsonStore.read());
+		    
 		}
 		catch (Exception e1) {
 		    // TODO Auto-generated catch block

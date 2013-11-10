@@ -231,7 +231,9 @@ public class DataStructure {
 	for (String label : importedLabels.readEndPoint(store).getLabels()) {
 	    if (temp.hasAnchor(label)) {
 		System.out.println("Sorting label "+label);
-		temp.getAnchor(label, jsonFactory).writeEndPoint(store,
+		ExtendedAnchor<CommitDao> anchor = temp.getAnchor(label, jsonFactory);
+		anchor.read(store);
+		anchor.writeEndPoint(store,
 			importedLabels.readEndPoint(store).getAnchor(label, jsonFactory).readEndPoint(store));
 	    }    else
 		temp.addAnchor(label, importedLabels.readEndPoint(store).getAnchor(label, jsonFactory));

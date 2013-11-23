@@ -46,8 +46,7 @@ public class Anchor implements Serializable {
 	    return destination;
 	}
 	else {
-	    // FIXME
-	    throw new Error("Address " + address + " is null.");
+	   return null;
 	}
     }
 

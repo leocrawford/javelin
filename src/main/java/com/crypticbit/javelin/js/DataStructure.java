@@ -62,7 +62,7 @@ public class DataStructure {
 	labelsAnchor.writeEndPoint(store, labels);
 
 	   // see if this works - FIXME
-	labelsAnchor.readEndPoint(store).getCommitAnchor("HEAD",jsonFactory).readEndPoint(store);
+	// labelsAnchor.readEndPoint(store).getCommitAnchor("HEAD",jsonFactory).readEndPoint(store);
 
     }
 
@@ -239,7 +239,7 @@ public class DataStructure {
 
 	    for (String importedLabel : importedLabels.readEndPoint(store).getLabels()) {
 		    if (localLabels.hasCommitAnchor(importedLabel)) {
-			    System.out.println("Sorting label "+importedLabel+ " from "+localLabels);
+			    System.out.println("Merging label "+importedLabel+ " from "+localLabels);
 			    ExtendedAnchor<CommitDao> commitAnchor = localLabels.getCommitAnchor(importedLabel, jsonFactory);
 			    commitAnchor.read(store);
 			    commitAnchor.writeEndPoint(store,

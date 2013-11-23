@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.SerializationUtils;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -50,7 +49,7 @@ public class DataStructure {
     private JsonStoreAdapterFactory jsonFactory;
 
     /**
-     * Create a new json data structure with a random anchor, which can be retrieved using <code>getAnchor</code>
+     * Create a new json data structure with a random anchor, which can be retrieved using <code>getCommitAnchor</code>
      * 
      * @throws VisitorException
      * @throws StoreException
@@ -59,8 +58,11 @@ public class DataStructure {
 	setup(store);
 	labelsAnchor = new ExtendedAnchor<LabelsDao>(jsonFactory, LabelsDao.class);
 	LabelsDao labels = new LabelsDao();
-	selectedAnchor = labels.addAnchor("HEAD", jsonFactory);
+	selectedAnchor = labels.addCommitAnchor("HEAD", jsonFactory);
 	labelsAnchor.writeEndPoint(store, labels);
+
+	   // see if this works - FIXME
+	labelsAnchor.readEndPoint(store).getCommitAnchor("HEAD",jsonFactory).readEndPoint(store);
 
     }
 
@@ -76,13 +78,13 @@ public class DataStructure {
 	    VisitorException, Error {
 	setup(store);
 	this.labelsAnchor = new ExtendedAnchor<LabelsDao>(labelsAddress, jsonFactory, LabelsDao.class);
-	if (labelsAnchor.readEndPoint(store).hasAnchor(label)) {
-	    this.selectedAnchor = labelsAnchor.getEndPoint().getAnchor(label, jsonFactory);
+	if (labelsAnchor.readEndPoint(store).hasCommitAnchor(label)) {
+	    this.selectedAnchor = labelsAnchor.getEndPoint().getCommitAnchor(label, jsonFactory);
 	}
 	else {
 	    // FIXME exception handling, and thought about changing to unknown branch
 	    throw new Error("Labels don't exist: " + labelsAnchor.getEndPoint());
-	    // this.selectedAnchor = labels.addAnchor(label);
+	    // this.selectedAnchor = labels.addCommitAnchor(label);
 	}
     }
 
@@ -139,10 +141,10 @@ public class DataStructure {
 	LabelsDao labels = labelsAnchor.readEndPoint(store);
 	for (String label : labels.getLabels()) {
 	    System.out.println("Processing label "+label);
-	    Identity commitAddress = labels.getAnchor(label, jsonFactory).getAddress();
+	    Identity commitAddress = labels.getCommitAnchor(label, jsonFactory).getAddress();
 	    tempKas.add(commitAddress);
-	    CommitDao commitDao = labels.getAnchor(label, jsonFactory).readEndPoint(store);
-	    Identity destination = labels.getAnchor(label, jsonFactory).read(store);
+	    CommitDao commitDao = labels.getCommitAnchor(label, jsonFactory).readEndPoint(store);
+	    Identity destination = labels.getCommitAnchor(label, jsonFactory).read(store);
 	    System.out.println("dest="+destination+","+commitDao);
 	    Commit c = new Commit(commitDao, destination, jsonFactory);
 	    DirectedGraph<Commit, DefaultEdge> x = c.getAsGraphToRoot();
@@ -191,7 +193,7 @@ public class DataStructure {
     }
 
     /*
-     * public Identity getAnchor() { return selectedAnchor.getDigest(); }
+     * public Identity getCommitAnchor() { return selectedAnchor.getDigest(); }
      */
 
     public Identity getLabelsAddress() {
@@ -202,8 +204,13 @@ public class DataStructure {
 	    StoreException, JsonSyntaxException, VisitorException {
 	ObjectInputStream ois = new ObjectInputStream(inputStream);
 
+
 	Identity labelsAddress = (Identity) ois.readObject();
-	
+	    ExtendedAnchor<LabelsDao> importedLabels = new ExtendedAnchor<>(labelsAddress, jsonFactory, LabelsDao.class);
+	    LabelsDao localLabels = labelsAnchor.readEndPoint(store);
+
+
+	// copy all cas elements
 	Map<Identity, PersistableResource> casResult = (Map<Identity, PersistableResource>) ois.readObject();
 	for (Entry<Identity, PersistableResource> x : casResult.entrySet()) {
 	    System.out.println("Wrote cas: "+x.getKey());
@@ -214,30 +221,32 @@ public class DataStructure {
 	    }
 	}
 
+	// copy all kas elements
 	Map<Identity, PersistableResource> kasResult = (Map<Identity, PersistableResource>) ois.readObject();
 	for (Entry<Identity, PersistableResource> x : kasResult.entrySet()) {
 	    System.out.println("Wrote kas: "+x.getKey());
 	    // FIXME - what should I check against?
 	    // FIXME store.get(x.getKey()).getBytes()) very cumbersome
-	    if(store.check(x.getKey()))
-		store.store(x.getKey(),new Digest(store.get(x.getKey()).getBytes()),new Digest(x.getValue().getBytes()));
-	    else
+	    if(store.check(x.getKey()))             {
+		    System.out.println("Over-writing:" +x.getKey());
+		    store.store(x.getKey(),new Digest(store.get(x.getKey()).getBytes()),new Digest(x.getValue().getBytes()));
+	    }else
 		store.store(x.getKey(),null,new Digest(x.getValue().getBytes()));
 	    	System.out.println("Got :"+new Digest(store.get(x.getKey()).getBytes()));
 	}
 
-	ExtendedAnchor<LabelsDao> importedLabels = new ExtendedAnchor<>(labelsAddress, jsonFactory, LabelsDao.class);
-	LabelsDao temp = labelsAnchor.readEndPoint(store);
-	for (String label : importedLabels.readEndPoint(store).getLabels()) {
-	    if (temp.hasAnchor(label)) {
-		System.out.println("Sorting label "+label);
-		ExtendedAnchor<CommitDao> anchor = temp.getAnchor(label, jsonFactory);
-		anchor.read(store);
-		anchor.writeEndPoint(store,
-			importedLabels.readEndPoint(store).getAnchor(label, jsonFactory).readEndPoint(store));
-	    }    else
-		temp.addAnchor(label, importedLabels.readEndPoint(store).getAnchor(label, jsonFactory));
-	}
+	    // merge labels
+
+	    for (String importedLabel : importedLabels.readEndPoint(store).getLabels()) {
+		    if (localLabels.hasCommitAnchor(importedLabel)) {
+			    System.out.println("Sorting label "+importedLabel+ " from "+localLabels);
+			    ExtendedAnchor<CommitDao> commitAnchor = localLabels.getCommitAnchor(importedLabel, jsonFactory);
+			    commitAnchor.read(store);
+			    commitAnchor.writeEndPoint(store,
+				      importedLabels.readEndPoint(store).getCommitAnchor(importedLabel, jsonFactory).readEndPoint(store));
+		    }    else
+			    localLabels.addAnchor(importedLabel, importedLabels.readEndPoint(store).getCommitAnchor(importedLabel, jsonFactory));
+	    }
 
     }
 

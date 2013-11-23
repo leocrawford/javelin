@@ -16,17 +16,17 @@ public class LabelsDao implements Serializable {
 
     }
 
-    public ExtendedAnchor<CommitDao> addAnchor(String label, JsonStoreAdapterFactory jsonStore) {
+    public ExtendedAnchor<CommitDao> addCommitAnchor(String label, JsonStoreAdapterFactory jsonStore) {
 	ExtendedAnchor<CommitDao> result = new ExtendedAnchor<>(jsonStore, CommitDao.class);
 	labels.put(label, result.getAddress());
 	return result;
     }
 
-    public ExtendedAnchor<CommitDao> getAnchor(String name, JsonStoreAdapterFactory jsonStore) {
+    public ExtendedAnchor<CommitDao> getCommitAnchor(String name, JsonStoreAdapterFactory jsonStore) {
 	return new ExtendedAnchor<>(labels.get(name), jsonStore, CommitDao.class);
     }
 
-    public boolean hasAnchor(String label) {
+    public boolean hasCommitAnchor(String label) {
 	return labels.containsKey(label);
     }
     

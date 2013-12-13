@@ -3,6 +3,7 @@ package com.crypticbit.javelin.js;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
@@ -27,6 +28,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
+
+import difflib.PatchFailedException;
 
 public class Commit implements Comparable<Commit> {
 
@@ -60,6 +63,7 @@ public class Commit implements Comparable<Commit> {
 	addCommitToTreeMap(x, twd, pathsToValues);
 	return twd;
     }
+
 
     @Override
     public boolean equals(Object obj) {
@@ -112,7 +116,7 @@ public class Commit implements Comparable<Commit> {
     public Identity getHead() {
 	return dao.getHead();
     }
-    
+
     public Identity getIdentity2() {
 	return daoDigest;
     }
@@ -224,6 +228,10 @@ public class Commit implements Comparable<Commit> {
 	    }
 	}
 	return result;
+    }
+
+    CommitDao getDao() {
+	return dao;
     }
 
 }

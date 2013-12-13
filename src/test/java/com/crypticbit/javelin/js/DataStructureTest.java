@@ -13,6 +13,7 @@ import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.crypticbit.javelin.js.DataStructure.MergeType;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.CasKasStore;
 import com.crypticbit.javelin.store.Identity;
@@ -190,7 +191,7 @@ public class DataStructureTest {
 	
 	  ByteArrayOutputStream out = new ByteArrayOutputStream();
 	  ds1.exportAll(out);
-	 ds2.importAll(new ByteArrayInputStream(out.toByteArray()));
+	 ds2.importAll(new ByteArrayInputStream(out.toByteArray()),MergeType.OVERWRITE);
 	  ds2.checkout();	
 	
 	Assert.assertEquals(ds1.read(), ds2.read());

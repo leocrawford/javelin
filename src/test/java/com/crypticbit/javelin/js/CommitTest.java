@@ -57,7 +57,7 @@ public class CommitTest extends TestUtils {
     @Test
     public void testCreateChangeSet() throws JsonSyntaxException, StoreException, PatchFailedException, IOException,
 	    VisitorException {
-	ThreeWayDiff patch = jca1.getCommit().createChangeSet(jca4.getCommit());
+//	ThreeWayDiff patch = jca1.getCommit().createChangeSet(jca4.getCommit());
 	// System.out.println("X-"+patch.apply());
 	jca1.merge(jca4);
 	// FIXME - should be unnecessary

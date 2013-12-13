@@ -2,13 +2,16 @@ package com.crypticbit.diff.demo.swing.contacts;
 
 import com.crypticbit.javelin.js.Commit;
 import com.crypticbit.javelin.js.DataStructure;
+import com.crypticbit.javelin.js.DataStructure.MergeType;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
+
 import difflib.PatchFailedException;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.*;
@@ -31,7 +34,7 @@ public class Main extends JFrame {
             @Override
             public void callback(InputStream is) {
                 try {
-                    jsonStore.importAll(is);
+                    jsonStore.importAll(is,MergeType.MERGE);
                     jsonStore.checkout();
                     commitChange();
                     System.out.println(jsonStore.read());
@@ -81,7 +84,7 @@ public class Main extends JFrame {
                     File f = chooser.getSelectedFile();
 
 
-                    jsonStore.importAll(new FileInputStream(f));
+                    jsonStore.importAll(new FileInputStream(f),MergeType.MERGE);
                     jsonStore.checkout();
                     commitChange();
                     System.out.println(jsonStore.read());

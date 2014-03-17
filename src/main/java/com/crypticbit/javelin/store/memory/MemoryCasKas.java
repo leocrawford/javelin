@@ -34,8 +34,8 @@ public class MemoryCasKas implements CasKasStore {
 
     @Override
     public PersistableResource get(Identity digest) {
-	if(!check(digest))
-	    throw new Error("FIXME: "+digest);
+	if (!check(digest))
+	    throw new Error("FIXME: " + digest);
 	GeneralPersistableResource pr = new GeneralPersistableResource(casMap.get(digest));
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Read " + pr.getBytes().length + " bytes from " + digest + " using memory CAS");

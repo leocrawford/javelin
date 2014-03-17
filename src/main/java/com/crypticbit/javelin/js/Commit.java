@@ -3,13 +3,12 @@ package com.crypticbit.javelin.js;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.DijkstraShortestPath;
-import org.jgrapht.alg.TarjanLowestCommonAncestor;
+import org.jgrapht.alg.NaiveLcaFinder;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.HackedDirectedGraphUnion;
 import org.jgrapht.graph.SimpleDirectedGraph;
@@ -29,8 +28,6 @@ import com.google.gson.JsonSyntaxException;
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
 
-import difflib.PatchFailedException;
-
 public class Commit implements Comparable<Commit> {
 
     private CommitDao dao;
@@ -39,6 +36,7 @@ public class Commit implements Comparable<Commit> {
 
     Commit(CommitDao dao, Identity daoDigest, JsonStoreAdapterFactory jsonFactory) {
 	assert (dao != null);
+	assert (daoDigest != null);
 
 	this.dao = dao;
 	this.daoDigest = daoDigest;
@@ -52,9 +50,14 @@ public class Commit implements Comparable<Commit> {
 
     public ThreeWayDiff createChangeSet(Commit other) throws JsonSyntaxException, StoreException, VisitorException {
 
-	Graph<Commit, DefaultEdge> x = getAsGraphToRoots(new Commit[] { this, other });
+	DirectedGraph<Commit, DefaultEdge> x = getAsGraphToRoots(new Commit[] { this, other });
 
-	Commit lca = new TarjanLowestCommonAncestor<Commit, DefaultEdge>(x).calculate(findRoot(), this, other);
+	Commit lca = new NaiveLcaFinder<Commit, DefaultEdge>(x).findLca(this, other);
+	
+	if(lca == null)
+	    // FIXME - better exception
+	    throw new RuntimeException("No common ancestor: "+x.toString()+","+other+","+this+","+findRoot()+","+other.equals(this));
+	
 	Collection<GraphPath<Commit, DefaultEdge>> pathsToValues = new LinkedList<>();
 	pathsToValues.add(getShortestPath(x, lca, this));
 	pathsToValues.add(getShortestPath(x, lca, other));

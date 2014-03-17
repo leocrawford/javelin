@@ -39,6 +39,7 @@ public class ListSequenceDiff<T> extends SequenceDiff<List<T>, ListDelta> {
 
     @Override
     public ListDelta createDelta(List<T> parent, List<T> child, Object branch) {
+	System.out.println("parent = "+parent+", child="+child);
 	return new ListDelta(DiffUtils.diff(parent, child), branch);
     }
 }

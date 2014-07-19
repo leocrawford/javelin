@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.Key;
 import com.google.common.base.Function;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
-public class JsonVisitorElementAdapter implements JsonVisitorDestination<JsonElement, JsonElement, Identity>,
+public class JsonVisitorElementAdapter implements JsonVisitorDestination<JsonElement, JsonElement, Key>,
 	JsonVisitorSource<JsonElement, JsonElement> {
 
     private JsonStoreAdapterFactory jsa;
@@ -20,7 +20,7 @@ public class JsonVisitorElementAdapter implements JsonVisitorDestination<JsonEle
     }
 
     @Override
-    public Function<Identity, JsonElement> getTransform(VisitorContext<Identity, JsonElement> context) {
+    public Function<Key, JsonElement> getTransform(VisitorContext<Key, JsonElement> context) {
 	return context.getRecurseFunction();
     }
 
@@ -52,7 +52,7 @@ public class JsonVisitorElementAdapter implements JsonVisitorDestination<JsonEle
     }
 
     @Override
-    public JsonElement writeList(Identity source, List<JsonElement> list) {
+    public JsonElement writeList(Key source, List<JsonElement> list) {
 	JsonArray r = new JsonArray();
 	for (JsonElement e : list) {
 	    r.add(e);
@@ -61,7 +61,7 @@ public class JsonVisitorElementAdapter implements JsonVisitorDestination<JsonEle
     }
 
     @Override
-    public JsonElement writeMap(Identity source, Map<String, JsonElement> map) {
+    public JsonElement writeMap(Key source, Map<String, JsonElement> map) {
 	JsonObject o = new JsonObject();
 	for (Entry<String, JsonElement> e : map.entrySet()) {
 	    o.add(e.getKey(), e.getValue());
@@ -70,12 +70,12 @@ public class JsonVisitorElementAdapter implements JsonVisitorDestination<JsonEle
     }
 
     @Override
-    public JsonElement writeNull(Identity source) {
+    public JsonElement writeNull(Key source) {
 	return writeValue(source, null);
     }
 
     @Override
-    public JsonElement writeValue(Identity source, Object value) {
+    public JsonElement writeValue(Key source, Object value) {
 	// Hack to get unit tests to pass. Did fail because a converting from
 	// JsonElement to Object and back gave a different type for same value
 	return new JsonParser().parse(jsa.getGson().toJson(value));

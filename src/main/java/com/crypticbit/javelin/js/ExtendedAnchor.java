@@ -1,7 +1,7 @@
 package com.crypticbit.javelin.js;
 
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.KeyAddressableStorage;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -11,7 +11,7 @@ public class ExtendedAnchor<T> extends Anchor {
     private DataAccessInterface<T> dataInterface;
     private T cachedValue;
 
-    public ExtendedAnchor(Identity address, JsonStoreAdapterFactory jsonFactory, Class<T> clazz) {
+    public ExtendedAnchor(Key address, JsonStoreAdapterFactory jsonFactory, Class<T> clazz) {
 	super(address);
 	dataInterface = jsonFactory.getSimpleObjectAdapter(clazz);
     }

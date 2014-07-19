@@ -72,7 +72,7 @@ public class DataStructure {
      * @throws StoreException
      * @throws JsonSyntaxException
      */
-    DataStructure(CasKasStore store, Identity labelsAddress, String label) throws JsonSyntaxException, StoreException,
+    DataStructure(CasKasStore store, Key labelsAddress, String label) throws JsonSyntaxException, StoreException,
 	    VisitorException, Error {
 	setup(store);
 	this.labelsAnchor = new ExtendedAnchor<LabelsDao>(labelsAddress, jsonFactory, LabelsDao.class);
@@ -122,7 +122,7 @@ public class DataStructure {
     }
 
     public synchronized DataStructure commit() throws StoreException, VisitorException {
-	Identity write = jsonFactory.getJsonElementAdapter().write(element);
+	Key write = jsonFactory.getJsonElementAdapter().write(element);
 	commit = createCommit(write, selectedAnchor.getDestination());
 	return checkout();
     }
@@ -131,18 +131,18 @@ public class DataStructure {
 	    IOException {
 
 	ObjectOutputStream oos = new ObjectOutputStream(outputStream);
-	Set<Identity> tempCas = new HashSet<>();
-	Set<Identity> tempKas = new HashSet<>();
+	Set<Key> tempCas = new HashSet<>();
+	Set<Key> tempKas = new HashSet<>();
 
-	Map<String, Identity> labelToCommitMap = new HashMap<>();
+	Map<String, Key> labelToCommitMap = new HashMap<>();
 
 	LabelsDao labels = labelsAnchor.readEndPoint(store);
 	for (String label : labels.getLabels()) {
 	    System.out.println("Processing label " + label);
-	    Identity commitAddress = labels.getCommitAnchor(label, jsonFactory).getAddress();
+	    Key commitAddress = labels.getCommitAnchor(label, jsonFactory).getAddress();
 	    tempKas.add(commitAddress);
 	    CommitDao commitDao = labels.getCommitAnchor(label, jsonFactory).readEndPoint(store);
-	    Identity destination = labels.getCommitAnchor(label, jsonFactory).read(store);
+	    Key destination = labels.getCommitAnchor(label, jsonFactory).read(store);
 	    System.out.println("dest=" + destination + "," + commitDao);
 	    labelToCommitMap.put(label, destination);
 	    Commit c = new Commit(commitDao, destination, jsonFactory);
@@ -166,23 +166,23 @@ public class DataStructure {
 
 	System.out.println("all: " + store.list());
 
-	Set<Identity> missing = new HashSet(store.list());
+	Set<Key> missing = new HashSet(store.list());
 	missing.removeAll(tempCas);
 	missing.removeAll(tempKas);
 
-	for (Identity i : missing) {
+	for (Key i : missing) {
 	    System.out.println(i + "=" + store.get(i));
 
 	}
 
-	Map<Identity, PersistableResource> casRresult = new HashMap<>();
-	for (Identity i : tempCas) {
+	Map<Key, PersistableResource> casRresult = new HashMap<>();
+	for (Key i : tempCas) {
 	    casRresult.put(i, store.get(i));
 	}
 	oos.writeObject(casRresult);
 
-	Map<Identity, PersistableResource> kasResult = new HashMap<>();
-	for (Identity i : tempKas) {
+	Map<Key, PersistableResource> kasResult = new HashMap<>();
+	for (Key i : tempKas) {
 	    kasResult.put(i, store.get(i));
 	}
 	oos.writeObject(kasResult);
@@ -197,7 +197,7 @@ public class DataStructure {
      * public Identity getCommitAnchor() { return selectedAnchor.getDigest(); }
      */
 
-    public Identity getLabelsAddress() {
+    public Key getLabelsAddress() {
 	return labelsAnchor.getAddress();
     }
 
@@ -209,14 +209,14 @@ public class DataStructure {
 	    StoreException, JsonSyntaxException, VisitorException {
 	ObjectInputStream ois = new ObjectInputStream(inputStream);
 
-	Map<String, Identity> labelToCommitMap = (Map<String, Identity>) ois.readObject();
+	Map<String, Key> labelToCommitMap = (Map<String, Key>) ois.readObject();
 
 	LabelsDao localLabels = labelsAnchor.readEndPoint(store);
 
 	// copy all cas elements
-	Map<Identity, PersistableResource> casResult = (Map<Identity, PersistableResource>) ois.readObject();
-	for (Entry<Identity, PersistableResource> x : casResult.entrySet()) {
-	    Identity idOfValueWrittenToStore = store.store(x.getValue());
+	Map<Key, PersistableResource> casResult = (Map<Key, PersistableResource>) ois.readObject();
+	for (Entry<Key, PersistableResource> x : casResult.entrySet()) {
+	    Key idOfValueWrittenToStore = store.store(x.getValue());
 	    if (!idOfValueWrittenToStore.equals(x.getKey())) {
 		throw new IllegalStateException("The entry " + x.getKey() + " produced a new key on store to local ("
 			+ idOfValueWrittenToStore + ")");
@@ -297,11 +297,11 @@ public class DataStructure {
 	return checkout();
     }
 
-    private Commit merge(ExtendedAnchor<CommitDao> commitAnchorToMergeA, Commit commitB, Identity addressB)
+    private Commit merge(ExtendedAnchor<CommitDao> commitAnchorToMergeA, Commit commitB, Key addressB)
 	    throws JsonSyntaxException, StoreException, PatchFailedException, VisitorException {
 	ThreeWayDiff patch = getCommitFromAnchor(commitAnchorToMergeA).createChangeSet(commitB);
-	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(patch.apply());
-	return new Commit(new CommitDao(valueIdentity, new Date(), "auser", new Identity[] {
+	Key valueIdentity = jsonFactory.getJsonObjectAdapter().write(patch.apply());
+	return new Commit(new CommitDao(valueIdentity, new Date(), "auser", new Key[] {
 		commitAnchorToMergeA.getDestination(), addressB }), valueIdentity, jsonFactory);// createCommit(valueIdentity,
 												// commitAnchorToMergeA.getDestination(),
 												// addressB);
@@ -350,7 +350,7 @@ public class DataStructure {
 	    ((Map) result).put(lastToken.getFragment(), jsonObject);
 	}
 
-	Identity valueIdentity = jsonFactory.getJsonObjectAdapter().write(originalResult);
+	Key valueIdentity = jsonFactory.getJsonObjectAdapter().write(originalResult);
 	// FIXME patterm of commit = create then checkout repeated several times
 	commit = createCommit(valueIdentity, selectedAnchor.getDestination());
 	checkout();
@@ -361,7 +361,7 @@ public class DataStructure {
 	jsonFactory = new JsonStoreAdapterFactory(store);
     }
 
-    private Commit createCommit(Identity valueIdentity, Identity... parents) throws StoreException, VisitorException {
+    private Commit createCommit(Key valueIdentity, Key... parents) throws StoreException, VisitorException {
 	// FIXME hardcoded user
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Updating id -> " + selectedAnchor.getDestination());

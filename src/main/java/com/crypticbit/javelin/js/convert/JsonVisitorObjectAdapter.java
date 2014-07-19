@@ -9,11 +9,11 @@ import com.crypticbit.javelin.js.lazy.IdentityReference;
 import com.crypticbit.javelin.js.lazy.LazyJsonArray;
 import com.crypticbit.javelin.js.lazy.LazyJsonMap;
 import com.crypticbit.javelin.js.lazy.Reference;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.Key;
 import com.google.common.base.Function;
 import com.google.gson.internal.LinkedTreeMap;
 
-public class JsonVisitorObjectAdapter implements JsonVisitorDestination<Object, Reference, Identity>,
+public class JsonVisitorObjectAdapter implements JsonVisitorDestination<Object, Reference, Key>,
 	JsonVisitorSource<Object, Object> {
 
     private JsonStoreAdapterFactory jsa;
@@ -23,10 +23,10 @@ public class JsonVisitorObjectAdapter implements JsonVisitorDestination<Object, 
     }
 
     @Override
-    public Function<Identity, Reference> getTransform(VisitorContext<Identity, Object> context) {
-	return new Function<Identity, Reference>() {
+    public Function<Key, Reference> getTransform(VisitorContext<Key, Object> context) {
+	return new Function<Key, Reference>() {
 	    @Override
-	    public Reference apply(Identity identity) {
+	    public Reference apply(Key identity) {
 		return new IdentityReference(jsa, identity);
 	    }
 	};
@@ -72,13 +72,13 @@ public class JsonVisitorObjectAdapter implements JsonVisitorDestination<Object, 
     }
 
     @Override
-    public Object writeList(Identity source, List<Reference> list) {
+    public Object writeList(Key source, List<Reference> list) {
 	// copy so writeable
 	return new LazyJsonArray(new ArrayList<>(list));
     }
 
     @Override
-    public Object writeMap(Identity source, Map<String, Reference> map) {
+    public Object writeMap(Key source, Map<String, Reference> map) {
 	// copy so writeable
 	LinkedTreeMap<String, Reference> linkedTreeMap = new LinkedTreeMap<String, Reference>();
 	linkedTreeMap.putAll(map);
@@ -87,12 +87,12 @@ public class JsonVisitorObjectAdapter implements JsonVisitorDestination<Object, 
     }
 
     @Override
-    public Object writeNull(Identity source) {
+    public Object writeNull(Key source) {
 	return null;
     }
 
     @Override
-    public Object writeValue(Identity source, Object value) {
+    public Object writeValue(Key source, Object value) {
 	return value;
     }
 

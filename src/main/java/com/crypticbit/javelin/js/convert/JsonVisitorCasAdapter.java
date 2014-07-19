@@ -5,14 +5,14 @@ import java.util.Map;
 
 import com.crypticbit.javelin.store.ContentAddressableStorage;
 import com.crypticbit.javelin.store.GeneralPersistableResource;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.common.base.Function;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
-public class JsonVisitorCasAdapter implements JsonVisitorSource<Identity, JsonElement>,
-	JsonVisitorDestination<Identity, Identity, Object> {
+public class JsonVisitorCasAdapter implements JsonVisitorSource<Key, JsonElement>,
+	JsonVisitorDestination<Key, Key, Object> {
 
     private ContentAddressableStorage cas;
     private Gson gson;
@@ -23,7 +23,7 @@ public class JsonVisitorCasAdapter implements JsonVisitorSource<Identity, JsonEl
     }
 
     @Override
-    public Function<Object, Identity> getTransform(VisitorContext<Object, Identity> context) {
+    public Function<Object, Key> getTransform(VisitorContext<Object, Key> context) {
 	return context.getRecurseFunction();
     }
 
@@ -37,7 +37,7 @@ public class JsonVisitorCasAdapter implements JsonVisitorSource<Identity, JsonEl
      * @see com.crypticbit.javelin.js.SourceCallback#parse(com.crypticbit.javelin .store.Identity)
      */
     @Override
-    public JsonElement parse(Identity digest) throws VisitorException {
+    public JsonElement parse(Key digest) throws VisitorException {
 	try {
 	    return new JsonParser().parse(cas.get(digest).getAsString());
 	}
@@ -51,14 +51,14 @@ public class JsonVisitorCasAdapter implements JsonVisitorSource<Identity, JsonEl
      * @see com.crypticbit.javelin.js.SourceCallback#parseList(com.google.gson .JsonElement)
      */
     @Override
-    public List<Identity> parseList(JsonElement in) {
-	return gson.fromJson(in, new TypeToken<List<Identity>>() {
+    public List<Key> parseList(JsonElement in) {
+	return gson.fromJson(in, new TypeToken<List<Key>>() {
 	}.getType());
     }
 
     @Override
-    public Map<String, Identity> parseMap(JsonElement in) {
-	return gson.fromJson(in, new TypeToken<Map<String, Identity>>() {
+    public Map<String, Key> parseMap(JsonElement in) {
+	return gson.fromJson(in, new TypeToken<Map<String, Key>>() {
 	}.getType());
     }
 
@@ -72,27 +72,27 @@ public class JsonVisitorCasAdapter implements JsonVisitorSource<Identity, JsonEl
     }
 
     @Override
-    public Identity writeList(Object source, List<Identity> list) throws VisitorException {
+    public Key writeList(Object source, List<Key> list) throws VisitorException {
 	return write(list);
     }
 
     @Override
-    public Identity writeMap(Object source, Map<String, Identity> map) throws VisitorException {
+    public Key writeMap(Object source, Map<String, Key> map) throws VisitorException {
 	return write(map);
     }
 
     @Override
-    public Identity writeNull(Object source) throws VisitorException {
+    public Key writeNull(Object source) throws VisitorException {
 	return write(null);
     }
 
     @Override
-    public Identity writeValue(Object source, Object value) throws VisitorException {
+    public Key writeValue(Object source, Object value) throws VisitorException {
 	return write(value);
     }
 
     // FIXME if already exists
-    Identity write(Object value) throws VisitorException {
+    Key write(Object value) throws VisitorException {
 	try {
 	    return cas.store(new GeneralPersistableResource(gson.toJson(value)));
 	}

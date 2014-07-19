@@ -16,7 +16,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import com.crypticbit.javelin.diff.Snapshot;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
@@ -31,10 +31,10 @@ import com.jayway.jsonpath.JsonPath;
 public class Commit implements Comparable<Commit> {
 
     private CommitDao dao;
-    private Identity daoDigest;
+    private Key daoDigest;
     private JsonStoreAdapterFactory jsonFactory;
 
-    Commit(CommitDao dao, Identity daoDigest, JsonStoreAdapterFactory jsonFactory) {
+    Commit(CommitDao dao, Key daoDigest, JsonStoreAdapterFactory jsonFactory) {
 	assert (dao != null);
 	assert (daoDigest != null);
 
@@ -76,8 +76,8 @@ public class Commit implements Comparable<Commit> {
 	return ((Commit) obj).daoDigest.equals(daoDigest);
     }
 
-    public Set<Identity> getAllIdentities() throws VisitorException {
-	Set<Identity> result = jsonFactory.getKeyAdapter().visit(getHead());
+    public Set<Key> getAllIdentities() throws VisitorException {
+	Set<Key> result = jsonFactory.getKeyAdapter().visit(getHead());
 	result.add(this.daoDigest);
 	return result;
     }
@@ -116,11 +116,11 @@ public class Commit implements Comparable<Commit> {
 	return jsonFactory.getJsonElementAdapter().read(dao.getHead());
     }
 
-    public Identity getHead() {
+    public Key getHead() {
 	return dao.getHead();
     }
 
-    public Identity getIdentity2() {
+    public Key getIdentity2() {
 	return daoDigest;
     }
 
@@ -131,7 +131,7 @@ public class Commit implements Comparable<Commit> {
     public Set<Commit> getParents() throws JsonSyntaxException, StoreException, VisitorException {
 	Set<Commit> parents = new TreeSet<>();
 	DataAccessInterface<CommitDao> simpleObjectAdapter = jsonFactory.getSimpleObjectAdapter(CommitDao.class);
-	for (Identity parent : dao.getParents()) {
+	for (Key parent : dao.getParents()) {
 	    Commit wrap = wrap(simpleObjectAdapter.read(parent), parent);
 	    parents.add(wrap);
 	}
@@ -178,7 +178,7 @@ public class Commit implements Comparable<Commit> {
     }
 
     // FIXME - should we try and find an existing instance?
-    Commit wrap(CommitDao dao, Identity digest) {
+    Commit wrap(CommitDao dao, Key digest) {
 	return new Commit(dao, digest, jsonFactory);
     }
 

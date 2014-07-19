@@ -21,15 +21,15 @@ public class JsonSimpleClassAdapterTest extends TestUtils {
 	DataAccessInterface<CommitDao> a = new JsonStoreAdapterFactory(new MemoryCasKas(new DigestFactory()))
 		.getSimpleObjectAdapter(CommitDao.class);
 
-	Digest d1 = new Digest();
-	Digest d2 = new Digest();
-	Digest d3 = new Digest();
+	Key d1 = new Key();
+	Key d2 = new Key();
+	Key d3 = new Key();
 
 	Date d = new Date();
 
-	CommitDao cd1 = new CommitDao(d1, d, "test", new Digest[] { d2, d3 });
+	CommitDao cd1 = new CommitDao(d1, d, "test", new Key[] { d2, d3 });
 
-	Identity i = a.write(cd1);
+	Key i = a.write(cd1);
 
 	CommitDao cd2 = a.read(i);
 

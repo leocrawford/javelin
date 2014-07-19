@@ -15,7 +15,7 @@ import com.crypticbit.javelin.js.DataAccessInterface;
 import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.DigestFactory;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.MemoryCasKas;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
@@ -32,17 +32,17 @@ public class JsonVisitorObjectAdapterTest {
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new MemoryCasKas(new DigestFactory()));
 
 	DataAccessInterface<Object> jsonObjectAdapter = store.getJsonObjectAdapter();
-	Identity stringIdentity = jsonObjectAdapter.write("String");
-	Identity nullIdentity = jsonObjectAdapter.write(null);
-	Identity integerIdentity = jsonObjectAdapter.write(100);
-	Identity floatIdentity = jsonObjectAdapter.write(2.1);
-	Identity booleanIdentity = jsonObjectAdapter.write(true);
-	Identity arrayIdentity = jsonObjectAdapter.write(Arrays.asList(new Integer[] { 1, 2, 3 }));
+	Key stringIdentity = jsonObjectAdapter.write("String");
+	Key nullIdentity = jsonObjectAdapter.write(null);
+	Key integerIdentity = jsonObjectAdapter.write(100);
+	Key floatIdentity = jsonObjectAdapter.write(2.1);
+	Key booleanIdentity = jsonObjectAdapter.write(true);
+	Key arrayIdentity = jsonObjectAdapter.write(Arrays.asList(new Integer[] { 1, 2, 3 }));
 	Map<String, Object> m = new HashMap<>();
 	m.put("a", 1);
 	m.put("b", null);
 	m.put("c", false);
-	Identity mapIdentity = jsonObjectAdapter.write(m);
+	Key mapIdentity = jsonObjectAdapter.write(m);
 
 	assertTrue(jsonObjectAdapter.read(stringIdentity).getClass() == String.class);
 	assertTrue(jsonObjectAdapter.read(nullIdentity) == null);

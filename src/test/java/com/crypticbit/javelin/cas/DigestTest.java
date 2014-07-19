@@ -10,7 +10,7 @@ import java.util.Random;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.crypticbit.javelin.store.Digest;
+import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.DigestFactory;
 
 public class DigestTest {
@@ -18,13 +18,13 @@ public class DigestTest {
     @Test
     public void test() {
 	byte[] randomData = createRandomData();
-	Digest originalDigest = new DigestFactory().getDefaultDigest(randomData);
+	Key originalDigest = new DigestFactory().getDefaultDigest(randomData);
 	byte[] originalDigestAsByte = originalDigest.getDigestAsByte();
 	String originalDigestAsString = originalDigest.getDigestAsString();
-	Digest recoveredDigestByByte = new Digest(originalDigestAsByte);
+	Key recoveredDigestByByte = new Key(originalDigestAsByte);
 	assertArrayEquals(originalDigestAsByte, recoveredDigestByByte.getDigestAsByte());
 	assertEquals(originalDigestAsString, recoveredDigestByByte.getDigestAsString());
-	Digest recoveredDigestByString = new Digest(originalDigestAsString);
+	Key recoveredDigestByString = new Key(originalDigestAsString);
 	assertArrayEquals(originalDigestAsByte, recoveredDigestByString.getDigestAsByte());
 	assertEquals(originalDigestAsString, recoveredDigestByString.getDigestAsString());
     }
@@ -32,15 +32,15 @@ public class DigestTest {
     @Test
     public void testCompare() {
 	byte[] random = createRandomData();
-	Digest d1 = new Digest(random);
-	Digest d2 = new Digest(random);
+	Key d1 = new Key(random);
+	Key d2 = new Key(random);
 
 	assertEquals(0, d1.compareTo(d2));
 
 	byte[] newRandom = new byte[random.length + 1];
 	System.arraycopy(random, 0, newRandom, 0, random.length);
 	newRandom[random.length] = 0x5;
-	Digest d3 = new Digest(newRandom);
+	Key d3 = new Key(newRandom);
 
 	assertTrue(d1.compareTo(d3) < 0);
 	assertTrue(d3.compareTo(d1) > 0);
@@ -50,12 +50,12 @@ public class DigestTest {
     @Test
     public void testEquals() {
 	byte[] random = createRandomData();
-	Digest d1 = new Digest(random);
-	Digest d2 = new Digest(random);
+	Key d1 = new Key(random);
+	Key d2 = new Key(random);
 
 	assertEquals(d1, d2);
 
-	Digest d3 = new Digest(createRandomData());
+	Key d3 = new Key(createRandomData());
 
 	assertNotEquals(d2, d3);
     }

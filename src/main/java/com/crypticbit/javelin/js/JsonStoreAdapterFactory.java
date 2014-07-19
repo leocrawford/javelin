@@ -5,8 +5,8 @@ import java.util.Set;
 
 import com.crypticbit.javelin.js.convert.*;
 import com.crypticbit.javelin.store.ContentAddressableStorage;
-import com.crypticbit.javelin.store.Digest;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.Key;
+import com.crypticbit.javelin.store.Key;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -24,16 +24,16 @@ public class JsonStoreAdapterFactory {
     /**
      * The internal gson object we use, which will write out Digest values properly
      */
-    private static final Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Identity.class,
-	    new TypeAdapter<Identity>() {
+    private static final Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Key.class,
+	    new TypeAdapter<Key>() {
 
 		@Override
-		public Digest read(JsonReader in) throws IOException {
-		    return new Digest(in.nextString());
+		public Key read(JsonReader in) throws IOException {
+		    return new Key(in.nextString());
 		}
 
 		@Override
-		public void write(JsonWriter out, Identity value) throws IOException {
+		public void write(JsonWriter out, Key value) throws IOException {
 		    if (value != null) {
 			out.value(value.getDigestAsString());
 		    }
@@ -60,9 +60,9 @@ public class JsonStoreAdapterFactory {
 	return joa;
     }
 
-    public JsonVisitor<Set<Identity>, Set<Identity>, Identity, JsonElement> getKeyAdapter() {
+    public JsonVisitor<Set<Key>, Set<Key>, Key, JsonElement> getKeyAdapter() {
 	JsonVisitorKeyAdapter jsonKeyAdapter = new JsonVisitorKeyAdapter();
-	return new JsonVisitor<Set<Identity>, Set<Identity>, Identity, JsonElement>(jsonKeyAdapter,
+	return new JsonVisitor<Set<Key>, Set<Key>, Key, JsonElement>(jsonKeyAdapter,
 		new JsonVisitorCasAdapter(cas, gson));
 
     }
@@ -75,24 +75,24 @@ public class JsonStoreAdapterFactory {
 	private JsonVisitorCasAdapter casAdapter = new JsonVisitorCasAdapter(cas, jsa.getGson());
 
 	private JsonVisitorSource<Object, B> source;
-	private JsonVisitorDestination<T, F, Identity> dest;
+	private JsonVisitorDestination<T, F, Key> dest;
 
 	private CasDai(ContentAddressableStorage cas, JsonStoreAdapterFactory jsa, JsonVisitorSource<Object, B> source,
-		JsonVisitorDestination<T, F, Identity> dest) {
+		JsonVisitorDestination<T, F, Key> dest) {
 	    super(cas, jsa);
 	    this.source = source;
 	    this.dest = dest;
 	}
 
 	@Override
-	public Object read(Identity commitId) throws VisitorException {
-	    JsonVisitor<T, F, Identity, JsonElement> sv = new JsonVisitor<>(dest, casAdapter);
+	public Object read(Key commitId) throws VisitorException {
+	    JsonVisitor<T, F, Key, JsonElement> sv = new JsonVisitor<>(dest, casAdapter);
 	    return sv.visit(commitId);
 	}
 
 	@Override
-	public Identity write(Object object) throws VisitorException {
-	    JsonVisitor<Identity, Identity, Object, B> sv = new JsonVisitor<Identity, Identity, Object, B>(casAdapter,
+	public Key write(Object object) throws VisitorException {
+	    JsonVisitor<Key, Key, Object, B> sv = new JsonVisitor<Key, Key, Object, B>(casAdapter,
 		    source);
 	    return sv.visit(object);
 	}

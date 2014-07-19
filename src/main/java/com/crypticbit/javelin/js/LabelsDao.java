@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.Key;
 
 public class LabelsDao implements Serializable {
 
-    private Map<String, Identity> labels = new HashMap<>();
+    private Map<String, Key> labels = new HashMap<>();
 
     public void addAnchor(String label, ExtendedAnchor<CommitDao> anchor) {
 	labels.put(label, anchor.getAddress());

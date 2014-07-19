@@ -11,7 +11,7 @@ import com.crypticbit.javelin.js.DataAccessInterface;
 import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.DigestFactory;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.MemoryCasKas;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
@@ -29,7 +29,7 @@ public class JsonVisitorElementAdpaterTest {
 
 	final String jsonFloat = "2.1";
 	final JsonElement json = GSON.fromJson(jsonFloat, JsonElement.class);
-	Identity floatIdentity = jsonElementAdapter.write(json);
+	Key floatIdentity = jsonElementAdapter.write(json);
 	assertEquals(json, jsonElementAdapter.read(floatIdentity));
 
     }
@@ -40,13 +40,13 @@ public class JsonVisitorElementAdpaterTest {
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new MemoryCasKas(new DigestFactory()));
 
 	DataAccessInterface<JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
-	Identity stringIdentity = jsonElementAdapter.write(GSON.fromJson("\"String\"", JsonElement.class));
-	Identity nullIdentity = jsonElementAdapter.write(GSON.fromJson("null", JsonElement.class));
-	Identity integerIdentity = jsonElementAdapter.write(GSON.fromJson("100", JsonElement.class));
-	Identity floatIdentity = jsonElementAdapter.write(GSON.fromJson("2.1", JsonElement.class));
-	Identity booleanIdentity = jsonElementAdapter.write(GSON.fromJson("TRUE", JsonElement.class));
-	Identity arrayIdentity = jsonElementAdapter.write(GSON.fromJson("[1,2,3]", JsonElement.class));
-	Identity mapIdentity = jsonElementAdapter.write(GSON.fromJson("{\"a\":1,\"b\":null,\"c\":FALSE}",
+	Key stringIdentity = jsonElementAdapter.write(GSON.fromJson("\"String\"", JsonElement.class));
+	Key nullIdentity = jsonElementAdapter.write(GSON.fromJson("null", JsonElement.class));
+	Key integerIdentity = jsonElementAdapter.write(GSON.fromJson("100", JsonElement.class));
+	Key floatIdentity = jsonElementAdapter.write(GSON.fromJson("2.1", JsonElement.class));
+	Key booleanIdentity = jsonElementAdapter.write(GSON.fromJson("TRUE", JsonElement.class));
+	Key arrayIdentity = jsonElementAdapter.write(GSON.fromJson("[1,2,3]", JsonElement.class));
+	Key mapIdentity = jsonElementAdapter.write(GSON.fromJson("{\"a\":1,\"b\":null,\"c\":FALSE}",
 		JsonElement.class));
 
 	assertTrue(jsonElementAdapter.read(stringIdentity).getAsJsonPrimitive().isString());

@@ -176,7 +176,7 @@ public class DataStructureTest extends TestUtils{
 	jca.commit();
 	byte[] labelsAddress = SerializationUtils.serialize(jca.getLabelsAddress());
 
-	DataStructure jca2 = new DataStructure(store, (Identity) SerializationUtils.deserialize(labelsAddress), "HEAD");
+	DataStructure jca2 = new DataStructure(store, (Key) SerializationUtils.deserialize(labelsAddress), "HEAD");
 	jca2.checkout();
 	Assert.assertEquals(jca.read(), jca2.read());
     }
@@ -223,7 +223,7 @@ public class DataStructureTest extends TestUtils{
     }
 
     private void dump(ContentAddressableStorage cas) throws StoreException {
-	for (Identity d : cas.list()) {
+	for (Key d : cas.list()) {
 	    System.out.println(d + "->" + cas.get(d));
 	}
     }

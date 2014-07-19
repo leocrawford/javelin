@@ -11,15 +11,15 @@ public class DigestFactory {
     private DigestMethod defaultDigestMethod = DEFAULT_DIGEST_METHOD;;
 
     /** generate a digest for the data <code>data</code> using the default digest method */
-    public Digest getDefaultDigest(byte[] data) {
+    public Key getDefaultDigest(byte[] data) {
 	return getDigest(defaultDigestMethod, data);
     }
 
     /** generate a digest for the data <code>data</code> using the specified digest method */
-    public Digest getDigest(DigestMethod method, byte[] data) {
+    public Key getDigest(DigestMethod method, byte[] data) {
 	MessageDigest digest = method.createDigest();
 	digest.update(data);
-	return new Digest(digest);
+	return new Key(digest);
     }
 
     /** Set the method that will be used to generate digests if <code>getDefaultDigest</code> is called */

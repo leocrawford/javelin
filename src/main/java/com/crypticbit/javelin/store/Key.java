@@ -13,31 +13,31 @@ import com.google.common.io.BaseEncoding;
  * 
  * @author leo
  */
-public class Digest implements Identity, Serializable {
+public class Key implements Comparable<Key>, Serializable {
 
     private byte[] digest;
 
     /** Random digest */
-    public Digest() {
+    public Key() {
 	digest = createRandomData(64);
     }
 
-    public Digest(byte[] digestAsByte) {
+    public Key(byte[] digestAsByte) {
 	this.digest = digestAsByte;
     }
 
-    public Digest(MessageDigest messageDigest) {
+    public Key(MessageDigest messageDigest) {
 	digest = messageDigest.digest();
     }
 
-    public Digest(String string) {
+    public Key(String string) {
 	this.digest = BaseEncoding.base32Hex().decode(string);
     }
 
     @Override
-    public int compareTo(Identity o) {
-	if (o instanceof Digest) {
-	    return ByteBuffer.wrap(digest).compareTo(ByteBuffer.wrap(((Digest) o).digest));
+    public int compareTo(Key o) {
+	if (o instanceof Key) {
+	    return ByteBuffer.wrap(digest).compareTo(ByteBuffer.wrap(((Key) o).digest));
 	}
 	else {
 	    return this.getClass().getName().compareTo(o.getClass().getName());
@@ -46,20 +46,18 @@ public class Digest implements Identity, Serializable {
 
     @Override
     public boolean equals(Object compare) {
-	if (compare instanceof Digest) {
-	    return Arrays.equals(digest, ((Digest) compare).digest);
+	if (compare instanceof Key) {
+	    return Arrays.equals(digest, ((Key) compare).digest);
 	}
 	else {
 	    return false;
 	}
     }
 
-    @Override
     public byte[] getDigestAsByte() {
 	return digest;
     }
 
-    @Override
     public String getDigestAsString() {
 	return BaseEncoding.base32Hex().encode(getDigestAsByte());
     }

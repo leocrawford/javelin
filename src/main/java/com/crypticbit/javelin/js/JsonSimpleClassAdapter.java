@@ -5,7 +5,7 @@ import java.util.logging.Logger;
 
 import com.crypticbit.javelin.store.ContentAddressableStorage;
 import com.crypticbit.javelin.store.GeneralPersistableResource;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 
@@ -21,7 +21,7 @@ public class JsonSimpleClassAdapter<T> extends DataAccessInterface<T> {
     }
 
     @Override
-    public T read(Identity identity) throws StoreException, JsonSyntaxException {
+    public T read(Key identity) throws StoreException, JsonSyntaxException {
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Read " + clazz + ": " + identity);
 	}
@@ -29,7 +29,7 @@ public class JsonSimpleClassAdapter<T> extends DataAccessInterface<T> {
     }
 
     @Override
-    public Identity write(T value) throws StoreException {
+    public Key write(T value) throws StoreException {
 	if (value == null)
 	    throw new Error("Writing null");
 	if (LOG.isLoggable(Level.FINEST)) {

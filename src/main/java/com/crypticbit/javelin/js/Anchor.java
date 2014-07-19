@@ -2,8 +2,8 @@ package com.crypticbit.javelin.js;
 
 import java.io.Serializable;
 
-import com.crypticbit.javelin.store.Digest;
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.Key;
+import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.KeyAddressableStorage;
 import com.crypticbit.javelin.store.StoreException;
 
@@ -15,15 +15,15 @@ import com.crypticbit.javelin.store.StoreException;
 
 public class Anchor implements Serializable {
 
-    private Identity address;
-    private transient Identity destination;
+    private Key address;
+    private transient Key destination;
 
-    public Anchor(Identity address) {
+    public Anchor(Key address) {
 	this.address = address;
     }
 
     Anchor() {
-	address = new Digest();
+	address = new Key();
     }
 
     Anchor(KeyAddressableStorage kas, Anchor clone) throws StoreException {
@@ -32,17 +32,17 @@ public class Anchor implements Serializable {
     }
 
     /** Same as read() but returns cached/last value */
-    public Identity getDestination() {
+    public Key getDestination() {
 	return destination;
     }
 
-    public Identity getAddress() {
+    public Key getAddress() {
 	return address;
     }
 
-    public Identity read(KeyAddressableStorage kas) throws StoreException {
+    public Key read(KeyAddressableStorage kas) throws StoreException {
 	if (kas.check(address)) {
-	    destination = new Digest(kas.get(address).getBytes());
+	    destination = new Key(kas.get(address).getBytes());
 	    return destination;
 	}
 	else {
@@ -50,7 +50,7 @@ public class Anchor implements Serializable {
 	}
     }
 
-    public void write(KeyAddressableStorage kas, Identity newReference) throws StoreException {
+    public void write(KeyAddressableStorage kas, Key newReference) throws StoreException {
 	kas.store(address, destination, newReference);
 	destination = newReference;
     }

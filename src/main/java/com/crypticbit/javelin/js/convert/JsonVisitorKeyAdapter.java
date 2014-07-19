@@ -2,43 +2,43 @@ package com.crypticbit.javelin.js.convert;
 
 import java.util.*;
 
-import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.Key;
 import com.google.common.base.Function;
 
-public class JsonVisitorKeyAdapter implements JsonVisitorDestination<Set<Identity>, Set<Identity>, Identity> {
+public class JsonVisitorKeyAdapter implements JsonVisitorDestination<Set<Key>, Set<Key>, Key> {
 
     @Override
-    public Function<Identity, Set<Identity>> getTransform(VisitorContext<Identity, Set<Identity>> context)
+    public Function<Key, Set<Key>> getTransform(VisitorContext<Key, Set<Key>> context)
 	    throws VisitorException {
 	return context.getRecurseFunction();
     }
 
     @Override
-    public Set<Identity> writeList(Identity source, List<Set<Identity>> list) throws VisitorException {
+    public Set<Key> writeList(Key source, List<Set<Key>> list) throws VisitorException {
 	return collapseSet(source, list);
     }
 
     @Override
-    public Set<Identity> writeMap(Identity source, Map<String, Set<Identity>> map) throws VisitorException {
+    public Set<Key> writeMap(Key source, Map<String, Set<Key>> map) throws VisitorException {
 	return collapseSet(source, map.values());
     }
 
     @Override
-    public Set<Identity> writeNull(Identity source) throws VisitorException {
+    public Set<Key> writeNull(Key source) throws VisitorException {
 	return writeValue(source, null);
     }
 
     @Override
-    public Set<Identity> writeValue(Identity source, Object value) throws VisitorException {
-	Set<Identity> result = new HashSet<Identity>(1);
+    public Set<Key> writeValue(Key source, Object value) throws VisitorException {
+	Set<Key> result = new HashSet<Key>(1);
 	result.add(source);
 	return result;
     }
 
-    private Set<Identity> collapseSet(Identity source, Collection<Set<Identity>> collection) {
-	Set<Identity> result = new HashSet<>();
+    private Set<Key> collapseSet(Key source, Collection<Set<Key>> collection) {
+	Set<Key> result = new HashSet<>();
 	result.add(source);
-	for (Set<Identity> e : collection) {
+	for (Set<Key> e : collection) {
 	    result.addAll(e);
 	}
 	return result;

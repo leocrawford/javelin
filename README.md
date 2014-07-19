@@ -55,6 +55,7 @@ a.getObjects(); // return the set of object in branch a (so they can be shipped 
 There are a number of interesting projects looking at a very similar problem. These include:
 
 * http://camlistore.org/
+* https://github.com/dominictarr/cyphernet
 * <need to look these up>
 
 In terms of technology, the things that shaped my thinking are:
@@ -66,6 +67,7 @@ In terms of technology, the things that shaped my thinking are:
 ##Resources
 
 * http://en.wikibooks.org/wiki/Understanding_Darcs/Patch_theory
+* https://www.youtube.com/watch?feature=player_embedded&v=8Z685OF-PS8
     
 ##Features
 

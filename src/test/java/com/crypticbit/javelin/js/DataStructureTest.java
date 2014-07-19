@@ -25,7 +25,7 @@ import com.google.gson.JsonSyntaxException;
 
 import difflib.PatchFailedException;
 
-public class DataStructureTest {
+public class DataStructureTest extends TestUtils{
 // FIXME reinstate null
     /* 
     private static final String JSON_EXAMPLE = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]";
@@ -187,7 +187,7 @@ public class DataStructureTest {
 
     @Test
     public void testImportExport() throws IOException, StoreException, JsonSyntaxException, VisitorException,
-	    ClassNotFoundException {
+	    ClassNotFoundException, PatchFailedException, InterruptedException {
 	DataStructure ds1 = new DataStructure(new StorageFactory().createMemoryCas());
 	DataStructure ds2 = new DataStructure(new StorageFactory().createMemoryCas());
 
@@ -203,8 +203,19 @@ public class DataStructureTest {
 	copy(ds1, ds2, MergeType.MERGE);
 	Assert.assertEquals(ds1.read(), ds2.read());
 	
+	ds2.write(JSON_EXAMPLE_3);
+	ds2.commit();
+	
+	ds1.write(JSON_EXAMPLE_5);
+	ds1.commit();
+	
+	copy(ds1, ds2, MergeType.MERGE);
+	
 	System.out.println(ds1.getCommit().getAsGraphToRoot());
 	System.out.println(ds2.getCommit().getAsGraphToRoot());
+	
+//	show(ds1.getCommit(),ds2.getCommit());
+//	Thread.sleep(1000*1000);
     }
 
     private void copy(DataStructure ds1, DataStructure ds2, MergeType mt) throws StoreException, VisitorException,

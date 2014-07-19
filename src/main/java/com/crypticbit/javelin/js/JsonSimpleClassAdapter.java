@@ -3,10 +3,10 @@ package com.crypticbit.javelin.js;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.crypticbit.javelin.store.ContentAddressableStorage;
 import com.crypticbit.javelin.store.GeneralPersistableResource;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
-import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.JsonSyntaxException;
 
 public class JsonSimpleClassAdapter<T> extends DataAccessInterface<T> {

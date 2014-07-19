@@ -13,11 +13,7 @@ import org.jgrapht.graph.DefaultEdge;
 
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.CasKasStore;
-import com.crypticbit.javelin.store.Digest;
-import com.crypticbit.javelin.store.Identity;
-import com.crypticbit.javelin.store.StoreException;
-import com.crypticbit.javelin.store.cas.PersistableResource;
+import com.crypticbit.javelin.store.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;

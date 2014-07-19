@@ -1,9 +1,7 @@
-package com.crypticbit.javelin.store.cas;
+package com.crypticbit.javelin.store;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import com.crypticbit.javelin.store.Digest;
 
 /* Create a MessageDigest based on a byte array, or potentially an InputStream */
 public class DigestFactory {

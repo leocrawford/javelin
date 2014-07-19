@@ -1,8 +1,5 @@
-package com.crypticbit.javelin.store.cas;
+package com.crypticbit.javelin.store;
 
-import com.crypticbit.javelin.store.AddressableStorage;
-import com.crypticbit.javelin.store.Identity;
-import com.crypticbit.javelin.store.StoreException;
 
 /**
  * Synchronous interface for the Content Addressable Storage System Methods are based on Camilstore ones described here,

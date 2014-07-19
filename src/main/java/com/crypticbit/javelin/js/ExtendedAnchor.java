@@ -2,8 +2,8 @@ package com.crypticbit.javelin.js;
 
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.Identity;
+import com.crypticbit.javelin.store.KeyAddressableStorage;
 import com.crypticbit.javelin.store.StoreException;
-import com.crypticbit.javelin.store.kas.KeyAddressableStorage;
 import com.google.gson.JsonSyntaxException;
 
 public class ExtendedAnchor<T> extends Anchor {

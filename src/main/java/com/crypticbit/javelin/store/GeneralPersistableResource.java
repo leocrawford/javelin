@@ -5,8 +5,6 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
-import com.crypticbit.javelin.store.cas.PersistableResource;
-
 public class GeneralPersistableResource implements PersistableResource, Serializable {
 
     private byte[] data;

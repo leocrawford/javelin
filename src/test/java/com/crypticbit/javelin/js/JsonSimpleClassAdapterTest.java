@@ -9,11 +9,7 @@ import java.util.logging.Level;
 import org.junit.Test;
 
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.Digest;
-import com.crypticbit.javelin.store.Identity;
-import com.crypticbit.javelin.store.StoreException;
-import com.crypticbit.javelin.store.cas.DigestFactory;
-import com.crypticbit.javelin.store.memory.MemoryCasKas;
+import com.crypticbit.javelin.store.*;
 import com.google.gson.JsonSyntaxException;
 
 public class JsonSimpleClassAdapterTest extends TestUtils {

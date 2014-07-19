@@ -15,11 +15,7 @@ import org.junit.Test;
 
 import com.crypticbit.javelin.js.DataStructure.MergeType;
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.CasKasStore;
-import com.crypticbit.javelin.store.Identity;
-import com.crypticbit.javelin.store.StorageFactory;
-import com.crypticbit.javelin.store.StoreException;
-import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
+import com.crypticbit.javelin.store.*;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 

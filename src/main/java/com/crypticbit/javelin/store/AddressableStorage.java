@@ -2,8 +2,6 @@ package com.crypticbit.javelin.store;
 
 import java.util.List;
 
-import com.crypticbit.javelin.store.cas.PersistableResource;
-
 public interface AddressableStorage {
 
     /** Check if digest exists, if not return <code>null</code> */

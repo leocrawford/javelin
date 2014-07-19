@@ -11,7 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.crypticbit.javelin.store.Digest;
-import com.crypticbit.javelin.store.cas.DigestFactory;
+import com.crypticbit.javelin.store.DigestFactory;
 
 public class DigestTest {
 

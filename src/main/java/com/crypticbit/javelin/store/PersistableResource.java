@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.store.cas;
+package com.crypticbit.javelin.store;
 
 import java.io.InputStream;
 

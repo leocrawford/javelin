@@ -1,8 +1,5 @@
-package com.crypticbit.javelin.store.kas;
+package com.crypticbit.javelin.store;
 
-import com.crypticbit.javelin.store.AddressableStorage;
-import com.crypticbit.javelin.store.Identity;
-import com.crypticbit.javelin.store.StoreException;
 
 public interface KeyAddressableStorage extends AddressableStorage {
 

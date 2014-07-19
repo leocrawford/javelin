@@ -3,10 +3,10 @@ package com.crypticbit.javelin.js.convert;
 import java.util.List;
 import java.util.Map;
 
+import com.crypticbit.javelin.store.ContentAddressableStorage;
 import com.crypticbit.javelin.store.GeneralPersistableResource;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
-import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.common.base.Function;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;

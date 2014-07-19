@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.store.memory;
+package com.crypticbit.javelin.store;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -7,8 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.crypticbit.javelin.store.*;
-import com.crypticbit.javelin.store.cas.DigestFactory;
-import com.crypticbit.javelin.store.cas.PersistableResource;
 
 /**
  * Provides a memory based CAS. The digest is calculated using a <code>digestFactory</code> which is created at

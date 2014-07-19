@@ -1,9 +1,9 @@
 package com.crypticbit.javelin.js;
 
 import com.crypticbit.javelin.js.convert.VisitorException;
+import com.crypticbit.javelin.store.ContentAddressableStorage;
 import com.crypticbit.javelin.store.Identity;
 import com.crypticbit.javelin.store.StoreException;
-import com.crypticbit.javelin.store.cas.ContentAddressableStorage;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 

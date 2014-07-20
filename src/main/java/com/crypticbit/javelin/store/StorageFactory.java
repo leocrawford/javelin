@@ -8,7 +8,7 @@ public class StorageFactory {
     }
 
     public CasKasStore createMemoryCas() {
-	return new MemoryCasKas(new DigestFactory());
+	return new MemoryCasKas(new KeyFactory());
     }
 
 }

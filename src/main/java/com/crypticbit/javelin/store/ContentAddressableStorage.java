@@ -8,7 +8,7 @@ package com.crypticbit.javelin.store;
 public interface ContentAddressableStorage extends AddressableStorage {
 
     /** Get the digest factory used to generate digests */
-    DigestFactory getDigestFactory();
+    KeyFactory getDigestFactory();
 
     String getName();
 

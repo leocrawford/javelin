@@ -18,7 +18,7 @@ public class JsonSimpleClassAdapterTest extends TestUtils {
     public void test() throws StoreException, IOException, JsonSyntaxException, VisitorException {
 	enableLog("com.crypticbit.javelin.js", Level.FINEST);
 
-	DataAccessInterface<CommitDao> a = new JsonStoreAdapterFactory(new MemoryCasKas(new DigestFactory()))
+	DataAccessInterface<CommitDao> a = new JsonStoreAdapterFactory(new MemoryCasKas(new KeyFactory()))
 		.getSimpleObjectAdapter(CommitDao.class);
 
 	Key d1 = new Key();

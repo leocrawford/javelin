@@ -15,7 +15,7 @@ import java.util.List;
 import org.junit.Test;
 
 import com.crypticbit.javelin.store.*;
-import com.crypticbit.javelin.store.DigestFactory.DigestMethod;
+import com.crypticbit.javelin.store.KeyFactory.DigestMethod;
 
 public class MemoryCasTest {
 

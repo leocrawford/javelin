@@ -11,14 +11,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.DigestFactory;
+import com.crypticbit.javelin.store.KeyFactory;
 
 public class DigestTest {
 
     @Test
     public void test() {
 	byte[] randomData = createRandomData();
-	Key originalDigest = new DigestFactory().getDefaultDigest(randomData);
+	Key originalDigest = new KeyFactory().getDefaultDigest(randomData);
 	byte[] originalDigestAsByte = originalDigest.getDigestAsByte();
 	String originalDigestAsString = originalDigest.getDigestAsString();
 	Key recoveredDigestByByte = new Key(originalDigestAsByte);

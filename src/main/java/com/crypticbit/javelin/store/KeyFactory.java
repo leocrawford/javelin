@@ -4,7 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /* Create a MessageDigest based on a byte array, or potentially an InputStream */
-public class DigestFactory {
+public class KeyFactory {
 
     private static final DigestMethod DEFAULT_DIGEST_METHOD = DigestMethod.SHA1;
 

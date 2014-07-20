@@ -15,13 +15,13 @@ import com.crypticbit.javelin.store.*;
  */
 public class MemoryCasKas implements CasKasStore {
 
-    private DigestFactory digestFactory;
+    private KeyFactory digestFactory;
 
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.cas");
 
     private final TreeMap<Key, byte[]> casMap = new TreeMap<>();
 
-    public MemoryCasKas(DigestFactory digestFactory) {
+    public MemoryCasKas(KeyFactory digestFactory) {
 	this.digestFactory = digestFactory;
     }
 
@@ -42,7 +42,7 @@ public class MemoryCasKas implements CasKasStore {
     }
 
     @Override
-    public DigestFactory getDigestFactory() {
+    public KeyFactory getDigestFactory() {
 	return digestFactory;
     }
 

@@ -9,6 +9,5 @@ public class StoreException extends Exception {
 
     public StoreException(String message, Throwable cause) {
 	super(message, cause);
-	// TODO Auto-generated constructor stub
     }
 }

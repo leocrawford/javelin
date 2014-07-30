@@ -5,18 +5,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Provides a memory based CAS. The digest is calculated using a <code>digestFactory</code> which is created at
- * instantiation, and has the same life as this object. You can change the default algorithm used by accessing the
- * factory.
+ * Provides a memory based AddressableStorage. 
  */
-public class MemoryCasKas implements AddressableStorage {
+public class MemoryAddressableStorage implements AddressableStorage {
 
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.cas");
     private final TreeMap<Key, byte[]> backingMap = new TreeMap<>();
     private final Map<Class<?>, Adapter<?>> adapters = new HashMap<>();
-
-    public MemoryCasKas() {
-    }
 
     @Override
     public String getName() {

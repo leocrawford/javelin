@@ -19,14 +19,14 @@ public class DigestTest {
     public void test() {
 	byte[] randomData = createRandomData();
 	Key originalDigest = new KeyFactory().getDefaultDigest(randomData);
-	byte[] originalDigestAsByte = originalDigest.getDigestAsByte();
-	String originalDigestAsString = originalDigest.getDigestAsString();
+	byte[] originalDigestAsByte = originalDigest.getKeyAsBytes();
+	String originalDigestAsString = originalDigest.getKeyAsString();
 	Key recoveredDigestByByte = new Key(originalDigestAsByte);
-	assertArrayEquals(originalDigestAsByte, recoveredDigestByByte.getDigestAsByte());
-	assertEquals(originalDigestAsString, recoveredDigestByByte.getDigestAsString());
+	assertArrayEquals(originalDigestAsByte, recoveredDigestByByte.getKeyAsBytes());
+	assertEquals(originalDigestAsString, recoveredDigestByByte.getKeyAsString());
 	Key recoveredDigestByString = new Key(originalDigestAsString);
-	assertArrayEquals(originalDigestAsByte, recoveredDigestByString.getDigestAsByte());
-	assertEquals(originalDigestAsString, recoveredDigestByString.getDigestAsString());
+	assertArrayEquals(originalDigestAsByte, recoveredDigestByString.getKeyAsBytes());
+	assertEquals(originalDigestAsString, recoveredDigestByString.getKeyAsString());
     }
 
     @Test

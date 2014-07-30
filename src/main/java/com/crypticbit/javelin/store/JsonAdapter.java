@@ -5,13 +5,12 @@ import java.nio.charset.Charset;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
+/* Converts JsonElement to byte array and back so it can be persisted */
+
 public class JsonAdapter implements Adapter<JsonElement> {
 
     static Gson gson = new Gson();
     static KeyFactory keyFactory = new KeyFactory();
-
-    public JsonAdapter() {
-    }
 
     @Override
     public byte[] toByteArray(JsonElement element) {
@@ -27,6 +26,5 @@ public class JsonAdapter implements Adapter<JsonElement> {
     public Key getContentDigest(JsonElement element) {
 	return keyFactory.getDefaultDigest(toByteArray(element));
     }
-
 
 }

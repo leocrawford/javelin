@@ -19,7 +19,7 @@ public class KeyFactory {
     public Key getDigest(DigestMethod method, byte[] data) {
 	MessageDigest digest = method.createDigest();
 	digest.update(data);
-	return new Key(digest);
+	return new Key(digest.digest());
     }
 
     /** Set the method that will be used to generate digests if <code>getDefaultDigest</code> is called */

@@ -175,9 +175,9 @@ public class DataStructureTest extends TestUtils{
 	DataStructure jca = new DataStructure(store);
 	jca.write(JSON_EXAMPLE);
 	jca.commit();
-	byte[] labelsAddress = SerializationUtils.serialize(jca.getLabelsAddress());
+	byte[] labelsAddress = jca.getLabelsAddress().getKeyAsBytes();
 
-	DataStructure jca2 = new DataStructure(store, (Key) SerializationUtils.deserialize(labelsAddress), "HEAD");
+	DataStructure jca2 = new DataStructure(store, new Key(labelsAddress), "HEAD");
 	jca2.checkout();
 	Assert.assertEquals(jca.read(), jca2.read());
     }

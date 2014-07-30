@@ -1,20 +1,12 @@
 package com.crypticbit.javelin.store;
 
-import java.nio.charset.Charset;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+/* Adapter to convert Key to and from byte array */
 
 public class KeyAdapter implements Adapter<Key> {
 
-    static KeyFactory keyFactory = new KeyFactory();
-
-    public KeyAdapter() {
-    }
-
     @Override
     public byte[] toByteArray(Key key) {
-	return key.getDigestAsByte();
+	return key.getKeyAsBytes();
     }
 
     @Override
@@ -27,6 +19,5 @@ public class KeyAdapter implements Adapter<Key> {
 	// only should be called for content addressable values
 	throw new UnsupportedOperationException();
     }
-
 
 }

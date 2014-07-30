@@ -9,7 +9,7 @@ public class StorageFactory {
     }
 
     public AddressableStorage createMemoryCas() {
-	AddressableStorage as = new MemoryCasKas();
+	AddressableStorage as = new MemoryAddressableStorage();
 	as.registerAdapter(new JsonAdapter(), JsonElement.class);
 	as.registerAdapter(new KeyAdapter(), Key.class);
 	return as;

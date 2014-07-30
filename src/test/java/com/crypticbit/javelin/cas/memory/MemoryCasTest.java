@@ -23,13 +23,6 @@ public class MemoryCasTest {
 
     private StorageFactory cf = new StorageFactory();
 
-    @Test
-    public void testCheck() throws UnsupportedEncodingException, StoreException, IOException, NoSuchAlgorithmException {
-	AddressableStorage cas = cf.createMemoryCas();
-	Key md1 = cas.store(prFromString("\"message 1\""),JsonElement.class);
-	assertTrue(cas.check(md1));
-	assertFalse(cas.check(new Key(MessageDigest.getInstance("SHA-1"))));
-    }
 
     @Test
     public void testGet() throws UnsupportedEncodingException, StoreException, IOException {

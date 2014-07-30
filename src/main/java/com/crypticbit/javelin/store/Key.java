@@ -2,74 +2,68 @@ package com.crypticbit.javelin.store;
 
 import java.io.Serializable;
 import java.nio.ByteBuffer;
-import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Random;
 
 import com.google.common.io.BaseEncoding;
 
 /**
- * Subclases must implement Comparable
+ * Used to uniquely identify resources. Can expose itself as String or byte[]
  * 
- * @author leo
  */
-public class Key implements Comparable<Key>, Serializable {
+public class Key implements Comparable<Key> {
 
-    private byte[] digest;
+    private byte[] keyAsBytes;
 
     /** Random digest */
     public Key() {
-	digest = createRandomData(64);
+	keyAsBytes = createRandomData(64);
     }
 
-    public Key(byte[] digestAsByte) {
-	this.digest = digestAsByte;
+    public Key(byte[] keyAsBytes) {
+	this.keyAsBytes = keyAsBytes;
     }
 
-    public Key(MessageDigest messageDigest) {
-	digest = messageDigest.digest();
-    }
-
-    public Key(String string) {
-	this.digest = BaseEncoding.base32Hex().decode(string);
+    public Key(String keyAsString) {
+	this.keyAsBytes = BaseEncoding.base32Hex().decode(keyAsString);
     }
 
     @Override
-    public int compareTo(Key o) {
-	if (o instanceof Key) {
-	    return ByteBuffer.wrap(digest).compareTo(ByteBuffer.wrap(((Key) o).digest));
+    public int compareTo(Key key) {
+	if (key instanceof Key) {
+	    return ByteBuffer.wrap(keyAsBytes).compareTo(ByteBuffer.wrap(key.keyAsBytes));
 	}
 	else {
-	    return this.getClass().getName().compareTo(o.getClass().getName());
+	    return this.getClass().getName().compareTo(key.getClass().getName());
 	}
     }
 
     @Override
     public boolean equals(Object compare) {
 	if (compare instanceof Key) {
-	    return Arrays.equals(digest, ((Key) compare).digest);
+	    return Arrays.equals(keyAsBytes, ((Key) compare).keyAsBytes);
 	}
 	else {
 	    return false;
 	}
     }
 
-    public byte[] getDigestAsByte() {
-	return digest;
+    public byte[] getKeyAsBytes() {
+	return keyAsBytes;
     }
 
-    public String getDigestAsString() {
-	return BaseEncoding.base32Hex().encode(getDigestAsByte());
+    public String getKeyAsString() {
+	return BaseEncoding.base32Hex().encode(getKeyAsBytes());
     }
 
     @Override
     public int hashCode() {
-	return ByteBuffer.wrap(digest).hashCode();
+	return ByteBuffer.wrap(keyAsBytes).hashCode();
     }
 
     @Override
     public String toString() {
-	return getDigestAsString().substring(0, 6);
+	return getKeyAsString().substring(0, 6);
     }
 
     private static byte[] createRandomData(int length) {

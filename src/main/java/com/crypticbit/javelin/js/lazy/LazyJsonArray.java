@@ -3,9 +3,7 @@ package com.crypticbit.javelin.js.lazy;
 import java.util.AbstractList;
 import java.util.List;
 
-import com.crypticbit.javelin.js.BackedElement;
-
-public class LazyJsonArray extends AbstractList<Object> implements BackedElement {
+public class LazyJsonArray extends AbstractList<Object> {
 
     private List<Reference> backingList;
 
@@ -23,14 +21,12 @@ public class LazyJsonArray extends AbstractList<Object> implements BackedElement
 	return backingList.get(index).getValue();
     }
 
-    @Override
     public Object getBackedValue() {
 	return backingList;
     }
 
     @Override
     public Object set(int index, Object element) {
-	System.out.println("Backing lit " + backingList.getClass());
 	return backingList.set(index, new ValueReference(element)).getValue();
     }
 

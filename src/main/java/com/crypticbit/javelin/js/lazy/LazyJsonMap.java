@@ -2,11 +2,10 @@ package com.crypticbit.javelin.js.lazy;
 
 import java.util.Map;
 
-import com.crypticbit.javelin.js.BackedElement;
 import com.google.common.collect.HackedTransformedEntriesMap;
 import com.google.common.collect.Maps.EntryTransformer;
 
-public class LazyJsonMap extends HackedTransformedEntriesMap<String, Reference, Object> implements BackedElement {
+public class LazyJsonMap extends HackedTransformedEntriesMap<String, Reference, Object> {
 
     public LazyJsonMap(Map<String, Reference> backingMap) {
 	super(backingMap, new EntryTransformer<String, Reference, Object>() {

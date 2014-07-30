@@ -16,46 +16,37 @@ import org.junit.Test;
 
 import com.crypticbit.javelin.store.*;
 import com.crypticbit.javelin.store.KeyFactory.DigestMethod;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
 public class MemoryCasTest {
 
     private StorageFactory cf = new StorageFactory();
 
     @Test
-    public void testChangeDigestBetweenOperations() throws UnsupportedEncodingException, StoreException, IOException {
-	ContentAddressableStorage cas = cf.createMemoryCas();
-
-	Key md1 = cas.store(prFromString("message 1"));
-	cas.getDigestFactory().setDefault(DigestMethod.SHA256);
-	Key md2 = cas.store(prFromString("message 2"));
-	assertEquals("9238IACC441303APBHFSS02FVHPLCK2G", md1.getDigestAsString());
-	assertEquals("GHR8RNN6B7NULVFBISLLA51H86U27DN36F3GT2R8QABN9AO9KL40====", md2.getDigestAsString());
-    }
-
-    @Test
     public void testCheck() throws UnsupportedEncodingException, StoreException, IOException, NoSuchAlgorithmException {
-	ContentAddressableStorage cas = cf.createMemoryCas();
-	Key md1 = cas.store(prFromString("message 1"));
+	AddressableStorage cas = cf.createMemoryCas();
+	Key md1 = cas.store(prFromString("\"message 1\""),JsonElement.class);
 	assertTrue(cas.check(md1));
 	assertFalse(cas.check(new Key(MessageDigest.getInstance("SHA-1"))));
     }
 
     @Test
     public void testGet() throws UnsupportedEncodingException, StoreException, IOException {
-	ContentAddressableStorage cas = cf.createMemoryCas();
-	Key md1 = cas.store(prFromString("message 1"));
-	Key md2 = cas.store(prFromString("message 2"));
+	AddressableStorage cas = cf.createMemoryCas();
+	Key md1 = cas.store(prFromString("\"message 1\""),JsonElement.class);
+	Key md2 = cas.store(prFromString("\"message 2\""),JsonElement.class);
 
-	assertEquals("message 1", prToString(cas.get(md1)));
-	assertEquals("message 2", prToString(cas.get(md2)));
+	assertEquals("\"message 1\"", prToString(cas.get(md1,JsonElement.class)));
+	assertEquals("\"message 2\"", prToString(cas.get(md2,JsonElement.class)));
     }
 
     @Test
     public void testList() throws UnsupportedEncodingException, StoreException, IOException {
-	ContentAddressableStorage cas = cf.createMemoryCas();
+	AddressableStorage cas = cf.createMemoryCas();
 	Key md[] = new Key[10];
 	for (int loop = 0; loop < 10; loop++) {
-	    md[loop] = cas.store(prFromString("message" + loop));
+	    md[loop] = cas.store(prFromString("message" + loop),JsonElement.class);
 	}
 	List<Key> list = cas.list();
 	assertEquals(10, list.size());
@@ -70,10 +61,10 @@ public class MemoryCasTest {
 
     @Test
     public void testListAfterStart() throws UnsupportedEncodingException, StoreException, IOException {
-	ContentAddressableStorage cas = cf.createMemoryCas();
+	AddressableStorage cas = cf.createMemoryCas();
 	List<Key> createList = new LinkedList<>();
 	for (int loop = 0; loop < 10; loop++) {
-	    createList.add(cas.store(prFromString("message" + loop)));
+	    createList.add(cas.store(prFromString("message" + loop),JsonElement.class));
 	}
 	Collections.sort(createList);
 	List<Key> list = cas.list(createList.get(5));
@@ -87,33 +78,14 @@ public class MemoryCasTest {
 	}
     }
 
-    @Test
-    public void testStoreWithDefaultSha1DigestMethod() throws StoreException, IOException {
-	ContentAddressableStorage cas = cf.createMemoryCas();
-	Key md = cas.store(prFromString("message 1"));
-	org.junit.Assert.assertEquals("9238IACC441303APBHFSS02FVHPLCK2G", md.getDigestAsString());
+    private Gson gson = new Gson();
+
+    private JsonElement prFromString(String string) throws UnsupportedEncodingException {
+	return gson.fromJson(string, JsonElement.class);
     }
 
-    @Test
-    public void testStoreWithSha256DigestMethod() throws StoreException, IOException {
-	ContentAddressableStorage cas = cf.createMemoryCas();
-	cas.getDigestFactory().setDefault(DigestMethod.SHA256);
-	Key md1 = cas.store(prFromString("message 1"));
-	Key md2 = cas.store(prFromString("message 2"));
-	org.junit.Assert.assertNotEquals(md1.getDigestAsString(), md2.getDigestAsString());
-	org.junit.Assert.assertNotEquals(md1.getDigestAsByte(), md2.getDigestAsByte());
-	org.junit.Assert.assertEquals("MKJATSD3877UDPE3EVMKO8H8H3NBG7SH78872458CVG0JGBLHSI0====", md1
-		.getDigestAsString());
-	org.junit.Assert.assertEquals("GHR8RNN6B7NULVFBISLLA51H86U27DN36F3GT2R8QABN9AO9KL40====", md2
-		.getDigestAsString());
-    }
-
-    private PersistableResource prFromString(String string) throws UnsupportedEncodingException {
-	return new GeneralPersistableResource(string);
-    }
-
-    private String prToString(PersistableResource pr) throws UnsupportedEncodingException, IOException {
-	return pr.toString();
+    private String prToString(JsonElement jsonElement) throws UnsupportedEncodingException, IOException {
+	return jsonElement.toString();
     }
 
 }

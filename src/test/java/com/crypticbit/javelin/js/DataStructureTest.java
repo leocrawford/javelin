@@ -16,6 +16,7 @@ import org.junit.Test;
 import com.crypticbit.javelin.js.DataStructure.MergeType;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.*;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
@@ -45,7 +46,7 @@ public class DataStructureTest extends TestUtils{
 	String JSON_EXAMPLE_3a = "[\"a\",{\"a\":1,\"b\":TRUE,\"c\":2.1}]";
 
 	enableLog();
-	CasKasStore memoryStore = new StorageFactory().createMemoryCas();
+	AddressableStorage  memoryStore = new StorageFactory().createMemoryCas();
 	DataStructure jca = new DataStructure(memoryStore);
 	jca.write(JSON_EXAMPLEa).commit();
 	DataStructure jca2 = jca.branch();
@@ -123,7 +124,7 @@ public class DataStructureTest extends TestUtils{
 
     @Test
     public void testConcurrentWriteUsingTwoObjects() throws IOException, StoreException, VisitorException {
-	CasKasStore store = new StorageFactory().createMemoryCas();
+	AddressableStorage store = new StorageFactory().createMemoryCas();
 	DataStructure jca = new DataStructure(store);
 	jca.write(JSON_EXAMPLE);
 	jca.commit();
@@ -149,7 +150,7 @@ public class DataStructureTest extends TestUtils{
 
     @Test
     public void testMultiplBranches() throws StoreException, VisitorException {
-	CasKasStore store = new StorageFactory().createMemoryCas();
+	AddressableStorage store = new StorageFactory().createMemoryCas();
 	DataStructure d1 = new DataStructure(store).write(JSON_EXAMPLE).commit();
 	DataStructure d2 = d1.branch();
 	d1.write(JSON_EXAMPLE_2).commit().saveLabel("Branch1");
@@ -170,7 +171,7 @@ public class DataStructureTest extends TestUtils{
     @Test
     public void testReadWriteUsingTwoObjects() throws IOException, StoreException, JsonSyntaxException,
 	    VisitorException {
-	CasKasStore store = new StorageFactory().createMemoryCas();
+	AddressableStorage store = new StorageFactory().createMemoryCas();
 	DataStructure jca = new DataStructure(store);
 	jca.write(JSON_EXAMPLE);
 	jca.commit();
@@ -222,9 +223,9 @@ public class DataStructureTest extends TestUtils{
 	ds2.checkout();
     }
 
-    private void dump(ContentAddressableStorage cas) throws StoreException {
+    private void dump(AddressableStorage cas) throws StoreException {
 	for (Key d : cas.list()) {
-	    System.out.println(d + "->" + cas.get(d));
+	    System.out.println(d + "->" + cas.get(d,JsonElement.class));
 	}
     }
 

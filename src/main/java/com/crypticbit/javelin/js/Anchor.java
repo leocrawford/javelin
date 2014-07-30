@@ -2,10 +2,10 @@ package com.crypticbit.javelin.js;
 
 import java.io.Serializable;
 
+import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.KeyAddressableStorage;
 import com.crypticbit.javelin.store.StoreException;
+import com.google.gson.JsonElement;
 
 /**
  * The "anchor" represents any branch, including head. After every write the anchor is updated with the reference to the
@@ -26,7 +26,7 @@ public class Anchor implements Serializable {
 	address = new Key();
     }
 
-    Anchor(KeyAddressableStorage kas, Anchor clone) throws StoreException {
+    Anchor(AddressableStorage kas, Anchor clone) throws StoreException {
 	this();
 	write(kas, clone.read(kas));
     }
@@ -40,9 +40,9 @@ public class Anchor implements Serializable {
 	return address;
     }
 
-    public Key read(KeyAddressableStorage kas) throws StoreException {
+    public Key read(AddressableStorage kas) throws StoreException {
 	if (kas.check(address)) {
-	    destination = new Key(kas.get(address).getBytes());
+	    destination = kas.get(address, Key.class);
 	    return destination;
 	}
 	else {
@@ -50,8 +50,8 @@ public class Anchor implements Serializable {
 	}
     }
 
-    public void write(KeyAddressableStorage kas, Key newReference) throws StoreException {
-	kas.store(address, destination, newReference);
+    public void write(AddressableStorage kas, Key newReference) throws StoreException {
+	kas.store(address, destination, newReference, Key.class);
 	destination = newReference;
     }
 

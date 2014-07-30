@@ -1,18 +1,19 @@
 package com.crypticbit.javelin.js;
 
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.ContentAddressableStorage;
+import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 
 public abstract class DataAccessInterface<T> {
 
-    protected ContentAddressableStorage cas;
+    protected AddressableStorage cas;
     protected JsonStoreAdapterFactory jsa;
 
-    protected DataAccessInterface(ContentAddressableStorage cas, JsonStoreAdapterFactory jsa) {
+    protected DataAccessInterface(AddressableStorage cas, JsonStoreAdapterFactory jsa) {
 	this.cas = cas;
 	this.jsa = jsa;
     }

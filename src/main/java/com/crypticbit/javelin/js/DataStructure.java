@@ -6,14 +6,15 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.text.html.HTMLDocument.HTMLReader.SpecialAction;
-
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.*;
+import com.crypticbit.javelin.store.AddressableStorage;
+import com.crypticbit.javelin.store.Key;
+import com.crypticbit.javelin.store.Adapter;
+import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
@@ -43,7 +44,7 @@ public class DataStructure {
      */
     private Commit commit;
     /** The underlying data store */
-    private CasKasStore store;
+    private AddressableStorage store;
     private JsonStoreAdapterFactory jsonFactory;
 
     /**
@@ -52,7 +53,7 @@ public class DataStructure {
      * @throws VisitorException
      * @throws StoreException
      */
-    public DataStructure(CasKasStore store) throws StoreException, VisitorException {
+    public DataStructure(AddressableStorage store) throws StoreException, VisitorException {
 	setup(store);
 	labelsAnchor = new ExtendedAnchor<LabelsDao>(jsonFactory, LabelsDao.class);
 	LabelsDao labels = new LabelsDao();
@@ -72,7 +73,7 @@ public class DataStructure {
      * @throws StoreException
      * @throws JsonSyntaxException
      */
-    DataStructure(CasKasStore store, Key labelsAddress, String label) throws JsonSyntaxException, StoreException,
+    DataStructure(AddressableStorage store, Key labelsAddress, String label) throws JsonSyntaxException, StoreException,
 	    VisitorException, Error {
 	setup(store);
 	this.labelsAnchor = new ExtendedAnchor<LabelsDao>(labelsAddress, jsonFactory, LabelsDao.class);
@@ -130,7 +131,7 @@ public class DataStructure {
     public void exportAll(OutputStream outputStream) throws JsonSyntaxException, StoreException, VisitorException,
 	    IOException {
 
-	ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+/*	ObjectOutputStream oos = new ObjectOutputStream(outputStream);
 	Set<Key> tempCas = new HashSet<>();
 	Set<Key> tempKas = new HashSet<>();
 
@@ -151,7 +152,7 @@ public class DataStructure {
 	    for (Commit v : x.vertexSet()) {
 		tempCas.addAll(v.getAllIdentities());
 		System.out.println("Commit=" + v.getIdentity2() + "," + v.toString() + ","
-			+ store.get(v.getIdentity2()));
+			+ store.getCas(v.getIdentity2()));
 	    }
 
 	}
@@ -171,21 +172,21 @@ public class DataStructure {
 	missing.removeAll(tempKas);
 
 	for (Key i : missing) {
-	    System.out.println(i + "=" + store.get(i));
+	    System.out.println(i + "=" + store.getCas(i));
 
 	}
 
 	Map<Key, PersistableResource> casRresult = new HashMap<>();
 	for (Key i : tempCas) {
-	    casRresult.put(i, store.get(i));
+	    casRresult.put(i, store.getCas(i));
 	}
 	oos.writeObject(casRresult);
 
 	Map<Key, PersistableResource> kasResult = new HashMap<>();
 	for (Key i : tempKas) {
-	    kasResult.put(i, store.get(i));
+	    kasResult.put(i, store.getCas(i));
 	}
-	oos.writeObject(kasResult);
+	oos.writeObject(kasResult); */
 
     }
 
@@ -207,7 +208,7 @@ public class DataStructure {
 
     public void importAll(InputStream inputStream, MergeType mergeType) throws IOException, ClassNotFoundException,
 	    StoreException, JsonSyntaxException, VisitorException {
-	ObjectInputStream ois = new ObjectInputStream(inputStream);
+	/*ObjectInputStream ois = new ObjectInputStream(inputStream);
 
 	Map<String, Key> labelToCommitMap = (Map<String, Key>) ois.readObject();
 
@@ -222,7 +223,7 @@ public class DataStructure {
 			+ idOfValueWrittenToStore + ")");
 	    }
 	}
-
+*/
 	/*
 	 * // copy all kas elements Map<Identity, PersistableResource> kasResult = (Map<Identity, PersistableResource>)
 	 * ois.readObject(); for (Entry<Identity, PersistableResource> x : kasResult.entrySet()) {
@@ -238,7 +239,7 @@ public class DataStructure {
 	 */
 
 	// merge labels
-
+/*
 	for (String importedLabel : labelToCommitMap.keySet()) {
 	    if (localLabels.hasCommitAnchor(importedLabel)) {
 		ExtendedAnchor<CommitDao> localCommitAnchor = localLabels.getCommitAnchor(importedLabel, jsonFactory);
@@ -278,7 +279,7 @@ public class DataStructure {
 	    else
 		System.out.println("Not writing label");
 	    // localLabels.addAnchor(importedLabel, importedCommitAnchor);
-	}
+	}*/
 
     }
 
@@ -356,7 +357,7 @@ public class DataStructure {
 	checkout();
     }
 
-    private void setup(CasKasStore store) {
+    private void setup(AddressableStorage store) {
 	this.store = store;
 	jsonFactory = new JsonStoreAdapterFactory(store);
     }

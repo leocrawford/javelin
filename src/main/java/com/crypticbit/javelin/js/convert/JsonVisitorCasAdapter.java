@@ -3,8 +3,8 @@ package com.crypticbit.javelin.js.convert;
 import java.util.List;
 import java.util.Map;
 
-import com.crypticbit.javelin.store.ContentAddressableStorage;
-import com.crypticbit.javelin.store.GeneralPersistableResource;
+import com.crypticbit.javelin.store.AddressableStorage;
+import com.crypticbit.javelin.store.JsonAdapter;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.common.base.Function;
@@ -14,10 +14,10 @@ import com.google.gson.reflect.TypeToken;
 public class JsonVisitorCasAdapter implements JsonVisitorSource<Key, JsonElement>,
 	JsonVisitorDestination<Key, Key, Object> {
 
-    private ContentAddressableStorage cas;
+    private AddressableStorage cas;
     private Gson gson;
 
-    public JsonVisitorCasAdapter(ContentAddressableStorage cas, Gson gson) {
+    public JsonVisitorCasAdapter(AddressableStorage cas, Gson gson) {
 	this.cas = cas;
 	this.gson = gson;
     }
@@ -39,7 +39,7 @@ public class JsonVisitorCasAdapter implements JsonVisitorSource<Key, JsonElement
     @Override
     public JsonElement parse(Key digest) throws VisitorException {
 	try {
-	    return new JsonParser().parse(cas.get(digest).getAsString());
+	    return cas.get(digest, JsonElement.class);
 	}
 	catch (JsonSyntaxException | StoreException e) {
 	    throw new VisitorException("Unable to read value from location " + digest + " in store " + cas.getName(), e);
@@ -94,7 +94,7 @@ public class JsonVisitorCasAdapter implements JsonVisitorSource<Key, JsonElement
     // FIXME if already exists
     Key write(Object value) throws VisitorException {
 	try {
-	    return cas.store(new GeneralPersistableResource(gson.toJson(value)));
+	    return cas.store(gson.toJsonTree(value),JsonElement.class);
 	}
 	catch (StoreException e) {
 	    throw new VisitorException("Unable to write to CAS store " + cas.getName(), e);

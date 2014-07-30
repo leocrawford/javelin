@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import com.crypticbit.javelin.js.convert.*;
-import com.crypticbit.javelin.store.ContentAddressableStorage;
-import com.crypticbit.javelin.store.Key;
+import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,7 +18,7 @@ public class JsonStoreAdapterFactory {
     private DataAccessInterface<JsonElement> jea;
 
     private DataAccessInterface<Object> joa;
-    private ContentAddressableStorage cas;
+    private AddressableStorage cas;
 
     /**
      * The internal gson object we use, which will write out Digest values properly
@@ -40,7 +39,7 @@ public class JsonStoreAdapterFactory {
 		}
 	    }).create();
 
-    public JsonStoreAdapterFactory(ContentAddressableStorage cas) {
+    public JsonStoreAdapterFactory(AddressableStorage cas) {
 	JsonVisitorObjectAdapter jsonObjectAdapter = new JsonVisitorObjectAdapter(this);
 	joa = new CasDai(cas, this, jsonObjectAdapter, jsonObjectAdapter);
 	JsonVisitorElementAdapter jsonElementAdapter = new JsonVisitorElementAdapter(this);
@@ -77,7 +76,7 @@ public class JsonStoreAdapterFactory {
 	private JsonVisitorSource<Object, B> source;
 	private JsonVisitorDestination<T, F, Key> dest;
 
-	private CasDai(ContentAddressableStorage cas, JsonStoreAdapterFactory jsa, JsonVisitorSource<Object, B> source,
+	private CasDai(AddressableStorage cas, JsonStoreAdapterFactory jsa, JsonVisitorSource<Object, B> source,
 		JsonVisitorDestination<T, F, Key> dest) {
 	    super(cas, jsa);
 	    this.source = source;

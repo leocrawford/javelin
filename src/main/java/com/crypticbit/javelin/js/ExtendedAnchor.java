@@ -1,8 +1,8 @@
 package com.crypticbit.javelin.js;
 
 import com.crypticbit.javelin.js.convert.VisitorException;
+import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.KeyAddressableStorage;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 
@@ -21,7 +21,7 @@ public class ExtendedAnchor<T> extends Anchor {
 	dataInterface = jsonFactory.getSimpleObjectAdapter(clazz);
     }
 
-    public ExtendedAnchor(KeyAddressableStorage kas, Anchor clone, JsonStoreAdapterFactory jsonFactory, Class<T> clazz)
+    public ExtendedAnchor(AddressableStorage kas, Anchor clone, JsonStoreAdapterFactory jsonFactory, Class<T> clazz)
 	    throws StoreException {
 	super(kas, clone);
 	// FIXME - write called in super
@@ -32,12 +32,12 @@ public class ExtendedAnchor<T> extends Anchor {
 	return cachedValue;
     }
 
-    public T readEndPoint(KeyAddressableStorage kas) throws JsonSyntaxException, StoreException, VisitorException {
+    public T readEndPoint(AddressableStorage kas) throws JsonSyntaxException, StoreException, VisitorException {
 	cachedValue = dataInterface.read(read(kas));
 	return cachedValue;
     }
 
-    public T writeEndPoint(KeyAddressableStorage kas, T value) throws StoreException, VisitorException {
+    public T writeEndPoint(AddressableStorage kas, T value) throws StoreException, VisitorException {
 	cachedValue = value;
 	write(kas, dataInterface.write(value));
 	return value;

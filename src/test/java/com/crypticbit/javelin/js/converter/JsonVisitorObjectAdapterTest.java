@@ -14,10 +14,7 @@ import org.junit.Test;
 import com.crypticbit.javelin.js.DataAccessInterface;
 import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.KeyFactory;
-import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.MemoryCasKas;
-import com.crypticbit.javelin.store.StoreException;
+import com.crypticbit.javelin.store.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
@@ -29,7 +26,7 @@ public class JsonVisitorObjectAdapterTest {
     @Test
     public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, VisitorException {
 
-	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new MemoryCasKas(new KeyFactory()));
+	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
 
 	DataAccessInterface<Object> jsonObjectAdapter = store.getJsonObjectAdapter();
 	Key stringIdentity = jsonObjectAdapter.write("String");

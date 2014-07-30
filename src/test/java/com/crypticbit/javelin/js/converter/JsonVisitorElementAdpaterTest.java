@@ -10,10 +10,7 @@ import org.junit.Test;
 import com.crypticbit.javelin.js.DataAccessInterface;
 import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.KeyFactory;
-import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.MemoryCasKas;
-import com.crypticbit.javelin.store.StoreException;
+import com.crypticbit.javelin.store.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
@@ -24,7 +21,7 @@ public class JsonVisitorElementAdpaterTest {
 
     @Test
     public void testConvertPrimitive() throws JsonSyntaxException, StoreException, VisitorException {
-	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new MemoryCasKas(new KeyFactory()));
+	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
 	DataAccessInterface<JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
 
 	final String jsonFloat = "2.1";
@@ -37,7 +34,7 @@ public class JsonVisitorElementAdpaterTest {
     @Test
     public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, VisitorException {
 
-	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new MemoryCasKas(new KeyFactory()));
+	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
 
 	DataAccessInterface<JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
 	Key stringIdentity = jsonElementAdapter.write(GSON.fromJson("\"String\"", JsonElement.class));

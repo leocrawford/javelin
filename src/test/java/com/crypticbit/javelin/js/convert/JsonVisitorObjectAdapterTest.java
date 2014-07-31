@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js.converter;
+package com.crypticbit.javelin.js.convert;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

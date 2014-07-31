@@ -1,17 +1,12 @@
 package com.crypticbit.javelin.js;
 
-import java.io.IOException;
 import java.util.Set;
 
 import com.crypticbit.javelin.js.convert.*;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 
 public class JsonStoreAdapterFactory {
 
@@ -23,21 +18,7 @@ public class JsonStoreAdapterFactory {
     /**
      * The internal gson object we use, which will write out Digest values properly
      */
-    private static final Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Key.class,
-	    new TypeAdapter<Key>() {
-
-		@Override
-		public Key read(JsonReader in) throws IOException {
-		    return new Key(in.nextString());
-		}
-
-		@Override
-		public void write(JsonWriter out, Key value) throws IOException {
-		    if (value != null) {
-			out.value(value.getKeyAsString());
-		    }
-		}
-	    }).create();
+    private static final Gson gson = new Gson();
 
     public JsonStoreAdapterFactory(AddressableStorage cas) {
 	JsonVisitorObjectAdapter jsonObjectAdapter = new JsonVisitorObjectAdapter(this);
@@ -61,8 +42,8 @@ public class JsonStoreAdapterFactory {
 
     public JsonVisitor<Set<Key>, Set<Key>, Key, JsonElement> getKeyAdapter() {
 	JsonVisitorKeyAdapter jsonKeyAdapter = new JsonVisitorKeyAdapter();
-	return new JsonVisitor<Set<Key>, Set<Key>, Key, JsonElement>(jsonKeyAdapter,
-		new JsonVisitorCasAdapter(cas, gson));
+	return new JsonVisitor<Set<Key>, Set<Key>, Key, JsonElement>(jsonKeyAdapter, new JsonVisitorCasAdapter(cas,
+		gson));
 
     }
 
@@ -87,8 +68,7 @@ public class JsonStoreAdapterFactory {
 
 	@Override
 	public Key write(Object object) throws VisitorException {
-	    JsonVisitor<Key, Key, Object, B> sv = new JsonVisitor<Key, Key, Object, B>(casAdapter,
-		    source);
+	    JsonVisitor<Key, Key, Object, B> sv = new JsonVisitor<Key, Key, Object, B>(casAdapter, source);
 	    return sv.visit(object);
 	}
     }

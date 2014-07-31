@@ -53,13 +53,20 @@ public class MemoryAddressableStorage implements AddressableStorage {
 
     @Override
     public <S> Key store(S value, Class<S> clazz) throws StoreException {
-	Adapter<S> adapter = (Adapter<S>) adapters.get(clazz);
+	Adapter<S> adapter = getAdapter(clazz);
 	Key key = adapter.getContentDigest(value);
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Adding " + key + " = " + value);
 	}
 	backingMap.put(key, adapter.toByteArray(value));
 	return key;
+    }
+
+    private <S> Adapter<S> getAdapter(Class<S> clazz) throws StoreException {
+	Adapter<S> adapter = (Adapter<S>) adapters.get(clazz);
+	if( adapter == null)
+	    throw new StoreException("There is no adapter for type "+clazz);
+	return adapter;
     }
 
     @Override

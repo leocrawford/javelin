@@ -8,38 +8,45 @@ import com.google.gson.JsonSyntaxException;
 
 public class ExtendedAnchor<T> extends Anchor {
 
-    private DataAccessInterface<T> dataInterface;
+    private AddressableStorage store;
+    private Class<T> clazz;
     private T cachedValue;
 
-    public ExtendedAnchor(Key address, JsonStoreAdapterFactory jsonFactory, Class<T> clazz) {
+    public ExtendedAnchor(Key address, AddressableStorage store, Class<T> clazz) {
 	super(address);
-	dataInterface = jsonFactory.getSimpleObjectAdapter(clazz);
+	this.store = store;
+	this.clazz = clazz;
     }
 
-    public ExtendedAnchor(JsonStoreAdapterFactory jsonFactory, Class<T> clazz) {
+    public ExtendedAnchor(AddressableStorage store, Class<T> clazz) {
 	super();
-	dataInterface = jsonFactory.getSimpleObjectAdapter(clazz);
+	this.store = store;
+	this.clazz = clazz;
+  
     }
 
-    public ExtendedAnchor(AddressableStorage kas, Anchor clone, JsonStoreAdapterFactory jsonFactory, Class<T> clazz)
+    public ExtendedAnchor(AddressableStorage store, Anchor clone, Class<T> clazz)
 	    throws StoreException {
-	super(kas, clone);
+	super(store, clone);
 	// FIXME - write called in super
-	dataInterface = jsonFactory.getSimpleObjectAdapter(clazz);
+	this.store = store;
+	this.clazz = clazz;
+
     }
 
     public T getEndPoint() {
 	return cachedValue;
     }
 
-    public T readEndPoint(AddressableStorage kas) throws JsonSyntaxException, StoreException, VisitorException {
-	cachedValue = dataInterface.read(read(kas));
+    public T readEndPoint(AddressableStorage store) throws JsonSyntaxException, StoreException, VisitorException {
+	cachedValue = store.get(read(store),clazz);
 	return cachedValue;
     }
 
-    public T writeEndPoint(AddressableStorage kas, T value) throws StoreException, VisitorException {
+    public T writeEndPoint(AddressableStorage store, T value) throws StoreException, VisitorException {
 	cachedValue = value;
-	write(kas, dataInterface.write(value));
+	System.out.println("store:"+store+","+this.store);
+	write(store, store.store(value,clazz));
 	return value;
     }
 

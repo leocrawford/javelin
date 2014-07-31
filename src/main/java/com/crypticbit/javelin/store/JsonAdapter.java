@@ -3,27 +3,31 @@ package com.crypticbit.javelin.store;
 import java.nio.charset.Charset;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 
 /* Converts JsonElement to byte array and back so it can be persisted */
 
-public class JsonAdapter implements Adapter<JsonElement> {
+public class JsonAdapter<S> implements Adapter<S> {
 
-    static Gson gson = new Gson();
-    static KeyFactory keyFactory = new KeyFactory();
+    static final Gson gson = new Gson();
+    static final KeyFactory keyFactory = new KeyFactory();
+    private Class<S> clazz;
+
+    public JsonAdapter(Class<S> clazz) {
+	this.clazz = clazz;
+    }
 
     @Override
-    public byte[] toByteArray(JsonElement element) {
+    public byte[] toByteArray(S element) {
 	return gson.toJson(element).getBytes(Charset.forName("UTF-8"));
     }
 
     @Override
-    public JsonElement fromByteArray(byte[] bytes) {
-	return gson.fromJson(new String(bytes, Charset.forName("UTF-8")), JsonElement.class);
+    public S fromByteArray(byte[] bytes) {
+	return gson.fromJson(new String(bytes, Charset.forName("UTF-8")), clazz);
     }
 
     @Override
-    public Key getContentDigest(JsonElement element) {
+    public Key getContentDigest(S element) {
 	return keyFactory.getDefaultDigest(toByteArray(element));
     }
 

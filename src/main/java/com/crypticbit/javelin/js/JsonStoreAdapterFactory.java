@@ -16,8 +16,8 @@ import com.google.gson.stream.JsonWriter;
 public class JsonStoreAdapterFactory {
 
     private DataAccessInterface<JsonElement> jea;
-
     private DataAccessInterface<Object> joa;
+
     private AddressableStorage cas;
 
     /**
@@ -64,10 +64,6 @@ public class JsonStoreAdapterFactory {
 	return new JsonVisitor<Set<Key>, Set<Key>, Key, JsonElement>(jsonKeyAdapter,
 		new JsonVisitorCasAdapter(cas, gson));
 
-    }
-
-    public <T> DataAccessInterface<T> getSimpleObjectAdapter(Class<T> clazz) {
-	return new JsonSimpleClassAdapter<T>(cas, clazz, this);
     }
 
     private final class CasDai<T, F, I, B> extends DataAccessInterface<Object> {

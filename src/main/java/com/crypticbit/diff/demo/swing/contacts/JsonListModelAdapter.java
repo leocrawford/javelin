@@ -4,8 +4,8 @@ import javax.swing.AbstractListModel;
 
 import com.crypticbit.javelin.js.DataStructure;
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.js.lazy.LazyJsonArray;
 import com.crypticbit.javelin.store.StoreException;
+import com.crypticbit.javelin.util.lazy.LazyJsonArray;
 import com.google.gson.JsonSyntaxException;
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;

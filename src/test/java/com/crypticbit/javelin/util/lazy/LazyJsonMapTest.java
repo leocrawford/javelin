@@ -1,9 +1,13 @@
-package com.crypticbit.javelin.js.lazy;
+package com.crypticbit.javelin.util.lazy;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+
+import com.crypticbit.javelin.util.lazy.LazyJsonMap;
+import com.crypticbit.javelin.util.lazy.Reference;
+import com.crypticbit.javelin.util.lazy.ValueReference;
 
 public class LazyJsonMapTest {
 

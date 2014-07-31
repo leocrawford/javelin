@@ -16,6 +16,7 @@ import org.jgrapht.graph.SimpleDirectedGraph;
 import com.crypticbit.javelin.diff.Snapshot;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.js.convert.VisitorException;
+import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.common.base.Supplier;
@@ -33,14 +34,17 @@ public class Commit implements Comparable<Commit> {
     private CommitDao dao;
     private Key daoDigest;
     private JsonStoreAdapterFactory jsonFactory;
+    private AddressableStorage store;
 
-    Commit(CommitDao dao, Key daoDigest, JsonStoreAdapterFactory jsonFactory) {
+    Commit(CommitDao dao, Key daoDigest, JsonStoreAdapterFactory jsonFactory,AddressableStorage store) {
 	assert (dao != null);
 	assert (daoDigest != null);
 
 	this.dao = dao;
 	this.daoDigest = daoDigest;
+	// FIXME do we need the factory?
 	this.jsonFactory = jsonFactory;
+	this.store = store;
     }
 
     @Override
@@ -130,9 +134,8 @@ public class Commit implements Comparable<Commit> {
 
     public Set<Commit> getParents() throws JsonSyntaxException, StoreException, VisitorException {
 	Set<Commit> parents = new TreeSet<>();
-	DataAccessInterface<CommitDao> simpleObjectAdapter = jsonFactory.getSimpleObjectAdapter(CommitDao.class);
 	for (Key parent : dao.getParents()) {
-	    Commit wrap = wrap(simpleObjectAdapter.read(parent), parent);
+	    Commit wrap = wrap(store.get(parent,CommitDao.class), parent);
 	    parents.add(wrap);
 	}
 	return parents;
@@ -179,7 +182,7 @@ public class Commit implements Comparable<Commit> {
 
     // FIXME - should we try and find an existing instance?
     Commit wrap(CommitDao dao, Key digest) {
-	return new Commit(dao, digest, jsonFactory);
+	return new Commit(dao, digest, jsonFactory, store);
     }
 
     /**

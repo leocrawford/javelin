@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js.lazy;
+package com.crypticbit.javelin.util.lazy;
 
 public interface Reference {
 

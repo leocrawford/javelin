@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.crypticbit.javelin.js.IdentityReference;
 import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.js.lazy.IdentityReference;
-import com.crypticbit.javelin.js.lazy.LazyJsonArray;
-import com.crypticbit.javelin.js.lazy.LazyJsonMap;
-import com.crypticbit.javelin.js.lazy.Reference;
 import com.crypticbit.javelin.store.Key;
+import com.crypticbit.javelin.util.lazy.LazyJsonArray;
+import com.crypticbit.javelin.util.lazy.LazyJsonMap;
+import com.crypticbit.javelin.util.lazy.Reference;
 import com.google.common.base.Function;
 import com.google.gson.internal.LinkedTreeMap;
 

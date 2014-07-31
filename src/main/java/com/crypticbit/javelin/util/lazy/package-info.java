@@ -3,4 +3,4 @@
  * stored as references which are dereferenced  on-demand (lazily)
  */
 
-package com.crypticbit.javelin.js.lazy;
+package com.crypticbit.javelin.util.lazy;

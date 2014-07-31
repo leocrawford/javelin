@@ -1,19 +1,19 @@
 package com.crypticbit.javelin.js;
 
-import java.io.*;
-import java.util.*;
-import java.util.Map.Entry;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
 
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.AddressableStorage;
+import com.crypticbit.javelin.store.JsonAdapter;
 import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.Adapter;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -55,9 +55,9 @@ public class DataStructure {
      */
     public DataStructure(AddressableStorage store) throws StoreException, VisitorException {
 	setup(store);
-	labelsAnchor = new ExtendedAnchor<LabelsDao>(jsonFactory, LabelsDao.class);
+	labelsAnchor = new ExtendedAnchor<>(store, LabelsDao.class);
 	LabelsDao labels = new LabelsDao();
-	selectedAnchor = labels.addCommitAnchor("HEAD", jsonFactory);
+	selectedAnchor = labels.addCommitAnchor("HEAD", store);
 	labelsAnchor.writeEndPoint(store, labels);
 
 	// see if this works - FIXME
@@ -73,12 +73,12 @@ public class DataStructure {
      * @throws StoreException
      * @throws JsonSyntaxException
      */
-    DataStructure(AddressableStorage store, Key labelsAddress, String label) throws JsonSyntaxException, StoreException,
-	    VisitorException, Error {
+    DataStructure(AddressableStorage store, Key labelsAddress, String label) throws JsonSyntaxException,
+	    StoreException, VisitorException, Error {
 	setup(store);
-	this.labelsAnchor = new ExtendedAnchor<LabelsDao>(labelsAddress, jsonFactory, LabelsDao.class);
+	this.labelsAnchor = new ExtendedAnchor<>(labelsAddress, store, LabelsDao.class);
 	if (labelsAnchor.readEndPoint(store).hasCommitAnchor(label)) {
-	    this.selectedAnchor = labelsAnchor.getEndPoint().getCommitAnchor(label, jsonFactory);
+	    this.selectedAnchor = labelsAnchor.getEndPoint().getCommitAnchor(label, store);
 	}
 	else {
 	    // FIXME exception handling, and thought about changing to unknown branch
@@ -98,7 +98,7 @@ public class DataStructure {
     private DataStructure(DataStructure parent) throws StoreException {
 	setup(parent.store);
 	this.labelsAnchor = parent.labelsAnchor;
-	this.selectedAnchor = new ExtendedAnchor<>(store, parent.selectedAnchor, jsonFactory, CommitDao.class);
+	this.selectedAnchor = new ExtendedAnchor<>(store, parent.selectedAnchor, CommitDao.class);
 
     }
 
@@ -114,7 +114,7 @@ public class DataStructure {
      */
 
     public synchronized DataStructure checkout() throws StoreException, JsonSyntaxException, VisitorException {
-	commit = new Commit(selectedAnchor.readEndPoint(store), selectedAnchor.getDestination(), jsonFactory);
+	commit = new Commit(selectedAnchor.readEndPoint(store), selectedAnchor.getDestination(), jsonFactory, store);
 	element = commit.getElement();
 	if (LOG.isLoggable(Level.FINER)) {
 	    LOG.log(Level.FINER, "Reading commit: " + commit);
@@ -131,62 +131,25 @@ public class DataStructure {
     public void exportAll(OutputStream outputStream) throws JsonSyntaxException, StoreException, VisitorException,
 	    IOException {
 
-/*	ObjectOutputStream oos = new ObjectOutputStream(outputStream);
-	Set<Key> tempCas = new HashSet<>();
-	Set<Key> tempKas = new HashSet<>();
-
-	Map<String, Key> labelToCommitMap = new HashMap<>();
-
-	LabelsDao labels = labelsAnchor.readEndPoint(store);
-	for (String label : labels.getLabels()) {
-	    System.out.println("Processing label " + label);
-	    Key commitAddress = labels.getCommitAnchor(label, jsonFactory).getAddress();
-	    tempKas.add(commitAddress);
-	    CommitDao commitDao = labels.getCommitAnchor(label, jsonFactory).readEndPoint(store);
-	    Key destination = labels.getCommitAnchor(label, jsonFactory).read(store);
-	    System.out.println("dest=" + destination + "," + commitDao);
-	    labelToCommitMap.put(label, destination);
-	    Commit c = new Commit(commitDao, destination, jsonFactory);
-	    DirectedGraph<Commit, DefaultEdge> x = c.getAsGraphToRoot();
-
-	    for (Commit v : x.vertexSet()) {
-		tempCas.addAll(v.getAllIdentities());
-		System.out.println("Commit=" + v.getIdentity2() + "," + v.toString() + ","
-			+ store.getCas(v.getIdentity2()));
-	    }
-
-	}
-
-	oos.writeObject(labelToCommitMap);
-
-	tempKas.add(labelsAnchor.getAddress());
-	tempCas.add(labelsAnchor.getDestination());
-
-	System.out.println("cas: " + tempCas);
-	System.out.println("kas: " + tempKas);
-
-	System.out.println("all: " + store.list());
-
-	Set<Key> missing = new HashSet(store.list());
-	missing.removeAll(tempCas);
-	missing.removeAll(tempKas);
-
-	for (Key i : missing) {
-	    System.out.println(i + "=" + store.getCas(i));
-
-	}
-
-	Map<Key, PersistableResource> casRresult = new HashMap<>();
-	for (Key i : tempCas) {
-	    casRresult.put(i, store.getCas(i));
-	}
-	oos.writeObject(casRresult);
-
-	Map<Key, PersistableResource> kasResult = new HashMap<>();
-	for (Key i : tempKas) {
-	    kasResult.put(i, store.getCas(i));
-	}
-	oos.writeObject(kasResult); */
+	/*
+	 * ObjectOutputStream oos = new ObjectOutputStream(outputStream); Set<Key> tempCas = new HashSet<>(); Set<Key>
+	 * tempKas = new HashSet<>(); Map<String, Key> labelToCommitMap = new HashMap<>(); LabelsDao labels =
+	 * labelsAnchor.readEndPoint(store); for (String label : labels.getLabels()) {
+	 * System.out.println("Processing label " + label); Key commitAddress = labels.getCommitAnchor(label,
+	 * jsonFactory).getAddress(); tempKas.add(commitAddress); CommitDao commitDao = labels.getCommitAnchor(label,
+	 * jsonFactory).readEndPoint(store); Key destination = labels.getCommitAnchor(label, jsonFactory).read(store);
+	 * System.out.println("dest=" + destination + "," + commitDao); labelToCommitMap.put(label, destination); Commit
+	 * c = new Commit(commitDao, destination, jsonFactory); DirectedGraph<Commit, DefaultEdge> x =
+	 * c.getAsGraphToRoot(); for (Commit v : x.vertexSet()) { tempCas.addAll(v.getAllIdentities());
+	 * System.out.println("Commit=" + v.getIdentity2() + "," + v.toString() + "," + store.getCas(v.getIdentity2()));
+	 * } } oos.writeObject(labelToCommitMap); tempKas.add(labelsAnchor.getAddress());
+	 * tempCas.add(labelsAnchor.getDestination()); System.out.println("cas: " + tempCas); System.out.println("kas: "
+	 * + tempKas); System.out.println("all: " + store.list()); Set<Key> missing = new HashSet(store.list());
+	 * missing.removeAll(tempCas); missing.removeAll(tempKas); for (Key i : missing) { System.out.println(i + "=" +
+	 * store.getCas(i)); } Map<Key, PersistableResource> casRresult = new HashMap<>(); for (Key i : tempCas) {
+	 * casRresult.put(i, store.getCas(i)); } oos.writeObject(casRresult); Map<Key, PersistableResource> kasResult =
+	 * new HashMap<>(); for (Key i : tempKas) { kasResult.put(i, store.getCas(i)); } oos.writeObject(kasResult);
+	 */
 
     }
 
@@ -208,22 +171,14 @@ public class DataStructure {
 
     public void importAll(InputStream inputStream, MergeType mergeType) throws IOException, ClassNotFoundException,
 	    StoreException, JsonSyntaxException, VisitorException {
-	/*ObjectInputStream ois = new ObjectInputStream(inputStream);
-
-	Map<String, Key> labelToCommitMap = (Map<String, Key>) ois.readObject();
-
-	LabelsDao localLabels = labelsAnchor.readEndPoint(store);
-
-	// copy all cas elements
-	Map<Key, PersistableResource> casResult = (Map<Key, PersistableResource>) ois.readObject();
-	for (Entry<Key, PersistableResource> x : casResult.entrySet()) {
-	    Key idOfValueWrittenToStore = store.store(x.getValue());
-	    if (!idOfValueWrittenToStore.equals(x.getKey())) {
-		throw new IllegalStateException("The entry " + x.getKey() + " produced a new key on store to local ("
-			+ idOfValueWrittenToStore + ")");
-	    }
-	}
-*/
+	/*
+	 * ObjectInputStream ois = new ObjectInputStream(inputStream); Map<String, Key> labelToCommitMap = (Map<String,
+	 * Key>) ois.readObject(); LabelsDao localLabels = labelsAnchor.readEndPoint(store); // copy all cas elements
+	 * Map<Key, PersistableResource> casResult = (Map<Key, PersistableResource>) ois.readObject(); for (Entry<Key,
+	 * PersistableResource> x : casResult.entrySet()) { Key idOfValueWrittenToStore = store.store(x.getValue()); if
+	 * (!idOfValueWrittenToStore.equals(x.getKey())) { throw new IllegalStateException("The entry " + x.getKey() +
+	 * " produced a new key on store to local (" + idOfValueWrittenToStore + ")"); } }
+	 */
 	/*
 	 * // copy all kas elements Map<Identity, PersistableResource> kasResult = (Map<Identity, PersistableResource>)
 	 * ois.readObject(); for (Entry<Identity, PersistableResource> x : kasResult.entrySet()) {
@@ -239,52 +194,31 @@ public class DataStructure {
 	 */
 
 	// merge labels
-/*
-	for (String importedLabel : labelToCommitMap.keySet()) {
-	    if (localLabels.hasCommitAnchor(importedLabel)) {
-		ExtendedAnchor<CommitDao> localCommitAnchor = localLabels.getCommitAnchor(importedLabel, jsonFactory);
-		switch (mergeType) {
-		case OVERWRITE:
-		    System.out.println("overwrite label " + importedLabel + " from " + localLabels);
-		    // FIXME does deleting read work?
-		    // localCommitAnchor.readEndPoint(store);
-		    localCommitAnchor.write(store, labelToCommitMap.get(importedLabel));
-		    break;
-		case IGNORE_CONFLICT:
-		    System.out.println("Doing nothing with label " + importedLabel + " from " + localLabels);
-		    break;
-		case MERGE:
-		    System.out.println("Merging label " + importedLabel + " from " + localLabels);
-		    localCommitAnchor.readEndPoint(store);
-		    try {
-			Commit ic = new Commit(jsonFactory.getSimpleObjectAdapter(CommitDao.class).read(
-				labelToCommitMap.get(importedLabel)), labelToCommitMap.get(importedLabel), jsonFactory);
-			System.out.println("import destination=" + labelToCommitMap.get(importedLabel));
-			System.out.println("local address=" + localCommitAnchor.getAddress());
-			System.out.println("local destination=" + localCommitAnchor.getDestination());
-			System.out.println(new Commit(localCommitAnchor.getEndPoint(), localCommitAnchor
-				.getDestination(), jsonFactory).getShortestHistory());
-			System.out.println(ic.getShortestHistory());
-
-			localCommitAnchor.writeEndPoint(store, merge(localCommitAnchor, ic,
-				labelToCommitMap.get(importedLabel)).getDao());
-		    }
-		    catch (PatchFailedException e) {
-			// FIXME betetr exception handling
-			throw new StoreException("Can't merge", e);
-		    }
-		    break;
-		}
-	    }
-	    else
-		System.out.println("Not writing label");
-	    // localLabels.addAnchor(importedLabel, importedCommitAnchor);
-	}*/
+	/*
+	 * for (String importedLabel : labelToCommitMap.keySet()) { if (localLabels.hasCommitAnchor(importedLabel)) {
+	 * ExtendedAnchor<CommitDao> localCommitAnchor = localLabels.getCommitAnchor(importedLabel, jsonFactory); switch
+	 * (mergeType) { case OVERWRITE: System.out.println("overwrite label " + importedLabel + " from " +
+	 * localLabels); // FIXME does deleting read work? // localCommitAnchor.readEndPoint(store);
+	 * localCommitAnchor.write(store, labelToCommitMap.get(importedLabel)); break; case IGNORE_CONFLICT:
+	 * System.out.println("Doing nothing with label " + importedLabel + " from " + localLabels); break; case MERGE:
+	 * System.out.println("Merging label " + importedLabel + " from " + localLabels);
+	 * localCommitAnchor.readEndPoint(store); try { Commit ic = new
+	 * Commit(jsonFactory.getSimpleObjectAdapter(CommitDao.class).read( labelToCommitMap.get(importedLabel)),
+	 * labelToCommitMap.get(importedLabel), jsonFactory); System.out.println("import destination=" +
+	 * labelToCommitMap.get(importedLabel)); System.out.println("local address=" + localCommitAnchor.getAddress());
+	 * System.out.println("local destination=" + localCommitAnchor.getDestination()); System.out.println(new
+	 * Commit(localCommitAnchor.getEndPoint(), localCommitAnchor .getDestination(),
+	 * jsonFactory).getShortestHistory()); System.out.println(ic.getShortestHistory());
+	 * localCommitAnchor.writeEndPoint(store, merge(localCommitAnchor, ic,
+	 * labelToCommitMap.get(importedLabel)).getDao()); } catch (PatchFailedException e) { // FIXME betetr exception
+	 * handling throw new StoreException("Can't merge", e); } break; } } else
+	 * System.out.println("Not writing label"); // localLabels.addAnchor(importedLabel, importedCommitAnchor); }
+	 */
 
     }
 
     private Commit getCommitFromAnchor(ExtendedAnchor<CommitDao> anchor) {
-	return new Commit(anchor.getEndPoint(), anchor.getDestination(), jsonFactory);
+	return new Commit(anchor.getEndPoint(), anchor.getDestination(), jsonFactory, store);
     }
 
     public Object lazyRead() throws JsonSyntaxException, StoreException, VisitorException {
@@ -303,7 +237,7 @@ public class DataStructure {
 	ThreeWayDiff patch = getCommitFromAnchor(commitAnchorToMergeA).createChangeSet(commitB);
 	Key valueIdentity = jsonFactory.getJsonObjectAdapter().write(patch.apply());
 	return new Commit(new CommitDao(valueIdentity, new Date(), "auser", new Key[] {
-		commitAnchorToMergeA.getDestination(), addressB }), valueIdentity, jsonFactory);// createCommit(valueIdentity,
+		commitAnchorToMergeA.getDestination(), addressB }), valueIdentity, jsonFactory, store);// createCommit(valueIdentity,
 												// commitAnchorToMergeA.getDestination(),
 												// addressB);
     }
@@ -359,7 +293,10 @@ public class DataStructure {
 
     private void setup(AddressableStorage store) {
 	this.store = store;
+	store.registerAdapter(new JsonAdapter<LabelsDao>(LabelsDao.class), LabelsDao.class);
+	store.registerAdapter(new JsonAdapter<CommitDao>(CommitDao.class), CommitDao.class);
 	jsonFactory = new JsonStoreAdapterFactory(store);
+
     }
 
     private Commit createCommit(Key valueIdentity, Key... parents) throws StoreException, VisitorException {
@@ -369,7 +306,7 @@ public class DataStructure {
 	}
 	return new Commit(selectedAnchor.writeEndPoint(store,
 		new CommitDao(valueIdentity, new Date(), "auser", parents)), selectedAnchor.getDestination(),
-		jsonFactory);
+		jsonFactory, store);
 
     }
 }

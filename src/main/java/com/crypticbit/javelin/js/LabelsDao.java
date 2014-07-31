@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 
 public class LabelsDao implements Serializable {
@@ -16,14 +17,14 @@ public class LabelsDao implements Serializable {
 
     }
 
-    public ExtendedAnchor<CommitDao> addCommitAnchor(String label, JsonStoreAdapterFactory jsonStore) {
-	ExtendedAnchor<CommitDao> result = new ExtendedAnchor<>(jsonStore, CommitDao.class);
+    public ExtendedAnchor<CommitDao> addCommitAnchor(String label, AddressableStorage store) {
+	ExtendedAnchor<CommitDao> result = new ExtendedAnchor<>(store, CommitDao.class);
 	labels.put(label, result.getAddress());
 	return result;
     }
 
-    public ExtendedAnchor<CommitDao> getCommitAnchor(String name, JsonStoreAdapterFactory jsonStore) {
-	return new ExtendedAnchor<>(labels.get(name), jsonStore, CommitDao.class);
+    public ExtendedAnchor<CommitDao> getCommitAnchor(String name, AddressableStorage store) {
+	return new ExtendedAnchor<>(labels.get(name), store, CommitDao.class);
     }
 
     public boolean hasCommitAnchor(String label) {

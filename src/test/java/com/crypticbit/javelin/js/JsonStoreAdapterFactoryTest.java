@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import com.crypticbit.javelin.js.convert.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.*;
 import com.google.gson.JsonElement;

@@ -34,20 +34,11 @@ public class JsonVisitor<T, F, I, B> implements VisitorContext<I, T> {
     private JsonVisitorDestination<T, F, I> destination;
     private JsonVisitorSource<I, B> source;
 
-    public JsonVisitor(JsonVisitorDestination<T, F, I> destination, JsonVisitorSource<I, B> source) {
+    public JsonVisitor(JsonVisitorSource<I, B> source, JsonVisitorDestination<T, F, I> destination) {
 	this.destination = destination;
 	this.source = source;
     }
 
-    @Override
-    public Function<T, T> getHaltFunction() {
-	return new Function<T, T>() {
-	    @Override
-	    public T apply(T input) {
-		return input;
-	    }
-	};
-    }
 
     @Override
     public Function<I, T> getRecurseFunction() {

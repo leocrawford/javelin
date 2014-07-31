@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js.convert;
+package com.crypticbit.javelin.js.converter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -11,8 +11,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.js.DataAccessInterface;
-import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
+import com.crypticbit.javelin.js.convert.DataAccessInterface;
+import com.crypticbit.javelin.js.convert.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.*;
 import com.google.gson.Gson;

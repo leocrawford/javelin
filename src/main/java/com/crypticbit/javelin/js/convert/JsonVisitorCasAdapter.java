@@ -4,22 +4,23 @@ import java.util.List;
 import java.util.Map;
 
 import com.crypticbit.javelin.store.AddressableStorage;
-import com.crypticbit.javelin.store.JsonAdapter;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.common.base.Function;
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 public class JsonVisitorCasAdapter implements JsonVisitorSource<Key, JsonElement>,
 	JsonVisitorDestination<Key, Key, Object> {
 
     private AddressableStorage cas;
-    private Gson gson;
+    private static Gson gson = new Gson();
 
-    public JsonVisitorCasAdapter(AddressableStorage cas, Gson gson) {
+    public JsonVisitorCasAdapter(AddressableStorage cas) {
 	this.cas = cas;
-	this.gson = gson;
     }
 
     @Override
@@ -94,7 +95,7 @@ public class JsonVisitorCasAdapter implements JsonVisitorSource<Key, JsonElement
     // FIXME if already exists
     Key write(Object value) throws VisitorException {
 	try {
-	    return cas.store(gson.toJsonTree(value),JsonElement.class);
+	    return cas.store(gson.toJsonTree(value), JsonElement.class);
 	}
 	catch (StoreException e) {
 	    throw new VisitorException("Unable to write to CAS store " + cas.getName(), e);

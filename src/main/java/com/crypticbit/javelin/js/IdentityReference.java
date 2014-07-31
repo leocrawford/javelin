@@ -1,5 +1,6 @@
 package com.crypticbit.javelin.js;
 
+import com.crypticbit.javelin.js.convert.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;

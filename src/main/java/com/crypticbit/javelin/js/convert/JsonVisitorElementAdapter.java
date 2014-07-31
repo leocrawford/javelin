@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.crypticbit.javelin.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.store.Key;
 import com.google.common.base.Function;
 import com.google.gson.*;
@@ -13,10 +12,10 @@ import com.google.gson.reflect.TypeToken;
 public class JsonVisitorElementAdapter implements JsonVisitorDestination<JsonElement, JsonElement, Key>,
 	JsonVisitorSource<JsonElement, JsonElement> {
 
-    private JsonStoreAdapterFactory jsa;
+    private static final Gson gson = new Gson();
 
-    public JsonVisitorElementAdapter(JsonStoreAdapterFactory jsa) {
-	this.jsa = jsa;
+
+    public JsonVisitorElementAdapter() {
     }
 
     @Override
@@ -36,13 +35,13 @@ public class JsonVisitorElementAdapter implements JsonVisitorDestination<JsonEle
 
     @Override
     public List<JsonElement> parseList(JsonElement in) {
-	return jsa.getGson().fromJson(in, new TypeToken<List<JsonElement>>() {
+	return gson.fromJson(in, new TypeToken<List<JsonElement>>() {
 	}.getType());
     }
 
     @Override
     public Map<String, JsonElement> parseMap(JsonElement in) {
-	return jsa.getGson().fromJson(in, new TypeToken<Map<String, JsonElement>>() {
+	return gson.fromJson(in, new TypeToken<Map<String, JsonElement>>() {
 	}.getType());
     }
 
@@ -78,7 +77,7 @@ public class JsonVisitorElementAdapter implements JsonVisitorDestination<JsonEle
     public JsonElement writeValue(Key source, Object value) {
 	// Hack to get unit tests to pass. Did fail because a converting from
 	// JsonElement to Object and back gave a different type for same value
-	return new JsonParser().parse(jsa.getGson().toJson(value));
+	return new JsonParser().parse(gson.toJson(value));
 	// return jsa.getGson().toJsonTree(value);
     }
 

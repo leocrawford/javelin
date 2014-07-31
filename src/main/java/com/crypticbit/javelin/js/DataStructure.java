@@ -10,6 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.crypticbit.javelin.diff.ThreeWayDiff;
+import com.crypticbit.javelin.js.convert.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.JsonAdapter;

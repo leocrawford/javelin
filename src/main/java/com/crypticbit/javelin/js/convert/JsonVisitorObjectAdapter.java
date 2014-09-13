@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.crypticbit.javelin.js.IdentityReference;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.util.lazy.LazyJsonArray;
 import com.crypticbit.javelin.util.lazy.LazyJsonMap;

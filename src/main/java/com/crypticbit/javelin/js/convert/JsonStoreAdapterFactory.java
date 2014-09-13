@@ -17,9 +17,9 @@ public class JsonStoreAdapterFactory {
 
     public JsonStoreAdapterFactory(AddressableStorage cas) {
 	JsonVisitorObjectAdapter jsonObjectAdapter = new JsonVisitorObjectAdapter(this);
-	joa = new TreeMapper(cas, jsonObjectAdapter, jsonObjectAdapter);
+	joa = new AddressableStorageMapper(cas, jsonObjectAdapter, jsonObjectAdapter);
 	JsonVisitorElementAdapter jsonElementAdapter = new JsonVisitorElementAdapter();
-	jea = new TreeMapper(cas, jsonElementAdapter, jsonElementAdapter);
+	jea = new AddressableStorageMapper(cas, jsonElementAdapter, jsonElementAdapter);
 	this.cas = cas;
     }
 

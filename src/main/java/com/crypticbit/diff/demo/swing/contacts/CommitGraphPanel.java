@@ -1,15 +1,9 @@
 package com.crypticbit.diff.demo.swing.contacts;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Map;
 
-import org.jgraph.JGraph;
-import org.jgraph.event.GraphSelectionEvent;
-import org.jgraph.event.GraphSelectionListener;
-import org.jgraph.graph.DefaultGraphCell;
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.ext.JGraphModelAdapter;
+import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
@@ -18,71 +12,89 @@ import com.crypticbit.javelin.js.DataStructure;
 import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
-import com.jgraph.layout.JGraphFacade;
-import com.jgraph.layout.tree.JGraphTreeLayout;
+import com.mxgraph.layout.mxParallelEdgeLayout;
+import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
+import com.mxgraph.swing.mxGraphComponent;
 
 import difflib.PatchFailedException;
 
-public class CommitGraphPanel extends JGraph {
+public class CommitGraphPanel extends mxGraphComponent {
 
-    private MergeableDirectedGraph asGraphToRoots = new MergeableDirectedGraph(DefaultEdge.class);
+	public CommitGraphPanel(Commit... commits) throws JsonSyntaxException,
+			StoreException, VisitorException {
 
-    public CommitGraphPanel(DataStructure jca) throws StoreException, IOException, JsonSyntaxException,
-	    PatchFailedException, InterruptedException, VisitorException {
-
-	System.out.println(asGraphToRoots.edgeSet().size());
-
-	show(new Commit[] { jca.getCommit() });
-	setModel(new JGraphModelAdapter<Commit, DefaultEdge>(asGraphToRoots));
-
-	System.out.println(asGraphToRoots.edgeSet().size());
-	addGraphSelectionListener(new GraphSelectionListener() {
-
-	    @Override
-	    public void valueChanged(GraphSelectionEvent e) {
-		if (e.getCell() instanceof DefaultGraphCell
-			&& ((DefaultGraphCell) e.getCell()).getUserObject() instanceof Commit) {
-		    Commit c = (Commit) ((DefaultGraphCell) e.getCell()).getUserObject();
-		    // do something
-
-		}
-
-	    }
-	});
-    }
-
-    public void show(Commit[] commits) throws JsonSyntaxException, UnsupportedEncodingException, StoreException,
-	    VisitorException {
-	System.out.println(Commit.getAsGraphToRoots(commits));
-	asGraphToRoots.merge(Commit.getAsGraphToRoots(commits));
-	final JGraphFacade graphFacade = new JGraphFacade(this);
-	JGraphTreeLayout lay = new JGraphTreeLayout();
-	lay.run(graphFacade);
-	final Map nestedMap = graphFacade.createNestedMap(true, true);
-	getGraphLayoutCache().edit(nestedMap);
-    }
-
-    public static final class MergeableDirectedGraph extends ListenableDirectedGraph<Commit, DefaultEdge> {
-	public MergeableDirectedGraph(Class<? extends DefaultEdge> edgeClass) {
-	    super(edgeClass);
+		super(getAdapter(commits));
 
 	}
 
-	public void merge(DirectedGraph<Commit, DefaultEdge> asGraphToRoots1) {
-	    for (DefaultEdge x : asGraphToRoots1.edgeSet()) {
-		System.out.println("y");
-		Commit edgeSource = asGraphToRoots1.getEdgeSource(x);
-		Commit edgeTarget = asGraphToRoots1.getEdgeTarget(x);
-		if (!containsVertex(edgeSource)) {
-		    addVertex(edgeSource);
-		}
-		if (!containsVertex(edgeTarget)) {
-		    addVertex(edgeTarget);
-		}
-		addEdge(edgeSource, edgeTarget);
-	    }
+	private static JGraphXAdapter getAdapter(Commit... commits) throws JsonSyntaxException, StoreException, VisitorException {
+		JGraphXAdapter adapter = new JGraphXAdapter(Commit.getAsGraphToRoots(commits));
+		/*
+		 * xa.getSelectionModel().addListener(mxEvent.SELECT, new
+		 * mxIEventListener() {
+		 * 
+		 * @Override public void invoke(Object arg0, mxEventObject e) { //
+		 * tCommit c = (Commit) ((DefaultGraphCell) e.getCell()) //
+		 * .getUserObject(); System.out.println(e); } });
+		 */
 
+		new mxHierarchicalLayout(adapter).execute(adapter
+				.getDefaultParent());
+		new mxParallelEdgeLayout(adapter).execute(adapter
+				.getDefaultParent());
+	return adapter;	
+		
+	
 	}
-    }
+	
+	private MergeableDirectedGraph asGraphToRoots = new MergeableDirectedGraph(
+			DefaultEdge.class);
+
+	public CommitGraphPanel(DataStructure jca) throws StoreException,
+			IOException, JsonSyntaxException, PatchFailedException,
+			InterruptedException, VisitorException {
+
+		this(new Commit[] { jca.getCommit() });
+	}
+
+	public static final class MergeableDirectedGraph extends
+			ListenableDirectedGraph<Commit, DefaultEdge> {
+		public MergeableDirectedGraph(Class<? extends DefaultEdge> edgeClass) {
+			super(edgeClass);
+
+		}
+
+		public void merge(DirectedGraph<Commit, DefaultEdge> asGraphToRoots1) {
+			for (DefaultEdge x : asGraphToRoots1.edgeSet()) {
+				System.out.println("y");
+				Commit edgeSource = asGraphToRoots1.getEdgeSource(x);
+				Commit edgeTarget = asGraphToRoots1.getEdgeTarget(x);
+				if (!containsVertex(edgeSource)) {
+					addVertex(edgeSource);
+				}
+				if (!containsVertex(edgeTarget)) {
+					addVertex(edgeTarget);
+				}
+				addEdge(edgeSource, edgeTarget);
+			}
+
+		}
+	}
+
+	public void show(Commit[] commits) {
+		try {
+			setGraph(getAdapter(commits));
+		} catch (JsonSyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (StoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (VisitorException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 
 }

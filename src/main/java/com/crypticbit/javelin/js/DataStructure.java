@@ -264,7 +264,6 @@ public class DataStructure {
 	// FIXME reuse JSON
 	// FIXME should this be in JCA?
 	Object jsonObject = new Gson().fromJson(json, Object.class);
-	System.out.println(jsonObject.getClass());
 	if (!(jsonObject instanceof Map) && !(jsonObject instanceof List)) {
 	    throw new IllegalArgumentException("Invalid container object");
 	}

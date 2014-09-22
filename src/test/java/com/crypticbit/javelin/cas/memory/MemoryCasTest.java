@@ -1,27 +1,21 @@
 package com.crypticbit.javelin.cas.memory;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.js.CommitDao;
-import com.crypticbit.javelin.js.convert.DataAccessInterface;
-import com.crypticbit.javelin.js.convert.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.*;
-import com.crypticbit.javelin.store.KeyFactory.DigestMethod;
+import com.crypticbit.javelin.store.AddressableStorage;
+import com.crypticbit.javelin.store.Key;
+import com.crypticbit.javelin.store.StorageFactory;
+import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;

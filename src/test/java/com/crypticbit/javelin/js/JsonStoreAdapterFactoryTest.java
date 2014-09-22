@@ -6,8 +6,9 @@ import org.junit.Test;
 
 import com.crypticbit.javelin.js.convert.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.*;
-import com.google.gson.JsonElement;
+import com.crypticbit.javelin.store.AddressableStorage;
+import com.crypticbit.javelin.store.StorageFactory;
+import com.crypticbit.javelin.store.StoreException;
 
 public class JsonStoreAdapterFactoryTest {
 

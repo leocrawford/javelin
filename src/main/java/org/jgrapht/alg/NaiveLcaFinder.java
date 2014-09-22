@@ -36,7 +36,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.Graph;
 
 public class NaiveLcaFinder<V, E> {
 

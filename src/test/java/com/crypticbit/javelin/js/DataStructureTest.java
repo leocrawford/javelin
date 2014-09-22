@@ -9,13 +9,15 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.SerializationUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.crypticbit.javelin.js.DataStructure.MergeType;
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.*;
+import com.crypticbit.javelin.store.AddressableStorage;
+import com.crypticbit.javelin.store.Key;
+import com.crypticbit.javelin.store.StorageFactory;
+import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;

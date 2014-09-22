@@ -24,14 +24,12 @@ class AddressableStorageMapper<T, F, I, B> implements DataAccessInterface<Object
 
     @Override
     public Object read(Key commitId) throws VisitorException {
-	System.out.println("read: " + commitId);
 	JsonVisitor<T, F, Key, JsonElement> sv = new JsonVisitor<>(casAdapter, dest);
 	return sv.visit(commitId);
     }
 
     @Override
     public Key write(Object object) throws VisitorException {
-	System.out.println("write: " + object);
 	JsonVisitor<Key, Key, Object, B> sv = new JsonVisitor<Key, Key, Object, B>(source, casAdapter);
 	return sv.visit(object);
     }

@@ -5,7 +5,6 @@ import java.io.Serializable;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
-import com.google.gson.JsonElement;
 
 /**
  * The "anchor" represents any branch, including head. After every write the anchor is updated with the reference to the

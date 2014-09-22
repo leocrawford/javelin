@@ -8,15 +8,11 @@ import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 
 import org.jgraph.JGraph;
-import org.jgraph.event.GraphSelectionEvent;
-import org.jgraph.event.GraphSelectionListener;
-import org.jgraph.graph.DefaultGraphCell;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
-import com.crypticbit.diff.demo.swing.JSONEditPanel.UpdateType;
 import com.crypticbit.javelin.js.Commit;
 import com.crypticbit.javelin.js.DataStructure;
 import com.crypticbit.javelin.js.convert.VisitorException;
@@ -47,9 +43,9 @@ public class CommitBuilder extends JFrame {
 	jSplit.add(jsonPanel);
 
 	getContentPane().add(jSplit);
-	commitPanel.addGraphSelectionListener(new GraphSelectionListener() {
+/*	commitPanel.addGraphSelectionListener(new GraphSelectionListener() {
 
-	    @Override
+	  *  @Override
 	    public void valueChanged(GraphSelectionEvent e) {
 		if (e.getCell() instanceof DefaultGraphCell
 			&& ((DefaultGraphCell) e.getCell()).getUserObject() instanceof Commit) {
@@ -65,7 +61,7 @@ public class CommitBuilder extends JFrame {
 
 	    }
 	});
-
+*/
 	pack();
 	new Thread() {
 	    @Override

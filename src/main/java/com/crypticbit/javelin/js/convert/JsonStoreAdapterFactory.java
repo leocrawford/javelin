@@ -2,10 +2,8 @@ package com.crypticbit.javelin.js.convert;
 
 import java.util.Set;
 
-import com.crypticbit.javelin.js.convert.*;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
 public class JsonStoreAdapterFactory {

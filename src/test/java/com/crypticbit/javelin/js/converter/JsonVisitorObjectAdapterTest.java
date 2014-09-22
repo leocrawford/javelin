@@ -14,7 +14,9 @@ import org.junit.Test;
 import com.crypticbit.javelin.js.convert.DataAccessInterface;
 import com.crypticbit.javelin.js.convert.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.js.convert.VisitorException;
-import com.crypticbit.javelin.store.*;
+import com.crypticbit.javelin.store.Key;
+import com.crypticbit.javelin.store.StorageFactory;
+import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 

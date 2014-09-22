@@ -271,7 +271,7 @@ public class Commit implements Comparable<Commit> {
 	protected void debug(int indent) {
 		try {
 			System.out.print(indent(indent)
-					+ "Commit "+getIdentity2() + ": ");
+					+ "Commit "+getHead() + ": ");
 			System.out.println(getElement().toString());
 			for (Commit parent : getParents()) {
 				parent.debug(indent + 1);

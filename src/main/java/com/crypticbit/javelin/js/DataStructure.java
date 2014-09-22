@@ -115,7 +115,7 @@ public class DataStructure {
      */
 
     public synchronized DataStructure checkout() throws StoreException, JsonSyntaxException, VisitorException {
-	commit = new Commit(selectedAnchor.readEndPoint(store), selectedAnchor.getDestination(), jsonFactory, store);
+	commit = new Commit(selectedAnchor.readEndPoint(store), selectedAnchor.getValue(), jsonFactory, store);
 	element = commit.getElement();
 	if (LOG.isLoggable(Level.FINER)) {
 	    LOG.log(Level.FINER, "Reading commit: " + commit);
@@ -125,7 +125,7 @@ public class DataStructure {
 
     public synchronized DataStructure commit() throws StoreException, VisitorException {
 	Key write = jsonFactory.getJsonElementAdapter().write(element);
-	commit = createCommit(write, selectedAnchor.getDestination());
+	commit = createCommit(write, selectedAnchor.getValue());
 	return checkout();
     }
 
@@ -219,7 +219,7 @@ public class DataStructure {
     }
 
     private Commit getCommitFromAnchor(ExtendedAnchor<CommitDao> anchor) {
-	return new Commit(anchor.getEndPoint(), anchor.getDestination(), jsonFactory, store);
+	return new Commit(anchor.getEndPoint(), anchor.getValue(), jsonFactory, store);
     }
 
     public Object lazyRead() throws JsonSyntaxException, StoreException, VisitorException {
@@ -229,7 +229,7 @@ public class DataStructure {
     public synchronized DataStructure merge(DataStructure other) throws JsonSyntaxException, StoreException,
 	    PatchFailedException, VisitorException {
 	// FIXME factor out code for creating change set to Commit and make work for multiple labels
-	commit = merge(selectedAnchor, getCommitFromAnchor(other.selectedAnchor), other.selectedAnchor.getDestination());
+	commit = merge(selectedAnchor, getCommitFromAnchor(other.selectedAnchor), other.selectedAnchor.getValue());
 	return checkout();
     }
 
@@ -238,7 +238,7 @@ public class DataStructure {
 	ThreeWayDiff patch = getCommitFromAnchor(commitAnchorToMergeA).createChangeSet(commitB);
 	Key valueIdentity = jsonFactory.getJsonObjectAdapter().write(patch.apply());
 	return new Commit(new CommitDao(valueIdentity, new Date(), "auser", new Key[] {
-		commitAnchorToMergeA.getDestination(), addressB }), valueIdentity, jsonFactory, store);// createCommit(valueIdentity,
+		commitAnchorToMergeA.getValue(), addressB }), valueIdentity, jsonFactory, store);// createCommit(valueIdentity,
 												// commitAnchorToMergeA.getDestination(),
 												// addressB);
     }
@@ -287,7 +287,7 @@ public class DataStructure {
 
 	Key valueIdentity = jsonFactory.getJsonObjectAdapter().write(originalResult);
 	// FIXME patterm of commit = create then checkout repeated several times
-	commit = createCommit(valueIdentity, selectedAnchor.getDestination());
+	commit = createCommit(valueIdentity, selectedAnchor.getValue());
 	checkout();
     }
 
@@ -302,10 +302,10 @@ public class DataStructure {
     private Commit createCommit(Key valueIdentity, Key... parents) throws StoreException, VisitorException {
 	// FIXME hardcoded user
 	if (LOG.isLoggable(Level.FINEST)) {
-	    LOG.log(Level.FINEST, "Updating id -> " + selectedAnchor.getDestination());
+	    LOG.log(Level.FINEST, "Updating id -> " + selectedAnchor.getValue());
 	}
 	return new Commit(selectedAnchor.writeEndPoint(store,
-		new CommitDao(valueIdentity, new Date(), "auser", parents)), selectedAnchor.getDestination(),
+		new CommitDao(valueIdentity, new Date(), "auser", parents)), selectedAnchor.getValue(),
 		jsonFactory, store);
 
     }

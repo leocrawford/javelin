@@ -7,51 +7,52 @@ import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 
 /**
- * The "anchor" represents any branch, including head. After every write the anchor is updated with the reference to the
- * head of the write. It's expected that one node will be hard-coded (set manually) which will represent the head or
- * root node, and all others will be referenced from within that data structure.
+ * The "anchor" represents an address and its associated value (which is also as
+ * address). This is used when we have content addressable storage but we need
+ * to preserve a permanent link to it.
  */
 
+@SuppressWarnings("serial")
 public class Anchor implements Serializable {
 
-    private Key address;
-    private transient Key destination;
+	private Key address;
+	private transient Key value;
 
-    public Anchor(Key address) {
-	this.address = address;
-    }
-
-    Anchor() {
-	address = new Key();
-    }
-
-    Anchor(AddressableStorage kas, Anchor clone) throws StoreException {
-	this();
-	write(kas, clone.read(kas));
-    }
-
-    /** Same as read() but returns cached/last value */
-    public Key getDestination() {
-	return destination;
-    }
-
-    public Key getAddress() {
-	return address;
-    }
-
-    public Key read(AddressableStorage kas) throws StoreException {
-	if (kas.check(address)) {
-	    destination = kas.get(address, Key.class);
-	    return destination;
+	public Anchor(Key address) {
+		this.address = address;
 	}
-	else {
-	   return null;
-	}
-    }
 
-    public void write(AddressableStorage kas, Key newReference) throws StoreException {
-	kas.store(address, destination, newReference, Key.class);
-	destination = newReference;
-    }
+	Anchor() {
+		address = new Key();
+	}
+
+	Anchor(AddressableStorage store, Anchor clone) throws StoreException {
+		this();
+		setValue(store, clone.getValue(store));
+	}
+
+	/** Same as read() but returns cached/last value */
+	public Key getValue() {
+		return value;
+	}
+
+	public Key getAddress() {
+		return address;
+	}
+
+	public Key getValue(AddressableStorage store) throws StoreException {
+		if (store.check(address)) {
+			value = store.get(address, Key.class);
+			return value;
+		} else {
+			return null;
+		}
+	}
+
+	public void setValue(AddressableStorage store, Key newValue)
+			throws StoreException {
+		store.store(address, value, newValue, Key.class);
+		value = newValue;
+	}
 
 }

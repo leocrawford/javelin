@@ -36,8 +36,10 @@ import com.jayway.jsonpath.JsonPath;
 
 public class Commit implements Comparable<Commit> {
 
+	/** The data access object representing this commit */
 	private CommitDao dao;
-	private Key daoDigest;
+	/** The location that this commit is stored at (its hash) */
+	private Key daoKey;
 	private JsonStoreAdapterFactory jsonFactory;
 	private AddressableStorage store;
 
@@ -47,15 +49,14 @@ public class Commit implements Comparable<Commit> {
 		assert (daoDigest != null);
 
 		this.dao = dao;
-		this.daoDigest = daoDigest;
-		// FIXME do we need the factory?
+		this.daoKey = daoDigest;
 		this.jsonFactory = jsonFactory;
 		this.store = store;
 	}
 
 	@Override
 	public int compareTo(Commit o) {
-		return daoDigest.compareTo(o.daoDigest);
+		return daoKey.compareTo(o.daoKey);
 	}
 
 	public ThreeWayDiff createChangeSet(Commit other)
@@ -84,13 +85,7 @@ public class Commit implements Comparable<Commit> {
 
 	@Override
 	public boolean equals(Object obj) {
-		return  obj instanceof Commit && daoDigest.equals(((Commit)obj).daoDigest);
-	}
-
-	public Set<Key> getAllIdentities() throws VisitorException {
-		Set<Key> result = jsonFactory.getKeyAdapter().visit(getHead());
-		result.add(this.daoDigest);
-		return result;
+		return obj instanceof Commit && daoKey.equals(((Commit) obj).daoKey);
 	}
 
 	/**
@@ -131,7 +126,6 @@ public class Commit implements Comparable<Commit> {
 		}
 	}
 
-
 	public JsonElement getElement() throws JsonSyntaxException, StoreException,
 			VisitorException {
 		return jsonFactory.getJsonElementAdapter().read(dao.getHead());
@@ -141,8 +135,8 @@ public class Commit implements Comparable<Commit> {
 		return dao.getHead();
 	}
 
-	public Key getIdentity2() {
-		return daoDigest;
+	public Key getKey() {
+		return daoKey;
 	}
 
 	public Object getObject() throws JsonSyntaxException, StoreException,
@@ -189,7 +183,7 @@ public class Commit implements Comparable<Commit> {
 
 	@Override
 	public int hashCode() {
-		return daoDigest.hashCode();
+		return daoKey.hashCode();
 	}
 
 	public Object navigate(String path) throws JsonSyntaxException,
@@ -200,7 +194,7 @@ public class Commit implements Comparable<Commit> {
 
 	@Override
 	public String toString() {
-		return "Commit: "+this.getIdentity2();
+		return "Commit: " + this.getKey();
 	}
 
 	// FIXME - should we try and find an existing instance?

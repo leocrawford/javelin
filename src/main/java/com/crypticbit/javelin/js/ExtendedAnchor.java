@@ -40,14 +40,14 @@ public class ExtendedAnchor<T> extends Anchor {
 
 	public T readEndPoint(AddressableStorage store) throws JsonSyntaxException,
 			StoreException, VisitorException {
-		cachedValue = store.get(read(store), clazz);
+		cachedValue = store.get(getValue(store), clazz);
 		return cachedValue;
 	}
 
 	public T writeEndPoint(AddressableStorage store, T value)
 			throws StoreException, VisitorException {
 		cachedValue = value;
-		write(store, store.store(value, clazz));
+		setValue(store, store.store(value, clazz));
 		return value;
 	}
 

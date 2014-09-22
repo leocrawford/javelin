@@ -13,6 +13,7 @@ import org.jgrapht.ext.JGraphModelAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
+import com.crypticbit.diff.demo.swing.contacts.CommitGraphPanel;
 import com.crypticbit.javelin.js.Commit;
 import com.crypticbit.javelin.js.DataStructure;
 import com.crypticbit.javelin.js.convert.VisitorException;
@@ -28,14 +29,13 @@ public class CommitBuilder extends JFrame {
 
     private DataStructure jca1, jca2, jca3, jca4;
 
-    private SmartJGraph commitPanel;
+    private CommitGraphPanel commitPanel;
 
     public CommitBuilder() throws StoreException, IOException, JsonSyntaxException, PatchFailedException,
 	    InterruptedException, VisitorException {
 	addDummyData();
 
-	commitPanel = new SmartJGraph();
-	commitPanel.merge(new Commit[] { jca4.getCommit(), jca1.getCommit() });
+	commitPanel = new CommitGraphPanel(jca4.getCommit(), jca1.getCommit());
 	JSplitPane jSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 	final JSONEditPanel jsonPanel = new JSONEditPanel();
 
@@ -98,13 +98,13 @@ public class CommitBuilder extends JFrame {
 	Thread.sleep(4000);
 
 	jca1.merge(jca4);
-	commitPanel.merge(new Commit[] { jca1.getCommit() });
+	commitPanel.show(new Commit[] { jca1.getCommit() });
 
 	Thread.sleep(2000);
 
 	jca4.write("hello").commit();
 
-	commitPanel.merge(new Commit[] { jca4.getCommit() });
+	commitPanel.show(new Commit[] { jca4.getCommit() });
 	System.out.println("x");
     }
 
@@ -113,47 +113,7 @@ public class CommitBuilder extends JFrame {
 	new CommitBuilder();
     }
 
-    public static final class MergeableDirectedGraph extends ListenableDirectedGraph<Commit, DefaultEdge> {
-	public MergeableDirectedGraph(Class<? extends DefaultEdge> edgeClass) {
-	    super(edgeClass);
-
-	}
-
-	public void merge(DirectedGraph<Commit, DefaultEdge> asGraphToRoots1) {
-	    for (DefaultEdge x : asGraphToRoots1.edgeSet()) {
-		Commit edgeSource = asGraphToRoots1.getEdgeSource(x);
-		Commit edgeTarget = asGraphToRoots1.getEdgeTarget(x);
-		if (!containsVertex(edgeSource)) {
-		    addVertex(edgeSource);
-		}
-		if (!containsVertex(edgeTarget)) {
-		    addVertex(edgeTarget);
-		}
-		addEdge(edgeSource, edgeTarget);
-	    }
-
-	}
-    }
-
-    static class SmartJGraph extends JGraph {
-
-	private MergeableDirectedGraph asGraphToRoots = new MergeableDirectedGraph(DefaultEdge.class);;
-
-	SmartJGraph() {
-	    super();
-	    this.setModel(new JGraphModelAdapter<Commit, DefaultEdge>(asGraphToRoots));
-
-	}
-
-	public void merge(Commit[] commits) throws JsonSyntaxException, UnsupportedEncodingException, StoreException,
-		VisitorException {
-	    asGraphToRoots.merge(Commit.getAsGraphToRoots(commits));
-	    final JGraphFacade graphFacade = new JGraphFacade(this);
-	    JGraphTreeLayout lay = new JGraphTreeLayout();
-	    lay.run(graphFacade);
-	    final Map nestedMap = graphFacade.createNestedMap(true, true);
-	    getGraphLayoutCache().edit(nestedMap);
-	}
-
-    }
+   
+    
+    
 }

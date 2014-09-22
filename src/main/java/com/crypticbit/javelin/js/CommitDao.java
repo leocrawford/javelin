@@ -27,12 +27,6 @@ public class CommitDao {
 		this.parents = parents;
 	}
 
-	@Override
-	// FIXME
-	public boolean equals(Object obj) {
-		throw new Error();
-		// return head.equals(((CommitDao) obj).head);
-	}
 
 	public Key getHead() {
 		return head;
@@ -48,23 +42,6 @@ public class CommitDao {
 
 	public Date getWhen() {
 		return when;
-	}
-
-	@Override
-	public int hashCode() {
-		return head.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		// FIXME - It's the commit we want to id, not the head. Two commits
-		// could point at same id.
-		return ""+head
-		/*
-		 * + ":" + user + "@" + SIMPLE_DATE_FORMAT.format(when) + (parents ==
-		 * null || parents.length == 0 ? " ROOT" : (parents.length == 1 ? "" :
-		 * " " + parents.length + " parents"))
-		 */;
 	}
 
 }

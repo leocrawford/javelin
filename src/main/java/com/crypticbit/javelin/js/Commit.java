@@ -84,10 +84,7 @@ public class Commit implements Comparable<Commit> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		return ((Commit) obj).daoDigest.equals(daoDigest);
+		return  obj instanceof Commit && daoDigest.equals(((Commit)obj).daoDigest);
 	}
 
 	public Set<Key> getAllIdentities() throws VisitorException {
@@ -134,9 +131,6 @@ public class Commit implements Comparable<Commit> {
 		}
 	}
 
-	public Date getDate() {
-		return dao.getWhen();
-	}
 
 	public JsonElement getElement() throws JsonSyntaxException, StoreException,
 			VisitorException {
@@ -206,7 +200,7 @@ public class Commit implements Comparable<Commit> {
 
 	@Override
 	public String toString() {
-		return dao.toString();
+		return "Commit: "+this.getIdentity2();
 	}
 
 	// FIXME - should we try and find an existing instance?
@@ -244,7 +238,7 @@ public class Commit implements Comparable<Commit> {
 		for (GraphPath<Commit, DefaultEdge> path : paths) {
 			for (DefaultEdge e : path.getEdgeList()) {
 				Commit end = x.getEdgeTarget(e);
-				multimap.put(end.getDate(),
+				multimap.put(end.dao.getWhen(),
 						new Snapshot<Object>(end.getObject(), path));
 			}
 		}
@@ -259,7 +253,7 @@ public class Commit implements Comparable<Commit> {
 		return dao;
 	}
 
-	private String indent(int indent) {
+	private static String indent(int indent) {
 		return new String(new char[indent]).replace("\0", " ");
 	}
 

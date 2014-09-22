@@ -15,7 +15,6 @@ import org.jgrapht.GraphPath;
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.alg.NaiveLcaFinder;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.HackedDirectedGraphUnion;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 import com.crypticbit.javelin.diff.Snapshot;
@@ -106,23 +105,33 @@ public class Commit implements Comparable<Commit> {
 	 */
 	public DirectedGraph<Commit, DefaultEdge> getAsGraphToRoot()
 			throws JsonSyntaxException, StoreException, VisitorException {
-		// FIXME - we should consider caching results
+		return getAsGraphToRoots(this);
+	}
 
-		DirectedGraph<Commit, DefaultEdge> thisAndParentsAsGraph = new SimpleDirectedGraph<Commit, DefaultEdge>(
+	public static DirectedGraph<Commit, DefaultEdge> getAsGraphToRoots(
+			Commit... commits) throws JsonSyntaxException, StoreException,
+			VisitorException {
+
+		DirectedGraph<Commit, DefaultEdge> graph = new SimpleDirectedGraph<Commit, DefaultEdge>(
 				DefaultEdge.class);
-		thisAndParentsAsGraph.addVertex(this);
-		for (Commit c : getParents()) {
-			thisAndParentsAsGraph.addVertex(c);
-			// FIXME - which way are we directing our graph
-			thisAndParentsAsGraph.addEdge(c, this);
+		for (Commit c : commits) {
+			addToGraph(graph, c);
 		}
-		DirectedGraph<Commit, DefaultEdge> thisAndParentsTreeAsGraph = thisAndParentsAsGraph;
-		for (Commit c : getParents()) {
-			thisAndParentsTreeAsGraph = new HackedDirectedGraphUnion(
-					thisAndParentsTreeAsGraph, c.getAsGraphToRoot()) {
-			};
+		return graph;
+	}
+
+	/**
+	 * Recursive method to add a node to a graph - and all parents nodes
+	 * (together with links between them)
+	 */
+	private static void addToGraph(DirectedGraph<Commit, DefaultEdge> graph,
+			Commit commit) throws JsonSyntaxException, StoreException,
+			VisitorException {
+		graph.addVertex(commit);
+		for (Commit c : commit.getParents()) {
+			addToGraph(graph, c);
+			graph.addEdge(c, commit);
 		}
-		return thisAndParentsTreeAsGraph;
 	}
 
 	public Date getDate() {
@@ -246,21 +255,6 @@ public class Commit implements Comparable<Commit> {
 
 	}
 
-	public static DirectedGraph<Commit, DefaultEdge> getAsGraphToRoots(
-			Commit[] commits) throws JsonSyntaxException, StoreException,
-			VisitorException {
-		DirectedGraph<Commit, DefaultEdge> result = null;
-		for (Commit c : commits) {
-			if (result == null) {
-				result = c.getAsGraphToRoot();
-			} else {
-				result = new HackedDirectedGraphUnion(result,
-						c.getAsGraphToRoot());
-			}
-		}
-		return result;
-	}
-
 	CommitDao getDao() {
 		return dao;
 	}
@@ -268,10 +262,10 @@ public class Commit implements Comparable<Commit> {
 	private String indent(int indent) {
 		return new String(new char[indent]).replace("\0", " ");
 	}
+
 	protected void debug(int indent) {
 		try {
-			System.out.print(indent(indent)
-					+ "Commit "+getHead() + ": ");
+			System.out.print(indent(indent) + "Commit " + getHead() + ": ");
 			System.out.println(getElement().toString());
 			for (Commit parent : getParents()) {
 				parent.debug(indent + 1);

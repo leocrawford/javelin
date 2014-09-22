@@ -27,8 +27,10 @@ public class CommitGraphPanel extends mxGraphComponent {
 
 	}
 
-	private static JGraphXAdapter getAdapter(Commit... commits) throws JsonSyntaxException, StoreException, VisitorException {
-		JGraphXAdapter adapter = new JGraphXAdapter(Commit.getAsGraphToRoots(commits));
+	private static JGraphXAdapter getAdapter(Commit... commits)
+			throws JsonSyntaxException, StoreException, VisitorException {
+		JGraphXAdapter adapter = new JGraphXAdapter(
+				Commit.getAsGraphToRoots(commits));
 		/*
 		 * xa.getSelectionModel().addListener(mxEvent.SELECT, new
 		 * mxIEventListener() {
@@ -38,15 +40,12 @@ public class CommitGraphPanel extends mxGraphComponent {
 		 * .getUserObject(); System.out.println(e); } });
 		 */
 
-		new mxHierarchicalLayout(adapter).execute(adapter
-				.getDefaultParent());
-		new mxParallelEdgeLayout(adapter).execute(adapter
-				.getDefaultParent());
-	return adapter;	
-		
-	
+		new mxHierarchicalLayout(adapter).execute(adapter.getDefaultParent());
+		new mxParallelEdgeLayout(adapter).execute(adapter.getDefaultParent());
+		return adapter;
+
 	}
-	
+
 	private MergeableDirectedGraph asGraphToRoots = new MergeableDirectedGraph(
 			DefaultEdge.class);
 
@@ -66,7 +65,6 @@ public class CommitGraphPanel extends mxGraphComponent {
 
 		public void merge(DirectedGraph<Commit, DefaultEdge> asGraphToRoots1) {
 			for (DefaultEdge x : asGraphToRoots1.edgeSet()) {
-				System.out.println("y");
 				Commit edgeSource = asGraphToRoots1.getEdgeSource(x);
 				Commit edgeTarget = asGraphToRoots1.getEdgeTarget(x);
 				if (!containsVertex(edgeSource)) {
@@ -84,17 +82,11 @@ public class CommitGraphPanel extends mxGraphComponent {
 	public void show(Commit[] commits) {
 		try {
 			setGraph(getAdapter(commits));
-		} catch (JsonSyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (StoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (VisitorException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
+			// FIXME: handle exception
 			e.printStackTrace();
 		}
-		
+
 	}
 
 }

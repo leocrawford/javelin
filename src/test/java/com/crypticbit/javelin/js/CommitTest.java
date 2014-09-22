@@ -46,14 +46,16 @@ public class CommitTest extends TestUtils {
 		// jca1.getCommit().createChangeSet(jca4.getCommit());
 		// System.out.println("X-"+patch.apply());
 		System.out.println("1 = " + jca1.read());
-		show(jca1.getCommit());
+		show(jca1.getCommit(),jca4.getCommit());
+
 		jca1.getCommit().debug();
 		DataStructure x = jca1.merge(jca4);
 		System.out.println("2 + " + x.read()+"; "+x.getCommit().getAsGraphToRoot());
 		x.getCommit().debug();
 		// FIXME - should be unnecessary
 		System.out.println("3");
-
+		show(jca1.getCommit(),jca4.getCommit(),x.getCommit());
+		
 		// jca1.checkout();
 		System.out.println(jca1.read());
 		System.out.println(jca1.read().getAsJsonArray().get(4).getAsJsonArray()

@@ -71,6 +71,7 @@ public class CommitTest extends TestUtils {
 	@Test
 	public void testGetAsGraph() throws StoreException, IOException,
 			JsonSyntaxException, VisitorException {
+	System.out.println("xxx");
 		assertEquals(3, jca1.getCommit().getAsGraphToRoot().vertexSet().size());
 		assertEquals(3, jca2.getCommit().getAsGraphToRoot().vertexSet().size());
 		assertEquals(4, jca3.getCommit().getAsGraphToRoot().vertexSet().size());

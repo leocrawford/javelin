@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js;
+package com.crypticbit.javelin.merkle;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,7 +6,8 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.js.convert.VisitorException;
+import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -17,7 +18,7 @@ public class CommitTest extends TestUtils {
 
 	// FIXME - test production of graph that contains a merge
 
-	private DataStructure jca1, jca2, jca3, jca4;
+	private MerkleTree jca1, jca2, jca3, jca4;
 
 	public CommitTest() throws StoreException, IOException, VisitorException {
 		String c1 = "[\"a\"]";
@@ -28,7 +29,7 @@ public class CommitTest extends TestUtils {
 		String c6 = "[\"a\",\"b\",\"c2\",\"d\",[\"f\"],\"f\"]";
 		String c7 = "[\"a\",\"b1\",\"c2\",\"d\",[\"f\"],\"g\"]";
 
-		jca1 = new DataStructure(new StorageFactory().createMemoryCas());
+		jca1 = new MerkleTree(new StorageFactory().createMemoryCas());
 		jca1.write(c1).commit().write(c2).commit();
 		jca2 = jca1.branch();
 		jca1.write(c3).commit();
@@ -46,20 +47,11 @@ public class CommitTest extends TestUtils {
 		// jca1.getCommit().createChangeSet(jca4.getCommit());
 		// System.out.println("X-"+patch.apply());
 		System.out.println("1 = " + jca1.read());
-		show(jca1.getCommit(),jca4.getCommit());
+//		show(jca1.getCommit(),jca4.getCommit());
 
 		jca1.getCommit().debug();
-		DataStructure x = jca1.merge(jca4);
-		System.out.println("2 + " + x.read()+"; "+x.getCommit().getAsGraphToRoot());
-		x.getCommit().debug();
-		// FIXME - should be unnecessary
-		System.out.println("3");
-		show(jca1.getCommit(),jca4.getCommit(),x.getCommit());
-		
-		// jca1.checkout();
-		System.out.println(jca1.read());
-		System.out.println(jca1.read().getAsJsonArray().get(4).getAsJsonArray()
-				.get(0));
+		MerkleTree x = jca1.merge(jca4);
+//		show(jca1.getCommit(),jca4.getCommit(),x.getCommit());
 	}
 
 	// @Test
@@ -71,7 +63,6 @@ public class CommitTest extends TestUtils {
 	@Test
 	public void testGetAsGraph() throws StoreException, IOException,
 			JsonSyntaxException, VisitorException {
-	System.out.println("xxx");
 		assertEquals(3, jca1.getCommit().getAsGraphToRoot().vertexSet().size());
 		assertEquals(3, jca2.getCommit().getAsGraphToRoot().vertexSet().size());
 		assertEquals(4, jca3.getCommit().getAsGraphToRoot().vertexSet().size());

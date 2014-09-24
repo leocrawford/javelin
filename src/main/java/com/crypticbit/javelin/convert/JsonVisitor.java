@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js.convert;
+package com.crypticbit.javelin.convert;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -32,9 +32,9 @@ import com.google.common.collect.Maps;
 public class JsonVisitor<T, F, I, B> implements VisitorContext<I, T> {
 
     private JsonVisitorDestination<T, F, I> destination;
-    private JsonVisitorSource<I, B> source;
+    private VisitorInterface<I, B> source;
 
-    public JsonVisitor(JsonVisitorSource<I, B> source, JsonVisitorDestination<T, F, I> destination) {
+    public JsonVisitor(VisitorInterface<I, B> source, JsonVisitorDestination<T, F, I> destination) {
 	this.destination = destination;
 	this.source = source;
     }

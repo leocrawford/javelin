@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js.convert;
+package com.crypticbit.javelin.convert;
 
 import com.google.common.base.Function;
 

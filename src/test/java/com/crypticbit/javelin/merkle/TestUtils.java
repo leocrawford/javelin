@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js;
+package com.crypticbit.javelin.merkle;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
@@ -9,7 +9,8 @@ import java.util.logging.Logger;
 import javax.swing.JDialog;
 
 import com.crypticbit.diff.demo.swing.contacts.CommitGraphPanel;
-import com.crypticbit.javelin.js.convert.VisitorException;
+import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.merkle.Commit;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 

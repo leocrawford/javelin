@@ -1,8 +1,13 @@
-package com.crypticbit.javelin.js.convert;
+package com.crypticbit.javelin.convert.js;
 
 import java.util.List;
 import java.util.Map;
 
+import com.crypticbit.javelin.convert.JsonVisitorDestination;
+import com.crypticbit.javelin.convert.VisitorContext;
+import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.VisitorInterface;
+import com.crypticbit.javelin.convert.VisitorInterface.ElementType;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
@@ -13,7 +18,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
-public class JsonVisitorCasAdapter implements JsonVisitorSource<Key, JsonElement>,
+public class JsonVisitorCasAdapter implements VisitorInterface<Key, JsonElement>,
 	JsonVisitorDestination<Key, Key, Object> {
 
     private AddressableStorage cas;

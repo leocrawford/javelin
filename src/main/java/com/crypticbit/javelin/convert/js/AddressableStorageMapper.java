@@ -1,7 +1,13 @@
-package com.crypticbit.javelin.js.convert;
+package com.crypticbit.javelin.convert.js;
 
+import com.crypticbit.javelin.convert.DataAccessInterface;
+import com.crypticbit.javelin.convert.JsonVisitor;
+import com.crypticbit.javelin.convert.JsonVisitorDestination;
+import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.VisitorInterface;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
+//import com.google.gson.JsonElement;
 import com.google.gson.JsonElement;
 
 /**
@@ -12,10 +18,10 @@ import com.google.gson.JsonElement;
 class AddressableStorageMapper<T, F, I, B> implements DataAccessInterface<Object> {
 
     private JsonVisitorCasAdapter casAdapter;
-    private JsonVisitorSource<Object, B> source;
+    private VisitorInterface<Object, B> source;
     private JsonVisitorDestination<T, F, Key> dest;
 
-    AddressableStorageMapper(AddressableStorage store, JsonVisitorSource<Object, B> source,
+    AddressableStorageMapper(AddressableStorage store, VisitorInterface<Object, B> source,
 	    JsonVisitorDestination<T, F, Key> dest) {
 	this.source = source;
 	this.dest = dest;

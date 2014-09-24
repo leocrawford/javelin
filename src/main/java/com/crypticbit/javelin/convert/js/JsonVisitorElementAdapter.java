@@ -1,9 +1,13 @@
-package com.crypticbit.javelin.js.convert;
+package com.crypticbit.javelin.convert.js;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.crypticbit.javelin.convert.JsonVisitorDestination;
+import com.crypticbit.javelin.convert.VisitorContext;
+import com.crypticbit.javelin.convert.VisitorInterface;
+import com.crypticbit.javelin.convert.VisitorInterface.ElementType;
 import com.crypticbit.javelin.store.Key;
 import com.google.common.base.Function;
 import com.google.gson.Gson;
@@ -15,7 +19,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.reflect.TypeToken;
 
 public class JsonVisitorElementAdapter implements JsonVisitorDestination<JsonElement, JsonElement, Key>,
-	JsonVisitorSource<JsonElement, JsonElement> {
+	VisitorInterface<JsonElement, JsonElement> {
 
     private static final Gson gson = new Gson();
 
@@ -29,7 +33,7 @@ public class JsonVisitorElementAdapter implements JsonVisitorDestination<JsonEle
     }
 
     @Override
-    public com.crypticbit.javelin.js.convert.JsonVisitorSource.ElementType getType(JsonElement in) {
+    public com.crypticbit.javelin.convert.VisitorInterface.ElementType getType(JsonElement in) {
 	return getTypeStatic(in);
     }
 
@@ -86,7 +90,7 @@ public class JsonVisitorElementAdapter implements JsonVisitorDestination<JsonEle
 	// return jsa.getGson().toJsonTree(value);
     }
 
-    static com.crypticbit.javelin.js.convert.JsonVisitorSource.ElementType getTypeStatic(JsonElement in) {
+    static com.crypticbit.javelin.convert.VisitorInterface.ElementType getTypeStatic(JsonElement in) {
 	if (in.isJsonArray()) {
 	    return ElementType.ARRAY;
 	}

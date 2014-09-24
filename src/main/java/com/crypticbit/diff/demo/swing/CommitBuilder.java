@@ -14,9 +14,9 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
 import com.crypticbit.diff.demo.swing.contacts.CommitGraphPanel;
-import com.crypticbit.javelin.js.Commit;
-import com.crypticbit.javelin.js.DataStructure;
-import com.crypticbit.javelin.js.convert.VisitorException;
+import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.merkle.Commit;
+import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -27,7 +27,7 @@ import difflib.PatchFailedException;
 
 public class CommitBuilder extends JFrame {
 
-    private DataStructure jca1, jca2, jca3, jca4;
+    private MerkleTree jca1, jca2, jca3, jca4;
 
     private CommitGraphPanel commitPanel;
 
@@ -82,7 +82,7 @@ public class CommitBuilder extends JFrame {
 	String c6 = "[\"a\",\"b\",\"c2\",\"d\",[\"f\"],\"f\"]";
 	String c7 = "[\"a\",\"b1\",\"c2\",\"d\",[\"f\"],\"g\"]";
 
-	jca1 = new DataStructure(new StorageFactory().createMemoryCas());
+	jca1 = new MerkleTree(new StorageFactory().createMemoryCas());
 	jca1.write(c1).commit().write(c2).commit();
 	jca2 = jca1.branch();
 	jca1.write(c3).commit();

@@ -1,7 +1,11 @@
-package com.crypticbit.javelin.js.convert;
+package com.crypticbit.javelin.convert.js;
 
 import java.util.Set;
 
+import com.crypticbit.javelin.convert.DataAccessInterface;
+import com.crypticbit.javelin.convert.JsonVisitor;
+import com.crypticbit.javelin.convert.JsonVisitorKeyAdapter;
+import com.crypticbit.javelin.convert.JsonVisitorObjectAdapter;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.google.gson.JsonElement;

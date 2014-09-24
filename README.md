@@ -68,6 +68,7 @@ In terms of technology, the things that shaped my thinking are:
 
 * http://en.wikibooks.org/wiki/Understanding_Darcs/Patch_theory
 * https://www.youtube.com/watch?feature=player_embedded&v=8Z685OF-PS8
+* http://en.wikipedia.org/wiki/Merkle_tree
     
 ##Features
 
@@ -82,7 +83,7 @@ Done:
  * disk [todo]
 * branching
  * create branches
- * merge branches [todo]
+ * merge branches 
 * patching
  * create patch
  * apply patch

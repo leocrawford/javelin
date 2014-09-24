@@ -2,8 +2,8 @@ package com.crypticbit.diff.demo.swing.contacts;
 
 import javax.swing.AbstractListModel;
 
-import com.crypticbit.javelin.js.DataStructure;
-import com.crypticbit.javelin.js.convert.VisitorException;
+import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.store.StoreException;
 import com.crypticbit.javelin.util.lazy.LazyJsonArray;
 import com.google.gson.JsonSyntaxException;
@@ -13,12 +13,12 @@ import com.jayway.jsonpath.JsonPath;
 @SuppressWarnings("serial")
 public class JsonListModelAdapter extends AbstractListModel<String> {
 
-    private DataStructure jca;
+    private MerkleTree jca;
     private String path;
     private LazyJsonArray backing;
     private JsonPath label;
 
-    JsonListModelAdapter(DataStructure jca, String path, String label) throws JsonSyntaxException, StoreException,
+    JsonListModelAdapter(MerkleTree jca, String path, String label) throws JsonSyntaxException, StoreException,
 	    VisitorException {
 	this.jca = jca;
 	this.path = path;

@@ -1,9 +1,11 @@
-package com.crypticbit.javelin.js.convert;
+package com.crypticbit.javelin.convert;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.crypticbit.javelin.convert.js.IdentityReference;
+import com.crypticbit.javelin.convert.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.util.lazy.LazyJsonArray;
 import com.crypticbit.javelin.util.lazy.LazyJsonMap;
@@ -12,7 +14,7 @@ import com.google.common.base.Function;
 import com.google.gson.internal.LinkedTreeMap;
 
 public class JsonVisitorObjectAdapter implements JsonVisitorDestination<Object, Reference, Key>,
-	JsonVisitorSource<Object, Object> {
+	VisitorInterface<Object, Object> {
 
     private JsonStoreAdapterFactory jsa;
 
@@ -31,7 +33,7 @@ public class JsonVisitorObjectAdapter implements JsonVisitorDestination<Object, 
     }
 
     @Override
-    public com.crypticbit.javelin.js.convert.JsonVisitorSource.ElementType getType(Object in) {
+    public com.crypticbit.javelin.convert.VisitorInterface.ElementType getType(Object in) {
 	if (in == null) {
 	    return ElementType.NULL;
 	}

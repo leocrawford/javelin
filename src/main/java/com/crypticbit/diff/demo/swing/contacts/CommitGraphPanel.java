@@ -7,9 +7,9 @@ import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
-import com.crypticbit.javelin.js.Commit;
-import com.crypticbit.javelin.js.DataStructure;
-import com.crypticbit.javelin.js.convert.VisitorException;
+import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.merkle.Commit;
+import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 import com.mxgraph.layout.mxParallelEdgeLayout;
@@ -49,7 +49,7 @@ public class CommitGraphPanel extends mxGraphComponent {
 	private MergeableDirectedGraph asGraphToRoots = new MergeableDirectedGraph(
 			DefaultEdge.class);
 
-	public CommitGraphPanel(DataStructure jca) throws StoreException,
+	public CommitGraphPanel(MerkleTree jca) throws StoreException,
 			IOException, JsonSyntaxException, PatchFailedException,
 			InterruptedException, VisitorException {
 

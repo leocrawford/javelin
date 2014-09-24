@@ -6,4 +6,4 @@
  * @author leo
  *
  */
-package com.crypticbit.javelin.js;
+package com.crypticbit.javelin.merkle;

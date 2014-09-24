@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js;
+package com.crypticbit.javelin.merkle;
 
 import static org.junit.Assert.fail;
 
@@ -12,8 +12,10 @@ import java.util.logging.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.crypticbit.javelin.js.DataStructure.MergeType;
-import com.crypticbit.javelin.js.convert.VisitorException;
+import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.merkle.Commit;
+import com.crypticbit.javelin.merkle.MerkleTree;
+import com.crypticbit.javelin.merkle.MerkleTree.MergeType;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StorageFactory;
@@ -49,9 +51,9 @@ public class DataStructureTest extends TestUtils{
 
 	enableLog();
 	AddressableStorage  memoryStore = new StorageFactory().createMemoryCas();
-	DataStructure jca = new DataStructure(memoryStore);
+	MerkleTree jca = new MerkleTree(memoryStore);
 	jca.write(JSON_EXAMPLEa).commit();
-	DataStructure jca2 = jca.branch();
+	MerkleTree jca2 = jca.branch();
 
 	jca.write(JSON_EXAMPLE_2a).commit();
 	jca2.write(JSON_EXAMPLE_3a).commit();
@@ -81,7 +83,7 @@ public class DataStructureTest extends TestUtils{
     @Test
     public void testBasicReadWrite() throws IOException, StoreException, JsonSyntaxException, VisitorException {
 	enableLog();
-	DataStructure jca = new DataStructure(new StorageFactory().createMemoryCas());
+	MerkleTree jca = new MerkleTree(new StorageFactory().createMemoryCas());
 	jca.write(JSON_EXAMPLE);
 	jca.commit();
 	jca.checkout();
@@ -92,7 +94,7 @@ public class DataStructureTest extends TestUtils{
     public void testCommitForComplexMultipleReadWrite() throws IOException, StoreException, JsonSyntaxException,
 	    VisitorException {
 	// enableLog();
-	DataStructure jca = new DataStructure(new StorageFactory().createMemoryCas());
+	MerkleTree jca = new MerkleTree(new StorageFactory().createMemoryCas());
 	jca.write(JSON_EXAMPLE).commit().getCommit();
 	Commit c2 = jca.write(JSON_EXAMPLE_2).write(JSON_EXAMPLE_3).commit().getCommit();
 
@@ -109,7 +111,7 @@ public class DataStructureTest extends TestUtils{
     @Test
     public void testCommitForMultipleReadWrite() throws IOException, StoreException, VisitorException {
 	// enableLog();
-	DataStructure jca = new DataStructure(new StorageFactory().createMemoryCas());
+	MerkleTree jca = new MerkleTree(new StorageFactory().createMemoryCas());
 	Commit c1 = jca.write(JSON_EXAMPLE).commit().getCommit();
 	Commit c2 = jca.write(JSON_EXAMPLE_2).commit().getCommit();
 	Commit c3 = jca.write(JSON_EXAMPLE_3).commit().getCommit();
@@ -127,12 +129,12 @@ public class DataStructureTest extends TestUtils{
     @Test
     public void testConcurrentWriteUsingTwoObjects() throws IOException, StoreException, VisitorException {
 	AddressableStorage store = new StorageFactory().createMemoryCas();
-	DataStructure jca = new DataStructure(store);
+	MerkleTree jca = new MerkleTree(store);
 	jca.write(JSON_EXAMPLE);
 	jca.commit();
 	jca.write(JSON_EXAMPLE_2);
 
-	DataStructure jca2 = new DataStructure(store, jca.getLabelsAddress(), "HEAD");
+	MerkleTree jca2 = new MerkleTree(store, jca.getLabelsAddress(), "HEAD");
 	jca2.checkout();
 	jca2.write(JSON_EXAMPLE_3);
 
@@ -153,19 +155,19 @@ public class DataStructureTest extends TestUtils{
     @Test
     public void testMultiplBranches() throws StoreException, VisitorException {
 	AddressableStorage store = new StorageFactory().createMemoryCas();
-	DataStructure d1 = new DataStructure(store).write(JSON_EXAMPLE).commit();
-	DataStructure d2 = d1.branch();
+	MerkleTree d1 = new MerkleTree(store).write(JSON_EXAMPLE).commit();
+	MerkleTree d2 = d1.branch();
 	d1.write(JSON_EXAMPLE_2).commit().saveLabel("Branch1");
 	d2.write(JSON_EXAMPLE_3).commit().saveLabel("Branch2");
-	DataStructure d3 = d2.branch();
+	MerkleTree d3 = d2.branch();
 	d3.write(JSON_EXAMPLE_4).commit().saveLabel("Branch3");
 	d2.write(JSON_EXAMPLE_5).commit();
 
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_2), new DataStructure(store, d1.getLabelsAddress(),
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_2), new MerkleTree(store, d1.getLabelsAddress(),
 		"Branch1").checkout().read());
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_5), new DataStructure(store, d1.getLabelsAddress(),
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_5), new MerkleTree(store, d1.getLabelsAddress(),
 		"Branch2").checkout().read());
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_4), new DataStructure(store, d1.getLabelsAddress(),
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_4), new MerkleTree(store, d1.getLabelsAddress(),
 		"Branch3").checkout().read());
 
     }
@@ -174,12 +176,12 @@ public class DataStructureTest extends TestUtils{
     public void testReadWriteUsingTwoObjects() throws IOException, StoreException, JsonSyntaxException,
 	    VisitorException {
 	AddressableStorage store = new StorageFactory().createMemoryCas();
-	DataStructure jca = new DataStructure(store);
+	MerkleTree jca = new MerkleTree(store);
 	jca.write(JSON_EXAMPLE);
 	jca.commit();
 	byte[] labelsAddress = jca.getLabelsAddress().getKeyAsBytes();
 
-	DataStructure jca2 = new DataStructure(store, new Key(labelsAddress), "HEAD");
+	MerkleTree jca2 = new MerkleTree(store, new Key(labelsAddress), "HEAD");
 	jca2.checkout();
 	Assert.assertEquals(jca.read(), jca2.read());
     }
@@ -187,8 +189,8 @@ public class DataStructureTest extends TestUtils{
     @Test
     public void testImportExport() throws IOException, StoreException, JsonSyntaxException, VisitorException,
 	    ClassNotFoundException, PatchFailedException, InterruptedException {
-	DataStructure ds1 = new DataStructure(new StorageFactory().createMemoryCas());
-	DataStructure ds2 = new DataStructure(new StorageFactory().createMemoryCas());
+	MerkleTree ds1 = new MerkleTree(new StorageFactory().createMemoryCas());
+	MerkleTree ds2 = new MerkleTree(new StorageFactory().createMemoryCas());
 
 	ds1.write(JSON_EXAMPLE);
 	ds1.commit();
@@ -217,7 +219,7 @@ public class DataStructureTest extends TestUtils{
 //	Thread.sleep(1000*1000);
     }
 
-    private void copy(DataStructure ds1, DataStructure ds2, MergeType mt) throws StoreException, VisitorException,
+    private void copy(MerkleTree ds1, MerkleTree ds2, MergeType mt) throws StoreException, VisitorException,
 	    IOException, ClassNotFoundException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	ds1.exportAll(out);

@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js;
+package com.crypticbit.javelin.merkle;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
@@ -17,10 +17,10 @@ import org.jgrapht.alg.NaiveLcaFinder;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
+import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.diff.Snapshot;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
-import com.crypticbit.javelin.js.convert.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;

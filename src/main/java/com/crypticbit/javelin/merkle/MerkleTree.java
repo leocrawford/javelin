@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js;
+package com.crypticbit.javelin.merkle;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
-import com.crypticbit.javelin.js.convert.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.js.convert.VisitorException;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.JsonAdapter;
 import com.crypticbit.javelin.store.Key;
@@ -32,7 +32,7 @@ import difflib.PatchFailedException;
 // what is immutable? commit? element? anchors?
 // multiple anchors?
 // FIXME tidy up exceptions
-public class DataStructure {
+public class MerkleTree {
 
 	private static final Logger LOG = Logger
 			.getLogger("com.crypticbit.javelin.js");
@@ -57,7 +57,7 @@ public class DataStructure {
 	 * @throws VisitorException
 	 * @throws StoreException
 	 */
-	public DataStructure(AddressableStorage store) throws StoreException,
+	public MerkleTree(AddressableStorage store) throws StoreException,
 			VisitorException {
 		setup(store);
 		labelsAnchor = new ExtendedAnchor<>(store, LabelsDao.class);
@@ -79,7 +79,7 @@ public class DataStructure {
 	 * @throws StoreException
 	 * @throws JsonSyntaxException
 	 */
-	DataStructure(AddressableStorage store, Key labelsAddress, String label)
+	MerkleTree(AddressableStorage store, Key labelsAddress, String label)
 			throws JsonSyntaxException, StoreException, VisitorException, Error {
 		setup(store);
 		this.labelsAnchor = new ExtendedAnchor<>(labelsAddress, store,
@@ -103,7 +103,7 @@ public class DataStructure {
 	/**
 	 * Create a new branch. Same DS
 	 */
-	private DataStructure(DataStructure parent) throws StoreException {
+	private MerkleTree(MerkleTree parent) throws StoreException {
 		setup(parent.store);
 		this.labelsAnchor = parent.labelsAnchor;
 		this.selectedAnchor = new ExtendedAnchor<>(store,
@@ -111,8 +111,8 @@ public class DataStructure {
 
 	}
 
-	public DataStructure branch() throws StoreException {
-		return new DataStructure(this);
+	public MerkleTree branch() throws StoreException {
+		return new MerkleTree(this);
 	}
 
 	// FIXME - what about persisting shared labels? Would they be betetr stored
@@ -122,7 +122,7 @@ public class DataStructure {
 	 * return new DataStructure(store, labels, newLabel); }
 	 */
 
-	public synchronized DataStructure checkout() throws StoreException,
+	public synchronized MerkleTree checkout() throws StoreException,
 			JsonSyntaxException, VisitorException {
 		commit = new Commit(selectedAnchor.readEndPoint(store),
 				selectedAnchor.getValue(), jsonFactory, store);
@@ -133,7 +133,7 @@ public class DataStructure {
 		return this;
 	}
 
-	public synchronized DataStructure commit() throws StoreException,
+	public synchronized MerkleTree commit() throws StoreException,
 			VisitorException {
 		Key write = jsonFactory.getJsonElementAdapter().write(element);
 		commit = createCommit(write, selectedAnchor.getValue());
@@ -281,7 +281,7 @@ public class DataStructure {
 		return commit.getObject();
 	}
 
-	public synchronized DataStructure merge(DataStructure other)
+	public synchronized MerkleTree merge(MerkleTree other)
 			throws JsonSyntaxException, StoreException, PatchFailedException,
 			VisitorException {
 		// FIXME factor out code for creating change set to Commit and make work
@@ -312,7 +312,7 @@ public class DataStructure {
 		labelsAnchor.writeEndPoint(store, labelsAnchor.getEndPoint());
 	}
 
-	public DataStructure write(String string) {
+	public MerkleTree write(String string) {
 		// FIXME resue Gson
 		element = new Gson().fromJson(string, JsonElement.class);
 		return this;

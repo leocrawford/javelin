@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js.convert;
+package com.crypticbit.javelin.convert;
 
 import java.util.List;
 import java.util.Map;

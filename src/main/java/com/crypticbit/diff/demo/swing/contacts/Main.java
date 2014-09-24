@@ -1,9 +1,9 @@
 package com.crypticbit.diff.demo.swing.contacts;
 
-import com.crypticbit.javelin.js.Commit;
-import com.crypticbit.javelin.js.DataStructure;
-import com.crypticbit.javelin.js.DataStructure.MergeType;
-import com.crypticbit.javelin.js.convert.VisitorException;
+import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.merkle.Commit;
+import com.crypticbit.javelin.merkle.MerkleTree;
+import com.crypticbit.javelin.merkle.MerkleTree.MergeType;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -22,7 +22,7 @@ public class Main extends JFrame {
     private String lastPath = null;
     private NamePanel namePanel;
     private CommitGraphPanel commitGraphPanel;
-    private DataStructure jsonStore;
+    private MerkleTree jsonStore;
 
 
 
@@ -138,7 +138,7 @@ public class Main extends JFrame {
         JSplitPane commitAndEditJSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         content.add(navAndViewJSplit);
 
-        jsonStore = new DataStructure(new StorageFactory().createMemoryCas());
+        jsonStore = new MerkleTree(new StorageFactory().createMemoryCas());
         jsonStore.write("{people:[{name:\"Leo\"},{name:\"John\"},{name:\"Caroline\"}]}").commit().commit();
 
         final ContactEditPanel contactEditPanel = new ContactEditPanel();

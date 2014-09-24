@@ -1,6 +1,6 @@
-package com.crypticbit.javelin.js;
+package com.crypticbit.javelin.merkle;
 
-import com.crypticbit.javelin.js.convert.VisitorException;
+import com.crypticbit.javelin.convert.VisitorException;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;

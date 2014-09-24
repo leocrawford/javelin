@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js.convert;
+package com.crypticbit.javelin.convert;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,7 @@ import java.util.Map;
  * @param <B>
  *            A representation of the object after it has been fetched or processed
  */
-public interface JsonVisitorSource<I, B> {
+public interface VisitorInterface<I, B> {
 
     public abstract ElementType getType(B in);
 

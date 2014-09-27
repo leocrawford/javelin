@@ -1,13 +1,13 @@
-package com.crypticbit.javelin.util.lazy;
+package com.crypticbit.javelin.convert.lazy;
 
 import java.util.AbstractList;
 import java.util.List;
 
-public class LazyJsonArray extends AbstractList<Object> {
+public class LazyArray extends AbstractList<Object> {
 
 	private List<Reference> backingList;
 
-	public LazyJsonArray(List<Reference> backingList) {
+	public LazyArray(List<Reference> backingList) {
 		this.backingList = backingList;
 	}
 

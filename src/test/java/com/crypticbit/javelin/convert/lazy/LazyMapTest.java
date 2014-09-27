@@ -1,11 +1,15 @@
-package com.crypticbit.javelin.util.lazy;
+package com.crypticbit.javelin.convert.lazy;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
 
-public class LazyJsonMapTest {
+import com.crypticbit.javelin.convert.lazy.LazyMap;
+import com.crypticbit.javelin.convert.lazy.Reference;
+import com.crypticbit.javelin.convert.lazy.ValueReference;
+
+public class LazyMapTest {
 
     @Test
     public void test() {
@@ -13,7 +17,7 @@ public class LazyJsonMapTest {
 	backing.put("t1", new ValueReference("v1"));
 	backing.put("t2", new ValueReference("v2"));
 
-	LazyJsonMap ljm = new LazyJsonMap(backing);
+	LazyMap ljm = new LazyMap(backing);
 
 	ljm.put("t2", new ValueReference("r2"));
 	ljm.put("t3", new ValueReference("r3"));

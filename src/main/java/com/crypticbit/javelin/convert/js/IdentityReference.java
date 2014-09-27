@@ -1,8 +1,8 @@
 package com.crypticbit.javelin.convert.js;
 
 import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.lazy.Reference;
 import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.util.lazy.Reference;
 
 public class IdentityReference implements Reference {
 

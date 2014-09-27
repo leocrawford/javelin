@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.util.lazy;
+package com.crypticbit.javelin.convert.lazy;
 
 public interface Reference {
 

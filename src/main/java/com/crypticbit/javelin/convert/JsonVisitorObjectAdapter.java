@@ -6,10 +6,10 @@ import java.util.Map;
 
 import com.crypticbit.javelin.convert.js.IdentityReference;
 import com.crypticbit.javelin.convert.js.JsonStoreAdapterFactory;
+import com.crypticbit.javelin.convert.lazy.LazyArray;
+import com.crypticbit.javelin.convert.lazy.LazyMap;
+import com.crypticbit.javelin.convert.lazy.Reference;
 import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.util.lazy.LazyJsonArray;
-import com.crypticbit.javelin.util.lazy.LazyJsonMap;
-import com.crypticbit.javelin.util.lazy.Reference;
 import com.google.common.base.Function;
 import com.google.gson.internal.LinkedTreeMap;
 
@@ -74,7 +74,7 @@ public class JsonVisitorObjectAdapter implements
 	@Override
 	public Object writeList(Key source, List<Reference> list) {
 		// copy so writeable
-		return new LazyJsonArray(new ArrayList<>(list));
+		return new LazyArray(new ArrayList<>(list));
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class JsonVisitorObjectAdapter implements
 		// copy so writeable
 		LinkedTreeMap<String, Reference> linkedTreeMap = new LinkedTreeMap<String, Reference>();
 		linkedTreeMap.putAll(map);
-		return new LazyJsonMap(linkedTreeMap);
+		return new LazyMap(linkedTreeMap);
 
 	}
 

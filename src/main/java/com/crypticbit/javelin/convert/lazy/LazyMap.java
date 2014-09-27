@@ -1,14 +1,14 @@
-package com.crypticbit.javelin.util.lazy;
+package com.crypticbit.javelin.convert.lazy;
 
 import java.util.Map;
 
 import com.google.common.collect.HackedTransformedEntriesMap;
 import com.google.common.collect.Maps.EntryTransformer;
 
-public class LazyJsonMap extends
+public class LazyMap extends
 		HackedTransformedEntriesMap<String, Reference, Object> {
 
-	public LazyJsonMap(Map<String, Reference> backingMap) {
+	public LazyMap(Map<String, Reference> backingMap) {
 		super(backingMap, new EntryTransformer<String, Reference, Object>() {
 
 			@Override

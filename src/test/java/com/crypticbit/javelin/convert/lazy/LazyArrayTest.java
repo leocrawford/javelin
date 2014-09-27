@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.util.lazy;
+package com.crypticbit.javelin.convert.lazy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,11 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class LazyJsonArrayTest {
+import com.crypticbit.javelin.convert.lazy.LazyArray;
+import com.crypticbit.javelin.convert.lazy.Reference;
+import com.crypticbit.javelin.convert.lazy.ValueReference;
+
+public class LazyArrayTest {
 
     @Test
     public void test() {
@@ -14,7 +18,7 @@ public class LazyJsonArrayTest {
 	backing.add(new ValueReference("v1"));
 	backing.add(new ValueReference("v2"));
 
-	LazyJsonArray lam = new LazyJsonArray(backing);
+	LazyArray lam = new LazyArray(backing);
 
 	lam.add("r1");
 	lam.add(1, "r2");

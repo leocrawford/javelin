@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.diff.jsonelement;
+package com.crypticbit.javelin.diff.js;
 
 import java.util.HashMap;
 import java.util.Map;

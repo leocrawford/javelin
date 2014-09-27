@@ -13,8 +13,8 @@ import javax.swing.event.TreeSelectionListener;
 
 import com.crypticbit.javelin.diff.DifferFactory;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
-import com.crypticbit.javelin.diff.jsonelement.JsonElementArray;
-import com.crypticbit.javelin.diff.jsonelement.JsonElementMap;
+import com.crypticbit.javelin.diff.js.JsonElementArray;
+import com.crypticbit.javelin.diff.js.JsonElementMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 

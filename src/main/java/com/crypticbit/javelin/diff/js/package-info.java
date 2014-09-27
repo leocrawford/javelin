@@ -5,4 +5,4 @@
  * @author leo
  *
  */
-package com.crypticbit.javelin.diff.jsonelement;
+package com.crypticbit.javelin.diff.js;

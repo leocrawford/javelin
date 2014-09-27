@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.diff.jsonelement;
+package com.crypticbit.javelin.diff.js;
 
 import java.util.ArrayList;
 import java.util.List;

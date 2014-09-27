@@ -12,63 +12,63 @@ import com.google.common.io.BaseEncoding;
  */
 public class Key implements Comparable<Key> {
 
-    private byte[] keyAsBytes;
+	private byte[] keyAsBytes;
 
-    /** Random digest */
-    public Key() {
-	keyAsBytes = createRandomData(64);
-    }
-
-    public Key(byte[] keyAsBytes) {
-	this.keyAsBytes = keyAsBytes;
-    }
-
-    public Key(String keyAsString) {
-	this.keyAsBytes = BaseEncoding.base32Hex().decode(keyAsString);
-    }
-
-    @Override
-    public int compareTo(Key key) {
-	if (key instanceof Key) {
-	    return ByteBuffer.wrap(keyAsBytes).compareTo(ByteBuffer.wrap(key.keyAsBytes));
+	/** Random digest */
+	public Key() {
+		keyAsBytes = createRandomData(64);
 	}
-	else {
-	    return this.getClass().getName().compareTo(key.getClass().getName());
+
+	public Key(byte[] keyAsBytes) {
+		this.keyAsBytes = keyAsBytes;
 	}
-    }
 
-    @Override
-    public boolean equals(Object compare) {
-	if (compare instanceof Key) {
-	    return Arrays.equals(keyAsBytes, ((Key) compare).keyAsBytes);
+	public Key(String keyAsString) {
+		this.keyAsBytes = BaseEncoding.base32Hex().decode(keyAsString);
 	}
-	else {
-	    return false;
+
+	@Override
+	public int compareTo(Key key) {
+		if (key instanceof Key) {
+			return ByteBuffer.wrap(keyAsBytes).compareTo(
+					ByteBuffer.wrap(key.keyAsBytes));
+		} else {
+			return this.getClass().getName()
+					.compareTo(key.getClass().getName());
+		}
 	}
-    }
 
-    public byte[] getKeyAsBytes() {
-	return keyAsBytes;
-    }
+	@Override
+	public boolean equals(Object compare) {
+		if (compare instanceof Key) {
+			return Arrays.equals(keyAsBytes, ((Key) compare).keyAsBytes);
+		} else {
+			return false;
+		}
+	}
 
-    public String getKeyAsString() {
-	return BaseEncoding.base32Hex().encode(getKeyAsBytes());
-    }
+	public byte[] getKeyAsBytes() {
+		return keyAsBytes;
+	}
 
-    @Override
-    public int hashCode() {
-	return ByteBuffer.wrap(keyAsBytes).hashCode();
-    }
+	public String getKeyAsString() {
+		return BaseEncoding.base32Hex().encode(getKeyAsBytes());
+	}
 
-    @Override
-    public String toString() {
-	return getKeyAsString().substring(0, 6);
-    }
+	@Override
+	public int hashCode() {
+		return ByteBuffer.wrap(keyAsBytes).hashCode();
+	}
 
-    private static byte[] createRandomData(int length) {
-	byte[] b = new byte[length];
-	new Random().nextBytes(b);
-	return b;
-    }
+	@Override
+	public String toString() {
+		return getKeyAsString().substring(0, 6);
+	}
+
+	private static byte[] createRandomData(int length) {
+		byte[] b = new byte[length];
+		new Random().nextBytes(b);
+		return b;
+	}
 
 }

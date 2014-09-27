@@ -49,9 +49,9 @@ public class CommitGraphPanel extends mxGraphComponent {
 	private MergeableDirectedGraph asGraphToRoots = new MergeableDirectedGraph(
 			DefaultEdge.class);
 
-	public CommitGraphPanel(MerkleTree jca) throws StoreException,
-			IOException, JsonSyntaxException, PatchFailedException,
-			InterruptedException, VisitorException {
+	public CommitGraphPanel(MerkleTree jca) throws StoreException, IOException,
+			JsonSyntaxException, PatchFailedException, InterruptedException,
+			VisitorException {
 
 		this(new Commit[] { jca.getCommit() });
 	}

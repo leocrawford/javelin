@@ -13,89 +13,91 @@ import com.google.common.collect.Maps;
 
 public class MapDelta<T> implements ItemDelta {
 
-    private MapDifference<String, T> diff;
-    private Object branch;
+	private MapDifference<String, T> diff;
+	private Object branch;
 
-    private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.diff");
+	private static final Logger LOG = Logger
+			.getLogger("com.crypticbit.javelin.diff");
 
-    public MapDelta(MapDifference<String, T> diff, Object branch) {
-	this.diff = diff;
-	this.branch = branch;
-    }
-
-    public void apply(Map<String, T> object, Map<String, ThreeWayDiff> recursiveDiffs) {
-
-	if (LOG.isLoggable(Level.FINEST)) {
-	    LOG.log(Level.FINEST, "Merge Map = " + diff + " to " + object);
+	public MapDelta(MapDifference<String, T> diff, Object branch) {
+		this.diff = diff;
+		this.branch = branch;
 	}
 
-	for (String key : getRemoved().keySet()) {
-	    object.remove(key);
-	}
-	for (String key : getAdded().keySet()) {
-	    putWithrecursive(key, object, getAdded(), recursiveDiffs);
-	}
-	for (String key : diff.entriesDiffering().keySet()) {
-	    putWithrecursive(key, object, Maps.transformValues(diff.entriesDiffering(),
-		    new Function<ValueDifference<T>, T>() {
-			@Override
-			public T apply(ValueDifference<T> input) {
-			    return input.rightValue();
-			}
+	public void apply(Map<String, T> object,
+			Map<String, ThreeWayDiff> recursiveDiffs) {
 
-			@Override
-			public boolean equals(Object object) {
-			    throw new Error();
-			}
+		if (LOG.isLoggable(Level.FINEST)) {
+			LOG.log(Level.FINEST, "Merge Map = " + diff + " to " + object);
+		}
 
-		    }), recursiveDiffs);
-	}
+		for (String key : getRemoved().keySet()) {
+			object.remove(key);
+		}
+		for (String key : getAdded().keySet()) {
+			putWithrecursive(key, object, getAdded(), recursiveDiffs);
+		}
+		for (String key : diff.entriesDiffering().keySet()) {
+			putWithrecursive(key, object, Maps.transformValues(
+					diff.entriesDiffering(),
+					new Function<ValueDifference<T>, T>() {
+						@Override
+						public T apply(ValueDifference<T> input) {
+							return input.rightValue();
+						}
 
-	if (LOG.isLoggable(Level.FINEST)) {
-	    LOG.log(Level.FINEST, "Merge Map Result = " + object);
-	}
+						@Override
+						public boolean equals(Object object) {
+							throw new Error();
+						}
 
-    }
+					}), recursiveDiffs);
+		}
 
-    public Map<String, T> getAdded() {
-	return diff.entriesOnlyOnRight();
-    }
+		if (LOG.isLoggable(Level.FINEST)) {
+			LOG.log(Level.FINEST, "Merge Map Result = " + object);
+		}
 
-    @Override
-    public Object getBranch() {
-	return branch;
-    }
-
-    public Map<String, T> getRemoved() {
-	return diff.entriesOnlyOnLeft();
-    }
-
-    @Override
-    public String toString() {
-	return diff + " [" + branch + "]";
-    }
-
-    private void handleRecursiveDiff(String key, T value, Map<String, ThreeWayDiff> recursiveDiffs) {
-	if (recursiveDiffs.containsKey(key)) {
-	    recursiveDiffs.get(key).addBranchSnapshot(value, getBranch());
-	}
-	else {
-	    recursiveDiffs.put(key, new ThreeWayDiff<>(value));
 	}
 
-    }
+	public Map<String, T> getAdded() {
+		return diff.entriesOnlyOnRight();
+	}
 
-    private void putWithrecursive(String key, Map<String, T> existing, Map<String, T> replacement,
-	    Map<String, ThreeWayDiff> recursiveDiffs) {
-	if (existing.containsKey(key) && !recursiveDiffs.containsKey(key)) {
-	    handleRecursiveDiff(key, existing.get(key), recursiveDiffs);
+	@Override
+	public Object getBranch() {
+		return branch;
 	}
-	if (recursiveDiffs.containsKey(key)) {
-	    handleRecursiveDiff(key, replacement.get(key), recursiveDiffs);
+
+	public Map<String, T> getRemoved() {
+		return diff.entriesOnlyOnLeft();
 	}
-	else {
-	    existing.put(key, replacement.get(key));
+
+	@Override
+	public String toString() {
+		return diff + " [" + branch + "]";
 	}
-    }
+
+	private void handleRecursiveDiff(String key, T value,
+			Map<String, ThreeWayDiff> recursiveDiffs) {
+		if (recursiveDiffs.containsKey(key)) {
+			recursiveDiffs.get(key).addBranchSnapshot(value, getBranch());
+		} else {
+			recursiveDiffs.put(key, new ThreeWayDiff<>(value));
+		}
+
+	}
+
+	private void putWithrecursive(String key, Map<String, T> existing,
+			Map<String, T> replacement, Map<String, ThreeWayDiff> recursiveDiffs) {
+		if (existing.containsKey(key) && !recursiveDiffs.containsKey(key)) {
+			handleRecursiveDiff(key, existing.get(key), recursiveDiffs);
+		}
+		if (recursiveDiffs.containsKey(key)) {
+			handleRecursiveDiff(key, replacement.get(key), recursiveDiffs);
+		} else {
+			existing.put(key, replacement.get(key));
+		}
+	}
 
 }

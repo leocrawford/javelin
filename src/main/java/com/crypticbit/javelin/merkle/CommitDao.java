@@ -21,7 +21,6 @@ public class CommitDao {
 	 * of a merge
 	 */
 	private final Key parents[];
-	
 
 	public CommitDao(Key head, Date when, String user, Key parent) {
 		this(head, when, user, (parent == null ? new Key[] {}

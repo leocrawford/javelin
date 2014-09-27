@@ -19,189 +19,192 @@ import java.net.Socket;
 
 public class Main extends JFrame {
 
-    private String lastPath = null;
-    private NamePanel namePanel;
-    private CommitGraphPanel commitGraphPanel;
-    private MerkleTree jsonStore;
+	private String lastPath = null;
+	private NamePanel namePanel;
+	private CommitGraphPanel commitGraphPanel;
+	private MerkleTree jsonStore;
 
+	public Main() throws StoreException, JsonSyntaxException,
+			PatchFailedException, IOException, InterruptedException,
+			VisitorException {
+		super("Contacts");
 
+		final Server.StreamCallback exported = new Server.StreamCallback() {
+			@Override
+			public void callback(InputStream is) {
+				try {
+					jsonStore.importAll(is, MergeType.MERGE);
+					jsonStore.checkout();
+					commitChange();
+					System.out.println(jsonStore.read());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 
-    public Main() throws StoreException, JsonSyntaxException, PatchFailedException, IOException, InterruptedException,
-            VisitorException {
-        super("Contacts");
+			@Override
+			public void callback(OutputStream os) {
+				try {
+					jsonStore.exportAll(os);
+					System.out.println("Exported");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		};
 
-        final Server.StreamCallback exported = new Server.StreamCallback() {
-            @Override
-            public void callback(InputStream is) {
-                try {
-                    jsonStore.importAll(is,MergeType.MERGE);
-                    jsonStore.checkout();
-                    commitChange();
-                    System.out.println(jsonStore.read());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+		JMenuBar menuBar = new JMenuBar();
+		JMenu menu = new JMenu("File");
+		menu.add(new JMenuItem(new AbstractAction("Export") {
 
-            @Override
-            public void callback(OutputStream os) {
-                try {
-                    jsonStore.exportAll(os);
-                    System.out.println("Exported");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        };
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					File f = File.createTempFile(jsonStore.getCommit()
+							.getUser(), "commit");
 
+					jsonStore.exportAll(new FileOutputStream(f));
+					System.out.println("Exported to: " + f + ".");
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 
+			}
+		}));
+		menu.add(new JMenuItem(new AbstractAction("Import") {
 
-        JMenuBar menuBar = new JMenuBar();
-        JMenu menu = new JMenu("File");
-        menu.add(new JMenuItem(new AbstractAction("Export") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					JFileChooser chooser = new JFileChooser();
+					chooser.showOpenDialog(Main.this);
+					File f = chooser.getSelectedFile();
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    File f = File.createTempFile(jsonStore.getCommit().getUser(), "commit");
+					jsonStore
+							.importAll(new FileInputStream(f), MergeType.MERGE);
+					jsonStore.checkout();
+					commitChange();
+					System.out.println(jsonStore.read());
 
-                    jsonStore.exportAll(new FileOutputStream(f));
-                    System.out.println("Exported to: " + f + ".");
-                } catch (Exception e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 
-            }
-        }));
-        menu.add(new JMenuItem(new AbstractAction("Import") {
+			}
+		}));
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    JFileChooser chooser = new JFileChooser();
-                    chooser.showOpenDialog(Main.this);
-                    File f = chooser.getSelectedFile();
+		menu.add(new JMenuItem(new AbstractAction("Start Listening") {
+			Server server = null;
 
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (server == null) {
+					server = new Server(exported);
 
-                    jsonStore.importAll(new FileInputStream(f),MergeType.MERGE);
-                    jsonStore.checkout();
-                    commitChange();
-                    System.out.println(jsonStore.read());
+					putValue(Action.NAME, "Stop Listening (" + server.getPort()
+							+ ")");
+				} else {
+					server.halt();
+					server = null;
+					putValue(Action.NAME, "Start Listening");
+				}
+			}
+		}));
 
-                } catch (Exception e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
+		menu.add(new JMenuItem(new AbstractAction("Sync") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					Socket socket = new Socket("127.0.0.1", 8000);
+					exported.callback(socket.getOutputStream());
 
-            }
-        }));
+				} catch (Exception ee) {
+					ee.printStackTrace();
+				}
+			}
 
+		}));
 
-        menu.add(new JMenuItem(new AbstractAction("Start Listening") {
-            Server server = null;
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (server == null)
-                {
-                    server = new Server(exported);
+		menuBar.add(menu);
+		setJMenuBar(menuBar);
 
-                putValue(Action.NAME, "Stop Listening ("+server.getPort()+")");
-                }         else
-                {
-                       server.halt();
-                    server = null;
-                    putValue(Action.NAME, "Start Listening");
-                }
-            }
-        }));
+		Container content = getContentPane();
+		JSplitPane navAndViewJSplit = new JSplitPane(
+				JSplitPane.HORIZONTAL_SPLIT);
+		JSplitPane commitAndEditJSplit = new JSplitPane(
+				JSplitPane.VERTICAL_SPLIT);
+		content.add(navAndViewJSplit);
 
-        menu.add(new JMenuItem(new AbstractAction("Sync") {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                      Socket socket = new Socket("127.0.0.1",8000);
-                        exported.callback(socket.getOutputStream());
+		jsonStore = new MerkleTree(new StorageFactory().createMemoryCas());
+		jsonStore
+				.write("{people:[{name:\"Leo\"},{name:\"John\"},{name:\"Caroline\"}]}")
+				.commit().commit();
 
-                } catch (Exception ee) {
-                    ee.printStackTrace();
-                }
-            }
+		final ContactEditPanel contactEditPanel = new ContactEditPanel();
+		namePanel = new NamePanel(jsonStore,
+				new JsonElementSelectionListener() {
 
-        }));
+					@Override
+					public void jsonElementSelected(String path, Object element) {
+						System.out.println(path + "->" + element + ","
+								+ element.getClass());
+						lastPath = path;
+						contactEditPanel.setJson(element.toString());
 
+					}
+				});
+		contactEditPanel.addJsonChangeListener(new JsonChangeListener() {
 
-        menuBar.add(menu);
-        setJMenuBar(menuBar);
+			@Override
+			public void notify(String json) {
+				try {
+					jsonStore.write(lastPath, json);
+					commitChange();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 
-        Container content = getContentPane();
-        JSplitPane navAndViewJSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        JSplitPane commitAndEditJSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        content.add(navAndViewJSplit);
+		});
 
-        jsonStore = new MerkleTree(new StorageFactory().createMemoryCas());
-        jsonStore.write("{people:[{name:\"Leo\"},{name:\"John\"},{name:\"Caroline\"}]}").commit().commit();
+		navAndViewJSplit.add(namePanel);
+		navAndViewJSplit.add(commitAndEditJSplit);
+		commitAndEditJSplit.add(contactEditPanel);
+		commitGraphPanel = new CommitGraphPanel(jsonStore);
+		commitAndEditJSplit.add(new JScrollPane(commitGraphPanel));
 
-        final ContactEditPanel contactEditPanel = new ContactEditPanel();
-        namePanel = new NamePanel(jsonStore, new JsonElementSelectionListener() {
+		setPreferredSize(new Dimension(680, 480));
+		pack();
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLocationRelativeTo(null);
+		setVisible(true);
 
-            @Override
-            public void jsonElementSelected(String path, Object element) {
-                System.out.println(path + "->" + element + "," + element.getClass());
-                lastPath = path;
-                contactEditPanel.setJson(element.toString());
+	}
 
-            }
-        });
-        contactEditPanel.addJsonChangeListener(new JsonChangeListener() {
+	/**
+	 * Call this when finished using this frame.
+	 */
+	public void closeWindow() {
+		setVisible(false);
+		dispose();
+	}
 
-            @Override
-            public void notify(String json) {
-                try {
-                    jsonStore.write(lastPath, json);
-                    commitChange();
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
+	private void commitChange() throws JsonSyntaxException,
+			UnsupportedEncodingException, StoreException, VisitorException {
+		namePanel.refresh();
+		commitGraphPanel.show(new Commit[] { jsonStore.getCommit() });
+	}
 
-        });
+	/**
+	 * @param args
+	 * @throws StoreException
+	 */
+	public static void main(String[] args) throws Exception {
+		new Main();
 
-        navAndViewJSplit.add(namePanel);
-        navAndViewJSplit.add(commitAndEditJSplit);
-        commitAndEditJSplit.add(contactEditPanel);
-        commitGraphPanel = new CommitGraphPanel(jsonStore);
-        commitAndEditJSplit.add(new JScrollPane(commitGraphPanel));
-
-        setPreferredSize(new Dimension(680, 480));
-        pack();
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setVisible(true);
-
-    }
-
-    /**
-     * Call this when finished using this frame.
-     */
-    public void closeWindow() {
-        setVisible(false);
-        dispose();
-    }
-
-    private void commitChange() throws JsonSyntaxException, UnsupportedEncodingException, StoreException,
-            VisitorException {
-        namePanel.refresh();
-        commitGraphPanel.show(new Commit[]{jsonStore.getCommit()});
-    }
-
-    /**
-     * @param args
-     * @throws StoreException
-     */
-    public static void main(String[] args) throws Exception {
-        new Main();
-
-    }
+	}
 
 }

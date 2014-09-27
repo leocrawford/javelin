@@ -7,14 +7,14 @@ import com.crypticbit.javelin.diff.SequenceDiff;
 
 public final class ListDiffer<T> implements DifferFactoryElement {
 
-    @Override
-    public SequenceDiff<List<T>, ListDelta> createApplicator() {
-	return new ListSequenceDiff<T>();
-    }
+	@Override
+	public SequenceDiff<List<T>, ListDelta> createApplicator() {
+		return new ListSequenceDiff<T>();
+	}
 
-    @Override
-    public boolean supports(Object object) {
-	return object instanceof List;
-    }
+	@Override
+	public boolean supports(Object object) {
+		return object instanceof List;
+	}
 
 }

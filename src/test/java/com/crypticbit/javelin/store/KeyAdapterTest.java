@@ -1,6 +1,7 @@
 package com.crypticbit.javelin.store;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import org.junit.Test;
 
@@ -8,17 +9,21 @@ public class KeyAdapterTest {
 
 	@Test
 	public void testToByteArray() {
-		fail("Not yet implemented");
-	}
 
-	@Test
-	public void testFromByteArray() {
-		fail("Not yet implemented");
-	}
+		KeyAdapter testAdapter = new KeyAdapter();
+		Key a = new Key();
+		Key b = new Key();
 
-	@Test
-	public void testGetContentDigest() {
-		fail("Not yet implemented");
+		byte[] abyte = testAdapter.toByteArray(a);
+		byte[] bbyte = testAdapter.toByteArray(b);
+
+		Key aCopy = testAdapter.fromByteArray(abyte);
+		Key bCopy = testAdapter.fromByteArray(bbyte);
+
+		assertEquals(a, aCopy);
+		assertEquals(b, bCopy);
+		assertNotEquals(a, b);
+
 	}
 
 }

@@ -9,7 +9,12 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-/* Converts an arbitrary class (S) to byte array and back so it can be persisted */
+/*
+ * Converts an arbitrary class (S) to byte array and back so it can be
+ * persisted. This uses gson under the covers so the points raised here apply:
+ * https://sites.google.com/site/gson/gson-user-guide#TOC-Object-Examples. In
+ * addition Key is registered as a type that can be  - which otherwise it couldn't be, 
+ */
 
 public class JsonAdapter<S> implements Adapter<S> {
 

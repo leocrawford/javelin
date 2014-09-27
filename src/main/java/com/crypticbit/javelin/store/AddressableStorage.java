@@ -3,10 +3,7 @@ package com.crypticbit.javelin.store;
 import java.util.List;
 
 /**
- * Synchronous interface for the Content Addressable Storage System Methods are
- * based on Camilstore ones described here,
- * http://ngerakines.github.io/camlispp/, though we could have simply
- * implemented Map!
+ * Synchronous interface for key value store
  */
 
 public interface AddressableStorage {

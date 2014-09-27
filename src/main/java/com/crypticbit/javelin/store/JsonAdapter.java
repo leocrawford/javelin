@@ -9,7 +9,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-/* Converts JsonElement to byte array and back so it can be persisted */
+/* Converts an arbitrary class (S) to byte array and back so it can be persisted */
 
 public class JsonAdapter<S> implements Adapter<S> {
 
@@ -28,7 +28,6 @@ public class JsonAdapter<S> implements Adapter<S> {
 					}
 				}
 			}).create();
-	static final KeyFactory keyFactory = new KeyFactory();
 	private Class<S> clazz;
 
 	public JsonAdapter(Class<S> clazz) {
@@ -48,7 +47,7 @@ public class JsonAdapter<S> implements Adapter<S> {
 
 	@Override
 	public Key getContentDigest(S element) {
-		return keyFactory.getDefaultDigest(toByteArray(element));
+		return new Key(toByteArray(element));
 	}
 
 }

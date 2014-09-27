@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 /**
  * Provides a memory based AddressableStorage.
  */
-public class MemoryAddressableStorage implements AddressableStorage {
+class MemoryAddressableStorage implements AddressableStorage {
 
 	private static final Logger LOG = Logger
 			.getLogger("com.crypticbit.javelin.cas");

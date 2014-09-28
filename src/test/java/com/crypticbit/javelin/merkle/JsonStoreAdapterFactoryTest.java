@@ -13,7 +13,7 @@ import com.crypticbit.javelin.store.StoreException;
 
 public class JsonStoreAdapterFactoryTest {
 
-    @Test
+   /* @Test
     public void testGetKeyAdapter() throws StoreException, VisitorException {
 
 	final AddressableStorage cas = new StorageFactory().createMemoryCas();
@@ -24,6 +24,6 @@ public class JsonStoreAdapterFactoryTest {
 
 	assertEquals(8, adapter.getKeyAdapter().visit(ds.getCommit().getHead()).size());
 
-    }
+    }*/
 
 }

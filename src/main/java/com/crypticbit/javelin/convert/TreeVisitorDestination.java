@@ -23,7 +23,7 @@ import com.google.common.base.Function;
  * @param <I>
  *            the type of the collections contents before transformation
  */
-public interface JsonVisitorDestination<T, F, I> {
+public interface TreeVisitorDestination<T, F, I> {
 
 	public Function<I, F> getTransform(VisitorContext<I, T> context)
 			throws VisitorException;

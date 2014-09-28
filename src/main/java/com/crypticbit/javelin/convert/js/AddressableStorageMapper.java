@@ -1,10 +1,10 @@
 package com.crypticbit.javelin.convert.js;
 
-import com.crypticbit.javelin.convert.DataAccessInterface;
-import com.crypticbit.javelin.convert.JsonVisitor;
-import com.crypticbit.javelin.convert.JsonVisitorDestination;
+import com.crypticbit.javelin.convert.TreeMapper;
+import com.crypticbit.javelin.convert.TreeVisitor;
+import com.crypticbit.javelin.convert.TreeVisitorDestination;
 import com.crypticbit.javelin.convert.VisitorException;
-import com.crypticbit.javelin.convert.VisitorInterface;
+import com.crypticbit.javelin.convert.TreeVisitorSource;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 // import com.google.gson.JsonElement;
@@ -12,35 +12,35 @@ import com.google.gson.JsonElement;
 
 /**
  * Simple API to use visitor as a way of copying one tree like data structure to
- * another. This is just the front door that give a usable DataAccessInterface
+ * another. This is just the front door that give a usable TreeMapper
  * interface.
  */
 
 class AddressableStorageMapper<T, F, I, B> implements
-		DataAccessInterface<Object> {
+		TreeMapper<Object> {
 
-	private JsonVisitorCasAdapter casAdapter;
-	private VisitorInterface<Object, B> source;
-	private JsonVisitorDestination<T, F, Key> dest;
+	private TreeVisitorBothStoreAdapter casAdapter;
+	private TreeVisitorSource<Object, B> source;
+	private TreeVisitorDestination<T, F, Key> dest;
 
 	AddressableStorageMapper(AddressableStorage store,
-			VisitorInterface<Object, B> source,
-			JsonVisitorDestination<T, F, Key> dest) {
+			TreeVisitorSource<Object, B> source,
+			TreeVisitorDestination<T, F, Key> dest) {
 		this.source = source;
 		this.dest = dest;
-		casAdapter = new JsonVisitorCasAdapter(store);
+		casAdapter = new TreeVisitorBothStoreAdapter(store);
 	}
 
 	@Override
 	public Object read(Key commitId) throws VisitorException {
-		JsonVisitor<T, F, Key, JsonElement> sv = new JsonVisitor<>(casAdapter,
+		TreeVisitor<T, F, Key, JsonElement> sv = new TreeVisitor<>(casAdapter,
 				dest);
 		return sv.visit(commitId);
 	}
 
 	@Override
 	public Key write(Object object) throws VisitorException {
-		JsonVisitor<Key, Key, Object, B> sv = new JsonVisitor<Key, Key, Object, B>(
+		TreeVisitor<Key, Key, Object, B> sv = new TreeVisitor<Key, Key, Object, B>(
 				source, casAdapter);
 		return sv.visit(object);
 	}

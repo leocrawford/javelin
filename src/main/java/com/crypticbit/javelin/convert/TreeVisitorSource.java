@@ -23,7 +23,7 @@ import java.util.Map;
  *            A representation of the object after it has been fetched or
  *            processed
  */
-public interface VisitorInterface<I, B> {
+public interface TreeVisitorSource<I, B> {
 
 	public abstract ElementType getType(B in);
 

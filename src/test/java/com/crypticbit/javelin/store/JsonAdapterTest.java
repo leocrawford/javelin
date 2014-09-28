@@ -54,8 +54,12 @@ public class JsonAdapterTest {
 		TestDao b = new TestDao("test b");
 
 		Key keyA = testAdapter.getContentDigest(a);
-		Key keyB = testAdapter.getContentDigest(a);
+		Key keyATake2 = testAdapter.getContentDigest(a);
+		Key keyB = testAdapter.getContentDigest(b);
 
+		// check repeatable
+		assertEquals(keyA, keyATake2);
+		// check unique
 		assertNotEquals(keyA, keyB);
 	}
 

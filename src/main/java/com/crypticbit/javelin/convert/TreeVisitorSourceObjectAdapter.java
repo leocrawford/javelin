@@ -13,13 +13,13 @@ import com.crypticbit.javelin.store.Key;
 import com.google.common.base.Function;
 import com.google.gson.internal.LinkedTreeMap;
 
-public class JsonVisitorObjectAdapter implements
-		JsonVisitorDestination<Object, Reference, Key>,
-		VisitorInterface<Object, Object> {
+public class TreeVisitorSourceObjectAdapter implements
+		TreeVisitorDestination<Object, Reference, Key>,
+		TreeVisitorSource<Object, Object> {
 
 	private JsonStoreAdapterFactory jsa;
 
-	public JsonVisitorObjectAdapter(JsonStoreAdapterFactory jsa) {
+	public TreeVisitorSourceObjectAdapter(JsonStoreAdapterFactory jsa) {
 		this.jsa = jsa;
 	}
 
@@ -35,7 +35,7 @@ public class JsonVisitorObjectAdapter implements
 	}
 
 	@Override
-	public com.crypticbit.javelin.convert.VisitorInterface.ElementType getType(
+	public com.crypticbit.javelin.convert.TreeVisitorSource.ElementType getType(
 			Object in) {
 		if (in == null) {
 			return ElementType.NULL;

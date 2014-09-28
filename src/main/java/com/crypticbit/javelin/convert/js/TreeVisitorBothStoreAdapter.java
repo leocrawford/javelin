@@ -3,10 +3,10 @@ package com.crypticbit.javelin.convert.js;
 import java.util.List;
 import java.util.Map;
 
-import com.crypticbit.javelin.convert.JsonVisitorDestination;
+import com.crypticbit.javelin.convert.TreeVisitorDestination;
 import com.crypticbit.javelin.convert.VisitorContext;
 import com.crypticbit.javelin.convert.VisitorException;
-import com.crypticbit.javelin.convert.VisitorInterface;
+import com.crypticbit.javelin.convert.TreeVisitorSource;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
@@ -17,14 +17,14 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
-public class JsonVisitorCasAdapter implements
-		VisitorInterface<Key, JsonElement>,
-		JsonVisitorDestination<Key, Key, Object> {
+public class TreeVisitorBothStoreAdapter implements
+		TreeVisitorSource<Key, JsonElement>,
+		TreeVisitorDestination<Key, Key, Object> {
 
 	private AddressableStorage cas;
 	private static Gson gson = new Gson();
 
-	public JsonVisitorCasAdapter(AddressableStorage cas) {
+	public TreeVisitorBothStoreAdapter(AddressableStorage cas) {
 		this.cas = cas;
 	}
 
@@ -36,7 +36,7 @@ public class JsonVisitorCasAdapter implements
 
 	@Override
 	public ElementType getType(JsonElement in) {
-		return JsonVisitorElementAdapter.getTypeStatic(in);
+		return TreeVisitorBothElementAdapter.getTypeStatic(in);
 	}
 
 	/*
@@ -82,7 +82,7 @@ public class JsonVisitorCasAdapter implements
 	 */
 	@Override
 	public Object parsePrimitive(JsonElement element) {
-		return JsonVisitorElementAdapter
+		return TreeVisitorBothElementAdapter
 				.parsePrimitiveStatic((JsonPrimitive) element);
 	}
 

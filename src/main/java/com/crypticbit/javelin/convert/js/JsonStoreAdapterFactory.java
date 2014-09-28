@@ -2,45 +2,39 @@ package com.crypticbit.javelin.convert.js;
 
 import java.util.Set;
 
-import com.crypticbit.javelin.convert.DataAccessInterface;
-import com.crypticbit.javelin.convert.JsonVisitor;
-import com.crypticbit.javelin.convert.JsonVisitorKeyAdapter;
-import com.crypticbit.javelin.convert.JsonVisitorObjectAdapter;
+import com.crypticbit.javelin.convert.TreeMapper;
+import com.crypticbit.javelin.convert.TreeVisitor;
+import com.crypticbit.javelin.convert.TreeVisitorDestinationKeyAdapter;
+import com.crypticbit.javelin.convert.TreeVisitorSourceObjectAdapter;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.google.gson.JsonElement;
 
 public class JsonStoreAdapterFactory {
 
-	private DataAccessInterface<JsonElement> jea;
-	private DataAccessInterface<Object> joa;
+	private TreeMapper<JsonElement> jea;
+	private TreeMapper<Object> joa;
 
-	private AddressableStorage cas;
+	private AddressableStorage store;
 
 	public JsonStoreAdapterFactory(AddressableStorage cas) {
-		JsonVisitorObjectAdapter jsonObjectAdapter = new JsonVisitorObjectAdapter(
+		TreeVisitorSourceObjectAdapter jsonObjectAdapter = new TreeVisitorSourceObjectAdapter(
 				this);
 		joa = new AddressableStorageMapper(cas, jsonObjectAdapter,
 				jsonObjectAdapter);
-		JsonVisitorElementAdapter jsonElementAdapter = new JsonVisitorElementAdapter();
+		TreeVisitorBothElementAdapter jsonElementAdapter = new TreeVisitorBothElementAdapter();
 		jea = new AddressableStorageMapper(cas, jsonElementAdapter,
 				jsonElementAdapter);
-		this.cas = cas;
+		this.store = cas;
 	}
 
-	public DataAccessInterface<JsonElement> getJsonElementAdapter() {
+	public TreeMapper<JsonElement> getJsonElementAdapter() {
 		return jea;
 	}
 
-	public DataAccessInterface<Object> getJsonObjectAdapter() {
+	public TreeMapper<Object> getJsonObjectAdapter() {
 		return joa;
 	}
 
-	public JsonVisitor<Set<Key>, Set<Key>, Key, JsonElement> getKeyAdapter() {
-		JsonVisitorKeyAdapter jsonKeyAdapter = new JsonVisitorKeyAdapter();
-		return new JsonVisitor<Set<Key>, Set<Key>, Key, JsonElement>(
-				new JsonVisitorCasAdapter(cas), jsonKeyAdapter);
-
-	}
 
 }

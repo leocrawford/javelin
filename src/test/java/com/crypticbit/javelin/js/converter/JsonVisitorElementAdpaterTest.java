@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.convert.DataAccessInterface;
+import com.crypticbit.javelin.convert.TreeMapper;
 import com.crypticbit.javelin.convert.VisitorException;
 import com.crypticbit.javelin.convert.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.store.Key;
@@ -24,7 +24,7 @@ public class JsonVisitorElementAdpaterTest {
     @Test
     public void testConvertPrimitive() throws JsonSyntaxException, StoreException, VisitorException {
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
-	DataAccessInterface<JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
+	TreeMapper<JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
 
 	final String jsonFloat = "2.1";
 	final JsonElement json = GSON.fromJson(jsonFloat, JsonElement.class);
@@ -38,7 +38,7 @@ public class JsonVisitorElementAdpaterTest {
 
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
 
-	DataAccessInterface<JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
+	TreeMapper<JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
 	Key stringIdentity = jsonElementAdapter.write(GSON.fromJson("\"String\"", JsonElement.class));
 	Key nullIdentity = jsonElementAdapter.write(GSON.fromJson("null", JsonElement.class));
 	Key integerIdentity = jsonElementAdapter.write(GSON.fromJson("100", JsonElement.class));

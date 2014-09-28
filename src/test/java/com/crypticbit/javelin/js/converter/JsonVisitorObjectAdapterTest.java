@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.convert.DataAccessInterface;
+import com.crypticbit.javelin.convert.TreeMapper;
 import com.crypticbit.javelin.convert.VisitorException;
 import com.crypticbit.javelin.convert.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.store.Key;
@@ -30,7 +30,7 @@ public class JsonVisitorObjectAdapterTest {
 
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
 
-	DataAccessInterface<Object> jsonObjectAdapter = store.getJsonObjectAdapter();
+	TreeMapper<Object> jsonObjectAdapter = store.getJsonObjectAdapter();
 	Key stringIdentity = jsonObjectAdapter.write("String");
 	Key nullIdentity = jsonObjectAdapter.write(null);
 	Key integerIdentity = jsonObjectAdapter.write(100);

@@ -36,13 +36,13 @@ import com.google.common.collect.Maps;
  *            A representation of the object after it has been fetched or
  *            processed (source)
  */
-public class JsonVisitor<T, F, I, B> implements VisitorContext<I, T> {
+public class TreeVisitor<T, F, I, B> implements VisitorContext<I, T> {
 
-	private JsonVisitorDestination<T, F, I> destination;
-	private VisitorInterface<I, B> source;
+	private TreeVisitorDestination<T, F, I> destination;
+	private TreeVisitorSource<I, B> source;
 
-	public JsonVisitor(VisitorInterface<I, B> source,
-			JsonVisitorDestination<T, F, I> destination) {
+	public TreeVisitor(TreeVisitorSource<I, B> source,
+			TreeVisitorDestination<T, F, I> destination) {
 		this.destination = destination;
 		this.source = source;
 	}
@@ -88,4 +88,13 @@ public class JsonVisitor<T, F, I, B> implements VisitorContext<I, T> {
 		}
 	}
 
+	@SuppressWarnings("serial")
+	static class HackedRuntimeException extends RuntimeException {
+
+		HackedRuntimeException(String message, VisitorException e) {
+			super(message, e);
+		}
+	}
+
+	
 }

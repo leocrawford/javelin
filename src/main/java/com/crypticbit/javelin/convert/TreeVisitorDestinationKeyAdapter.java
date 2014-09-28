@@ -9,8 +9,8 @@ import java.util.Set;
 import com.crypticbit.javelin.store.Key;
 import com.google.common.base.Function;
 
-public class JsonVisitorKeyAdapter implements
-		JsonVisitorDestination<Set<Key>, Set<Key>, Key> {
+public class TreeVisitorDestinationKeyAdapter implements
+		TreeVisitorDestination<Set<Key>, Set<Key>, Key> {
 
 	@Override
 	public Function<Key, Set<Key>> getTransform(

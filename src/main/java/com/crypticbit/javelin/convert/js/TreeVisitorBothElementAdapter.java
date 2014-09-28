@@ -4,9 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.crypticbit.javelin.convert.TreeVisitorDestination;
+import com.crypticbit.javelin.convert.TreeVisitorBoth;
 import com.crypticbit.javelin.convert.VisitorContext;
-import com.crypticbit.javelin.convert.TreeVisitorSource;
 import com.crypticbit.javelin.store.Key;
 import com.google.common.base.Function;
 import com.google.gson.Gson;
@@ -18,23 +17,20 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.reflect.TypeToken;
 
 public class TreeVisitorBothElementAdapter implements
-		TreeVisitorDestination<JsonElement, JsonElement, Key>,
-		TreeVisitorSource<JsonElement, JsonElement> {
-
+		TreeVisitorBoth<JsonElement, JsonElement> {
 	private static final Gson gson = new Gson();
 
 	public TreeVisitorBothElementAdapter() {
 	}
 
-	@Override
+	/* @Override
 	public Function<Key, JsonElement> getTransform(
 			VisitorContext<Key, JsonElement> context) {
 		return context.getRecurseFunction();
-	}
+	} */
 
 	@Override
-	public com.crypticbit.javelin.convert.TreeVisitorSource.ElementType getType(
-			JsonElement in) {
+	public TreeVisitorBoth.ElementType getType(JsonElement in) {
 		return getTypeStatic(in);
 	}
 
@@ -61,7 +57,7 @@ public class TreeVisitorBothElementAdapter implements
 	}
 
 	@Override
-	public JsonElement writeList(Key source, List<JsonElement> list) {
+	public JsonElement writeList(List<JsonElement> list) {
 		JsonArray r = new JsonArray();
 		for (JsonElement e : list) {
 			r.add(e);
@@ -70,7 +66,7 @@ public class TreeVisitorBothElementAdapter implements
 	}
 
 	@Override
-	public JsonElement writeMap(Key source, Map<String, JsonElement> map) {
+	public JsonElement writeMap(Map<String, JsonElement> map) {
 		JsonObject o = new JsonObject();
 		for (Entry<String, JsonElement> e : map.entrySet()) {
 			o.add(e.getKey(), e.getValue());
@@ -79,19 +75,19 @@ public class TreeVisitorBothElementAdapter implements
 	}
 
 	@Override
-	public JsonElement writeNull(Key source) {
-		return writeValue(source, null);
+	public JsonElement writeNull() {
+		return writeValue(null);
 	}
 
 	@Override
-	public JsonElement writeValue(Key source, Object value) {
+	public JsonElement writeValue(Object value) {
 		// Hack to get unit tests to pass. Did fail because a converting from
 		// JsonElement to Object and back gave a different type for same value
 		return new JsonParser().parse(gson.toJson(value));
 		// return jsa.getGson().toJsonTree(value);
 	}
 
-	static com.crypticbit.javelin.convert.TreeVisitorSource.ElementType getTypeStatic(
+	static TreeVisitorBoth.ElementType getTypeStatic(
 			JsonElement in) {
 		if (in.isJsonArray()) {
 			return ElementType.ARRAY;

@@ -3,10 +3,10 @@ package com.crypticbit.javelin.convert.js;
 import java.util.List;
 import java.util.Map;
 
-import com.crypticbit.javelin.convert.TreeVisitorDestination;
+import com.crypticbit.javelin.convert.TreeVisitorBoth;
+import com.crypticbit.javelin.convert.TreeVisitorBoth.ElementType;
 import com.crypticbit.javelin.convert.VisitorContext;
 import com.crypticbit.javelin.convert.VisitorException;
-import com.crypticbit.javelin.convert.TreeVisitorSource;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
@@ -18,8 +18,8 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 public class TreeVisitorBothStoreAdapter implements
-		TreeVisitorSource<Key, JsonElement>,
-		TreeVisitorDestination<Key, Key, Object> {
+		
+		TreeVisitorBoth<Key, JsonElement> {
 
 	private AddressableStorage cas;
 	private static Gson gson = new Gson();
@@ -28,11 +28,11 @@ public class TreeVisitorBothStoreAdapter implements
 		this.cas = cas;
 	}
 
-	@Override
+	/* @Override
 	public Function<Object, Key> getTransform(
 			VisitorContext<Object, Key> context) {
 		return context.getRecurseFunction();
-	}
+	} */
 
 	@Override
 	public ElementType getType(JsonElement in) {
@@ -87,23 +87,23 @@ public class TreeVisitorBothStoreAdapter implements
 	}
 
 	@Override
-	public Key writeList(Object source, List<Key> list) throws VisitorException {
+	public Key writeList(List<Key> list) throws VisitorException {
 		return write(list);
 	}
 
 	@Override
-	public Key writeMap(Object source, Map<String, Key> map)
+	public Key writeMap(Map<String, Key> map)
 			throws VisitorException {
 		return write(map);
 	}
 
 	@Override
-	public Key writeNull(Object source) throws VisitorException {
+	public Key writeNull() throws VisitorException {
 		return write(null);
 	}
 
 	@Override
-	public Key writeValue(Object source, Object value) throws VisitorException {
+	public Key writeValue(Object value) throws VisitorException {
 		return write(value);
 	}
 

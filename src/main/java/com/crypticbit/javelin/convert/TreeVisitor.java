@@ -38,13 +38,10 @@ import com.google.common.collect.Maps;
  */
 public class TreeVisitor<T, F, I, B> implements VisitorContext<I, T> {
 
-	private TreeVisitorDestination<T, F, I> destination;
-	private TreeVisitorSource<I, B> source;
+	private TreeVisitorBoth<T, F, I, B> tv;
 
-	public TreeVisitor(TreeVisitorSource<I, B> source,
-			TreeVisitorDestination<T, F, I> destination) {
-		this.destination = destination;
-		this.source = source;
+	public TreeVisitor(TreeVisitorBoth<T,F,I, B> tv){
+		this.tv = tv;
 	}
 
 	@Override
@@ -63,23 +60,24 @@ public class TreeVisitor<T, F, I, B> implements VisitorContext<I, T> {
 	}
 
 	public T visit(I input) throws VisitorException {
-		B in = source.parse(input);
+		B in = tv.parse(input);
 		try {
-			switch (source.getType(in)) {
+			switch (tv.getType(in)) {
 			case ARRAY:
-				return destination.writeList(
-						input,
-						Lists.transform(source.parseList(in),
-								destination.getTransform(this)));
+				return tv.writeList(
+						
+						Lists.transform(tv.parseList(in),
+								tv.getTransform(this)));
 			case OBJECT:
-				return destination.writeMap(
-						input,
-						Maps.transformValues(source.parseMap(in),
-								destination.getTransform(this)));
+				return tv.writeMap(
+						
+						Maps.transformValues(tv.parseMap(in),
+								tv.getTransform(this)));
 			case PRIMITIVE:
-				return destination.writeValue(input, source.parsePrimitive(in));
+				return tv.writeValue(
+						tv.parsePrimitive(in));
 			default:
-				return destination.writeNull(input);
+				return tv.writeNull();
 			}
 			// because guava Function doesn't allows us to throw non run-time
 			// exceptions we do this

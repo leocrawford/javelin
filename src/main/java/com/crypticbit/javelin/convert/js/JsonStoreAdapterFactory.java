@@ -10,17 +10,14 @@ public class JsonStoreAdapterFactory {
 	private TreeMapper<JsonElement> jea;
 	private TreeMapper<Object> joa;
 
-	private AddressableStorage store;
-
-	public JsonStoreAdapterFactory(AddressableStorage cas) {
+	public JsonStoreAdapterFactory(AddressableStorage store) {
 		TreeVisitorSourceObjectAdapter jsonObjectAdapter = new TreeVisitorSourceObjectAdapter(
 				this);
-		joa = new AddressableStorageMapper(cas, jsonObjectAdapter,
+		joa = new AddressableStorageMapper(store, jsonObjectAdapter,
 				jsonObjectAdapter);
 		TreeVisitorBothElementAdapter jsonElementAdapter = new TreeVisitorBothElementAdapter();
-		jea = new AddressableStorageMapper(cas, jsonElementAdapter,
+		jea = new AddressableStorageMapper(store, jsonElementAdapter,
 				jsonElementAdapter);
-		this.store = cas;
 	}
 
 	public TreeMapper<JsonElement> getJsonElementAdapter() {

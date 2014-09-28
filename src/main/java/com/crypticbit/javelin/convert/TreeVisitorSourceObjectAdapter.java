@@ -14,8 +14,7 @@ import com.google.common.base.Function;
 import com.google.gson.internal.LinkedTreeMap;
 
 public class TreeVisitorSourceObjectAdapter implements
-		TreeVisitorDestination<Object, Reference, Key>,
-		TreeVisitorSource<Object, Object> {
+		TreeVisitorBoth<Object, Reference> {
 
 	private JsonStoreAdapterFactory jsa;
 
@@ -23,7 +22,7 @@ public class TreeVisitorSourceObjectAdapter implements
 		this.jsa = jsa;
 	}
 
-	@Override
+/*	@Override
 	public Function<Key, Reference> getTransform(
 			VisitorContext<Key, Object> context) {
 		return new Function<Key, Reference>() {
@@ -32,11 +31,10 @@ public class TreeVisitorSourceObjectAdapter implements
 				return new IdentityReference(jsa, identity);
 			}
 		};
-	}
+	} */
 
 	@Override
-	public com.crypticbit.javelin.convert.TreeVisitorSource.ElementType getType(
-			Object in) {
+	public TreeVisitorBoth.ElementType getType(Object in) {
 		if (in == null) {
 			return ElementType.NULL;
 		} else if (in instanceof List) {
@@ -72,13 +70,13 @@ public class TreeVisitorSourceObjectAdapter implements
 	}
 
 	@Override
-	public Object writeList(Key source, List<Reference> list) {
+	public Object writeList(List<Reference> list) {
 		// copy so writeable
 		return new LazyArray(new ArrayList<>(list));
 	}
 
 	@Override
-	public Object writeMap(Key source, Map<String, Reference> map) {
+	public Object writeMap(Map<String, Reference> map) {
 		// copy so writeable
 		LinkedTreeMap<String, Reference> linkedTreeMap = new LinkedTreeMap<String, Reference>();
 		linkedTreeMap.putAll(map);
@@ -87,12 +85,12 @@ public class TreeVisitorSourceObjectAdapter implements
 	}
 
 	@Override
-	public Object writeNull(Key source) {
+	public Object writeNull() {
 		return null;
 	}
 
 	@Override
-	public Object writeValue(Key source, Object value) {
+	public Object writeValue(Object value) {
 		return value;
 	}
 

@@ -1,120 +1,162 @@
 package com.crypticbit.javelin.convert.js;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.crypticbit.javelin.convert.TreeVisitorBoth;
-import com.crypticbit.javelin.convert.TreeVisitorBoth.ElementType;
-import com.crypticbit.javelin.convert.VisitorContext;
+import com.crypticbit.javelin.convert.TreeCopySource;
 import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.lazy.LazyArray;
+import com.crypticbit.javelin.convert.lazy.LazyMap;
+import com.crypticbit.javelin.convert.lazy.Reference;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.common.base.Function;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import com.google.common.collect.Maps;
+import com.google.gson.*;
 
-public class TreeVisitorBothStoreAdapter implements
-		
-		TreeVisitorBoth<Key, JsonElement> {
+public class TreeVisitorBothStoreAdapter implements TreeCopySource<Key, JsonElement> {
 
-	private AddressableStorage cas;
-	private static Gson gson = new Gson();
+    private AddressableStorage store;
+    private static Gson gson = new Gson();
 
-	public TreeVisitorBothStoreAdapter(AddressableStorage cas) {
-		this.cas = cas;
-	}
+    public TreeVisitorBothStoreAdapter(AddressableStorage store) {
+	this.store = store;
+    }
 
-	/* @Override
-	public Function<Object, Key> getTransform(
-			VisitorContext<Object, Key> context) {
-		return context.getRecurseFunction();
-	} */
+    @Override
+    public Function<Object, JsonElement> getDestTransform() {
+	return new Function<Object, JsonElement>() {
 
-	@Override
-	public ElementType getType(JsonElement in) {
-		return TreeVisitorBothElementAdapter.getTypeStatic(in);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.crypticbit.javelin.js.SourceCallback#parse(com.crypticbit.javelin
-	 * .store.Identity)
-	 */
-	@Override
-	public JsonElement parse(Key digest) throws VisitorException {
-		try {
-			return cas.get(digest, JsonElement.class);
-		} catch (JsonSyntaxException | StoreException e) {
-			throw new VisitorException("Unable to read value from location "
-					+ digest + " in store " + cas.getName(), e);
+	    @Override
+	    public JsonElement apply(Object unpackedElement) {
+		if (unpackedElement == null)
+		    return JsonNull.INSTANCE;
+		if (unpackedElement instanceof Map) {
+		    JsonObject result = new JsonObject();
+		    for (Map.Entry<String, Object> entry : ((Map<String, Object>) unpackedElement).entrySet())
+			result.add(entry.getKey(), convertObjectToKey(entry.getValue()));
+		    return result;
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.crypticbit.javelin.js.SourceCallback#parseList(com.google.gson
-	 * .JsonElement)
-	 */
-	@Override
-	public List<Key> parseList(JsonElement in) {
-		return gson.fromJson(in, new TypeToken<List<Key>>() {
-		}.getType());
-	}
-
-	@Override
-	public Map<String, Key> parseMap(JsonElement in) {
-		return gson.fromJson(in, new TypeToken<Map<String, Key>>() {
-		}.getType());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.crypticbit.javelin.js.SourceCallback#parsePrimitive(com.google
-	 * .gson.JsonPrimitive)
-	 */
-	@Override
-	public Object parsePrimitive(JsonElement element) {
-		return TreeVisitorBothElementAdapter
-				.parsePrimitiveStatic((JsonPrimitive) element);
-	}
-
-	@Override
-	public Key writeList(List<Key> list) throws VisitorException {
-		return write(list);
-	}
-
-	@Override
-	public Key writeMap(Map<String, Key> map)
-			throws VisitorException {
-		return write(map);
-	}
-
-	@Override
-	public Key writeNull() throws VisitorException {
-		return write(null);
-	}
-
-	@Override
-	public Key writeValue(Object value) throws VisitorException {
-		return write(value);
-	}
-
-	// FIXME if already exists
-	Key write(Object value) throws VisitorException {
-		try {
-			return cas.store(gson.toJsonTree(value), JsonElement.class);
-		} catch (StoreException e) {
-			throw new VisitorException("Unable to write to CAS store "
-					+ cas.getName(), e);
+		if (unpackedElement instanceof List) {
+		    JsonArray result = new JsonArray();
+		    for (Object entry : (List<Object>) unpackedElement) {
+			result.add(convertObjectToKey(entry));
+		    }
+		    return result;
 		}
+		try {
+		    return gson.toJsonTree(pack(gson.toJsonTree(unpackedElement)).getKeyAsString());
+		}
+		catch (VisitorException e) {
+		    // TODO Auto-generated catch block
+		    e.printStackTrace();
+		    throw new Error();
+		}
+	    }
+
+	    private JsonElement convertObjectToKey(Object entry) {
+		try {
+		    return gson.toJsonTree(pack(apply(entry)).getKeyAsString());
+		}
+		catch (VisitorException e) {
+		    // FIXME
+		    e.printStackTrace();
+		    throw new Error();
+		}
+	    }
+	};
+
+    }
+
+    @Override
+    public Key pack(JsonElement unpackedElement) throws VisitorException {
+	try {
+	    return store.store(unpackedElement, JsonElement.class);
 	}
+	catch (StoreException e) {
+	    throw new VisitorException("unable to copy the tree to the store", e);
+	}
+    }
+
+    private final Function<JsonElement, Reference> jsonToIdentityReferenceFunction = new Function<JsonElement, Reference>() {
+	@Override
+	public Reference apply(JsonElement input) {
+	    return new IdentityReference(new Key(input.getAsString()));
+	}
+    };
+
+    @Override
+    public Function<JsonElement, Object> getSourceTransform() {
+	return new Function<JsonElement, Object>() {
+
+	    @Override
+	    public Object apply(JsonElement input) {
+		if (input.isJsonObject()) {
+		    return new LazyMap(Maps.transformValues(asMap(input.getAsJsonObject()),
+			    jsonToIdentityReferenceFunction));
+		}
+		else if (input.isJsonArray()) {
+		    return new LazyArray(com.google.common.collect.Lists.transform(asArray(input.getAsJsonArray()),
+			    jsonToIdentityReferenceFunction));
+		}
+		else if (input.isJsonPrimitive()) {
+		    return jsonToIdentityReferenceFunction.apply(input);
+		}
+		else
+		    return null;
+	    }
+
+	    private Map<String, JsonElement> asMap(JsonObject jo) {
+		Map<String, JsonElement> result = new HashMap<>();
+		for (Map.Entry<String, JsonElement> entry : jo.entrySet()) {
+		    result.put(entry.getKey(), entry.getValue());
+		}
+		return result;
+
+	    }
+
+	    private List<JsonElement> asArray(JsonArray ja) {
+		List<JsonElement> result = new ArrayList<>();
+		for (JsonElement entry : ja) {
+		    result.add(entry);
+		}
+		return result;
+	    }
+	};
+    }
+
+    @Override
+    public JsonElement unpack(Key element) throws VisitorException {
+	try {
+	    return store.get(element, JsonElement.class);
+	}
+	catch (StoreException e) {
+	    throw new VisitorException("unable to copy the tree referenced by key " + element, e);
+	}
+    }
+
+    class IdentityReference implements Reference {
+
+	private Key key;
+
+	public IdentityReference(Key key) {
+	    this.key = key;
+	}
+
+	@Override
+	public Object getValue() {
+	    try {
+		return getSourceTransform().apply(unpack(key));
+	    }
+	    catch (VisitorException e) {
+		// FIXME
+		throw new Error(e);
+	    }
+	}
+
+    }
 
 }

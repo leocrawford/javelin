@@ -30,7 +30,7 @@ public class JsonVisitorObjectAdapterTest {
 
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
 
-	TreeMapper<Object> jsonObjectAdapter = store.getJsonObjectAdapter();
+	TreeMapper<Object,Key> jsonObjectAdapter = store.getJsonObjectAdapter();
 	Key stringIdentity = jsonObjectAdapter.write("String");
 	Key nullIdentity = jsonObjectAdapter.write(null);
 	Key integerIdentity = jsonObjectAdapter.write(100);
@@ -43,7 +43,7 @@ public class JsonVisitorObjectAdapterTest {
 	m.put("c", false);
 	Key mapIdentity = jsonObjectAdapter.write(m);
 
-	assertTrue(jsonObjectAdapter.read(stringIdentity).getClass() == String.class);
+	assertEquals(String.class,jsonObjectAdapter.read(stringIdentity).getClass());
 	assertTrue(jsonObjectAdapter.read(nullIdentity) == null);
 	assertTrue(jsonObjectAdapter.read(integerIdentity) instanceof Integer);
 	assertEquals(100, jsonObjectAdapter.read(integerIdentity));

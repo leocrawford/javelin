@@ -23,7 +23,7 @@ public class Key implements Comparable<Key> {
 		this.keyAsBytes = keyAsBytes;
 	}
 
-	Key(String keyAsString) {
+	public Key(String keyAsString) {
 		this.keyAsBytes = BaseEncoding.base32Hex().decode(keyAsString);
 	}
 

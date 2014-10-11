@@ -17,7 +17,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.gson.*;
 
-public class TreeVisitorBothStoreAdapter implements TreeCopySource<Key, JsonElement> {
+public class TreeVisitorBothStoreAdapter implements TreeCopySource<Key> {
 
     private AddressableStorage store;
     private static Gson gson = new Gson();
@@ -27,58 +27,36 @@ public class TreeVisitorBothStoreAdapter implements TreeCopySource<Key, JsonElem
     }
 
     @Override
-    public Function<Object, JsonElement> getDestTransform() {
-	return new Function<Object, JsonElement>() {
-
-	    @Override
-	    public JsonElement apply(Object unpackedElement) {
-		if (unpackedElement == null)
-		    return JsonNull.INSTANCE;
-		if (unpackedElement instanceof Map) {
-		    JsonObject result = new JsonObject();
-		    for (Map.Entry<String, Object> entry : ((Map<String, Object>) unpackedElement).entrySet())
-			result.add(entry.getKey(), convertObjectToKey(entry.getValue()));
-		    return result;
-		}
-		if (unpackedElement instanceof List) {
-		    JsonArray result = new JsonArray();
-		    for (Object entry : (List<Object>) unpackedElement) {
-			result.add(convertObjectToKey(entry));
-		    }
-		    return result;
-		}
-		try {
-		    return gson.toJsonTree(pack(gson.toJsonTree(unpackedElement)).getKeyAsString());
-		}
-		catch (VisitorException e) {
-		    // TODO Auto-generated catch block
-		    e.printStackTrace();
-		    throw new Error();
-		}
+    public Key pack(Object unpackedElement) throws VisitorException {
+	try {
+	    if (unpackedElement == null)
+		return save(JsonNull.INSTANCE);
+	    if (unpackedElement instanceof Map) {
+		JsonObject result = new JsonObject();
+		for (Map.Entry<String, Object> entry : ((Map<String, Object>) unpackedElement).entrySet())
+		    result.add(entry.getKey(), convertObjectToKey(entry.getValue()));
+		return save(result);
 	    }
-
-	    private JsonElement convertObjectToKey(Object entry) {
-		try {
-		    return gson.toJsonTree(pack(apply(entry)).getKeyAsString());
+	    if (unpackedElement instanceof List) {
+		JsonArray result = new JsonArray();
+		for (Object entry : (List<Object>) unpackedElement) {
+		    result.add(convertObjectToKey(entry));
 		}
-		catch (VisitorException e) {
-		    // FIXME
-		    e.printStackTrace();
-		    throw new Error();
-		}
+		return save(result);
 	    }
-	};
-
+	    return save(gson.toJsonTree(unpackedElement));
+	}
+	catch (StoreException se) {
+	    throw new VisitorException("Can't write to store", se);
+	}
     }
 
-    @Override
-    public Key pack(JsonElement unpackedElement) throws VisitorException {
-	try {
-	    return store.store(unpackedElement, JsonElement.class);
-	}
-	catch (StoreException e) {
-	    throw new VisitorException("unable to copy the tree to the store", e);
-	}
+    private Key save(JsonElement toSave) throws StoreException {
+	return store.store(toSave, JsonElement.class);
+    }
+
+    private JsonElement convertObjectToKey(Object entry) throws VisitorException {
+	return gson.toJsonTree(pack(entry).getKeyAsString());
     }
 
     private final Function<JsonElement, Reference> jsonToIdentityReferenceFunction = new Function<JsonElement, Reference>() {
@@ -88,50 +66,51 @@ public class TreeVisitorBothStoreAdapter implements TreeCopySource<Key, JsonElem
 	}
     };
 
-    @Override
-    public Function<JsonElement, Object> getSourceTransform() {
-	return new Function<JsonElement, Object>() {
+    private Map<String, JsonElement> asMap(JsonObject jo) {
+	Map<String, JsonElement> result = new HashMap<>();
+	for (Map.Entry<String, JsonElement> entry : jo.entrySet()) {
+	    result.put(entry.getKey(), entry.getValue());
+	}
+	return result;
 
-	    @Override
-	    public Object apply(JsonElement input) {
-		if (input.isJsonObject()) {
-		    return new LazyMap(Maps.transformValues(asMap(input.getAsJsonObject()),
-			    jsonToIdentityReferenceFunction));
-		}
-		else if (input.isJsonArray()) {
-		    return new LazyArray(com.google.common.collect.Lists.transform(asArray(input.getAsJsonArray()),
-			    jsonToIdentityReferenceFunction));
-		}
-		else if (input.isJsonPrimitive()) {
-		    return jsonToIdentityReferenceFunction.apply(input);
-		}
-		else
-		    return null;
-	    }
+    }
 
-	    private Map<String, JsonElement> asMap(JsonObject jo) {
-		Map<String, JsonElement> result = new HashMap<>();
-		for (Map.Entry<String, JsonElement> entry : jo.entrySet()) {
-		    result.put(entry.getKey(), entry.getValue());
-		}
-		return result;
-
-	    }
-
-	    private List<JsonElement> asArray(JsonArray ja) {
-		List<JsonElement> result = new ArrayList<>();
-		for (JsonElement entry : ja) {
-		    result.add(entry);
-		}
-		return result;
-	    }
-	};
+    private List<JsonElement> asArray(JsonArray ja) {
+	List<JsonElement> result = new ArrayList<>();
+	for (JsonElement entry : ja) {
+	    result.add(entry);
+	}
+	return result;
     }
 
     @Override
-    public JsonElement unpack(Key element) throws VisitorException {
+    public Object unpack(Key element) throws VisitorException {
 	try {
-	    return store.get(element, JsonElement.class);
+	    JsonElement input = store.get(element, JsonElement.class);
+
+	    if (input.isJsonObject()) {
+		return new LazyMap(Maps
+			.transformValues(asMap(input.getAsJsonObject()), jsonToIdentityReferenceFunction));
+	    }
+	    else if (input.isJsonArray()) {
+		return new LazyArray(com.google.common.collect.Lists.transform(asArray(input.getAsJsonArray()),
+			jsonToIdentityReferenceFunction));
+	    }
+	    else if (input.isJsonPrimitive()) {
+		return gson.fromJson(input, Object.class);
+//		JsonPrimitive value = input.getAsJsonPrimitive();
+//		if (value.isBoolean())
+//		    return value.getAsBoolean();
+//		if (value.isNumber())
+//		    if(value.getAsNumber().)
+//		    return value.getAsNumber();
+//		if (value.isString())
+//		    return value.getAsString();
+//		else
+//		    throw new IllegalStateException("unknown type: " + value);
+	    }
+	    else
+		return null;
 	}
 	catch (StoreException e) {
 	    throw new VisitorException("unable to copy the tree referenced by key " + element, e);
@@ -149,7 +128,7 @@ public class TreeVisitorBothStoreAdapter implements TreeCopySource<Key, JsonElem
 	@Override
 	public Object getValue() {
 	    try {
-		return getSourceTransform().apply(unpack(key));
+		return unpack(key);
 	    }
 	    catch (VisitorException e) {
 		// FIXME

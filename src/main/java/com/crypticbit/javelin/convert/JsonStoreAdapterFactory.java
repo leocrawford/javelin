@@ -1,8 +1,5 @@
-package com.crypticbit.javelin.convert.js;
+package com.crypticbit.javelin.convert;
 
-import com.crypticbit.javelin.convert.TreeCopy;
-import com.crypticbit.javelin.convert.TreeMapper;
-import com.crypticbit.javelin.convert.TreeVisitorSourceObjectAdapter;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.google.gson.JsonElement;

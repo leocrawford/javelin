@@ -1,12 +1,10 @@
-package com.crypticbit.javelin.convert.js;
+package com.crypticbit.javelin.convert;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.crypticbit.javelin.convert.TreeCopySource;
-import com.crypticbit.javelin.convert.VisitorException;
 import com.crypticbit.javelin.convert.lazy.LazyArray;
 import com.crypticbit.javelin.convert.lazy.LazyMap;
 import com.crypticbit.javelin.convert.lazy.Reference;

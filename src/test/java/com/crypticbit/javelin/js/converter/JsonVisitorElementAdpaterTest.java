@@ -7,9 +7,9 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.convert.TreeMapper;
 import com.crypticbit.javelin.convert.VisitorException;
-import com.crypticbit.javelin.convert.js.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;

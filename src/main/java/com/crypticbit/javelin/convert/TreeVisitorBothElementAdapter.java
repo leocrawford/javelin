@@ -1,6 +1,5 @@
-package com.crypticbit.javelin.convert.js;
+package com.crypticbit.javelin.convert;
 
-import com.crypticbit.javelin.convert.TreeCopySource;
 import com.google.common.base.Function;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

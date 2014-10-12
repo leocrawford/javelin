@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js.converter;
+package com.crypticbit.javelin.convert;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -11,16 +11,13 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.convert.TreeMapper;
-import com.crypticbit.javelin.convert.TreeMapperException;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-public class JsonVisitorObjectAdapterTest {
+public class ObjectTreeNodeConverterTest {
 
     private static final Gson GSON = new Gson();
 
@@ -47,9 +44,9 @@ public class JsonVisitorObjectAdapterTest {
 	
 	assertEquals(String.class,jsonObjectAdapter.read(stringIdentity).getClass());
 	assertTrue(jsonObjectAdapter.read(nullIdentity) == null);
-//	assertTrue(jsonObjectAdapter.read(integerIdentity) instanceof Integer);
-//	assertEquals(100, jsonObjectAdapter.read(integerIdentity));
-//	assertTrue(jsonObjectAdapter.read(floatIdentity) instanceof Float);
+	assertTrue(jsonObjectAdapter.read(integerIdentity) instanceof Number);
+	assertEquals(new Integer(100), jsonObjectAdapter.read(integerIdentity));
+	assertTrue(jsonObjectAdapter.read(floatIdentity) instanceof Number);
 //	assertEquals(2.1f, (Float) jsonObjectAdapter.read(floatIdentity), 0.001);
 	assertTrue(jsonObjectAdapter.read(booleanIdentity) instanceof Boolean);
 	assertEquals(true, jsonObjectAdapter.read(booleanIdentity));

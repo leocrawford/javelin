@@ -96,16 +96,6 @@ public class StoreTreeNodeConverter implements TreeNodeAdapter<Key> {
 	    }
 	    else if (input.isJsonPrimitive()) {
 		return gson.fromJson(input, Object.class);
-//		JsonPrimitive value = input.getAsJsonPrimitive();
-//		if (value.isBoolean())
-//		    return value.getAsBoolean();
-//		if (value.isNumber())
-//		    if(value.getAsNumber().)
-//		    return value.getAsNumber();
-//		if (value.isString())
-//		    return value.getAsString();
-//		else
-//		    throw new IllegalStateException("unknown type: " + value);
 	    }
 	    else
 		return null;

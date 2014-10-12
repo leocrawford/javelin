@@ -1,4 +1,4 @@
-package com.crypticbit.javelin.js.converter;
+package com.crypticbit.javelin.convert;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -17,7 +17,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 
-public class JsonVisitorElementAdpaterTest {
+public class JsonElementTreeNodeConverterTest {
 
     private static final Gson GSON = new Gson();
 

@@ -15,7 +15,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.gson.*;
 
-public class TreeVisitorBothStoreAdapter implements TreeCopySource<Key> {
+public class TreeVisitorBothStoreAdapter implements TreeNodeAdapter<Key> {
 
     private AddressableStorage store;
     private static Gson gson = new Gson();
@@ -25,7 +25,7 @@ public class TreeVisitorBothStoreAdapter implements TreeCopySource<Key> {
     }
 
     @Override
-    public Key pack(Object unpackedElement) throws VisitorException {
+    public Key write(Object unpackedElement) throws VisitorException {
 	try {
 	    if (unpackedElement == null)
 		return save(JsonNull.INSTANCE);
@@ -54,7 +54,7 @@ public class TreeVisitorBothStoreAdapter implements TreeCopySource<Key> {
     }
 
     private JsonElement convertObjectToKey(Object entry) throws VisitorException {
-	return gson.toJsonTree(pack(entry).getKeyAsString());
+	return gson.toJsonTree(write(entry).getKeyAsString());
     }
 
     private final Function<JsonElement, Reference> jsonToIdentityReferenceFunction = new Function<JsonElement, Reference>() {
@@ -82,7 +82,7 @@ public class TreeVisitorBothStoreAdapter implements TreeCopySource<Key> {
     }
 
     @Override
-    public Object unpack(Key element) throws VisitorException {
+    public Object read(Key element) throws VisitorException {
 	try {
 	    JsonElement input = store.get(element, JsonElement.class);
 
@@ -126,7 +126,7 @@ public class TreeVisitorBothStoreAdapter implements TreeCopySource<Key> {
 	@Override
 	public Object getValue() {
 	    try {
-		return unpack(key);
+		return read(key);
 	    }
 	    catch (VisitorException e) {
 		// FIXME

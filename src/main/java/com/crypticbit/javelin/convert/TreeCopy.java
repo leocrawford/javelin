@@ -2,12 +2,12 @@ package com.crypticbit.javelin.convert;
 
 
 
-public class TreeCopy<S,P> implements TreeMapper<P,S>{
+public class TreeCopy<S,P> {
 
-    private TreeCopySource<S> source;
-    private TreeCopySource<P> dest;
+    private TreeNodeAdapter<S> source;
+    private TreeNodeAdapter<P> dest;
 
-    public TreeCopy(TreeCopySource<S> source, TreeCopySource<P> dest) {
+    public TreeCopy(TreeNodeAdapter<S> source, TreeNodeAdapter<P> dest) {
 	this.source = source;
 	this.dest = dest;
     }
@@ -17,11 +17,10 @@ public class TreeCopy<S,P> implements TreeMapper<P,S>{
     }
     
     
-    private static <S,P> P copy(TreeCopySource<S> source, TreeCopySource<P> dest, S element) throws VisitorException {
-	return dest.pack(source.unpack(element));
+    private static <S,P> P copy(TreeNodeAdapter<S> source, TreeNodeAdapter<P> dest, S element) throws VisitorException {
+	return dest.write(source.read(element));
     }
 
-    @Override
     public S write(P value) throws VisitorException {
 	return copy(dest,source,value);
     }

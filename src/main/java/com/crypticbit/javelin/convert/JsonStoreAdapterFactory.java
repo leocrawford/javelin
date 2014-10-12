@@ -6,27 +6,26 @@ import com.google.gson.JsonElement;
 
 public class JsonStoreAdapterFactory {
 
-	private TreeMapper<JsonElement,Key> jea;
-	private TreeMapper<Object,Key> joa;
+    private TreeCopy<Key, JsonElement> jea;
+    private TreeCopy<Key, Object> joa;
 
-	public JsonStoreAdapterFactory(AddressableStorage store) {
-		
-	    TreeVisitorBothStoreAdapter sa = new TreeVisitorBothStoreAdapter(store);
-	    TreeVisitorBothElementAdapter ea = new TreeVisitorBothElementAdapter();
-	    TreeVisitorSourceObjectAdapter oa = new TreeVisitorSourceObjectAdapter();
-	    
-	    jea = new TreeCopy<>(sa, ea);
-	    joa = new TreeCopy<>(sa, oa);
-	    
-	}
+    public JsonStoreAdapterFactory(AddressableStorage store) {
 
-	public TreeMapper<JsonElement,Key> getJsonElementAdapter() {
-		return jea;
-	}
+	TreeVisitorBothStoreAdapter sa = new TreeVisitorBothStoreAdapter(store);
+	TreeVisitorBothElementAdapter ea = new TreeVisitorBothElementAdapter();
+	TreeVisitorSourceObjectAdapter oa = new TreeVisitorSourceObjectAdapter();
 
-	public TreeMapper<Object,Key> getJsonObjectAdapter() {
-		return joa;
-	}
+	jea = new TreeCopy<>(sa, ea);
+	joa = new TreeCopy<>(sa, oa);
 
+    }
+
+    public TreeCopy<Key,JsonElement> getJsonElementAdapter() {
+	return jea;
+    }
+
+    public TreeCopy<Key, Object> getJsonObjectAdapter() {
+	return joa;
+    }
 
 }

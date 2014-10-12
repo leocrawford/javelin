@@ -1,10 +1,9 @@
 package com.crypticbit.javelin.convert;
 
-import com.google.common.base.Function;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
-public class TreeVisitorBothElementAdapter implements TreeNodeAdapter<JsonElement> {
+public class JsonElementTreeNodeConverter implements TreeNodeAdapter<JsonElement> {
     private static final Gson gson = new Gson();
 
 

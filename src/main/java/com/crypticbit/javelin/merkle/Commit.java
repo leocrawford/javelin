@@ -18,7 +18,7 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
 import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.TreeMapperException;
 import com.crypticbit.javelin.diff.Snapshot;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.store.AddressableStorage;
@@ -60,7 +60,7 @@ public class Commit implements Comparable<Commit> {
 	}
 
 	public ThreeWayDiff createChangeSet(Commit other)
-			throws JsonSyntaxException, StoreException, VisitorException {
+			throws JsonSyntaxException, StoreException, TreeMapperException {
 
 		DirectedGraph<Commit, DefaultEdge> x = getAsGraphToRoots(new Commit[] {
 				this, other });
@@ -93,16 +93,16 @@ public class Commit implements Comparable<Commit> {
 	 * commit tree like a graph, and use standard graph operations rather than
 	 * coding our own
 	 * 
-	 * @throws VisitorException
+	 * @throws TreeMapperException
 	 */
 	public DirectedGraph<Commit, DefaultEdge> getAsGraphToRoot()
-			throws JsonSyntaxException, StoreException, VisitorException {
+			throws JsonSyntaxException, StoreException, TreeMapperException {
 		return getAsGraphToRoots(this);
 	}
 
 	public static DirectedGraph<Commit, DefaultEdge> getAsGraphToRoots(
 			Commit... commits) throws JsonSyntaxException, StoreException,
-			VisitorException {
+			TreeMapperException {
 
 		DirectedGraph<Commit, DefaultEdge> graph = new SimpleDirectedGraph<Commit, DefaultEdge>(
 				DefaultEdge.class);
@@ -118,7 +118,7 @@ public class Commit implements Comparable<Commit> {
 	 */
 	private static void addToGraph(DirectedGraph<Commit, DefaultEdge> graph,
 			Commit commit) throws JsonSyntaxException, StoreException,
-			VisitorException {
+			TreeMapperException {
 		graph.addVertex(commit);
 		for (Commit c : commit.getParents()) {
 			addToGraph(graph, c);
@@ -127,7 +127,7 @@ public class Commit implements Comparable<Commit> {
 	}
 
 	public JsonElement getElement() throws JsonSyntaxException, StoreException,
-			VisitorException {
+			TreeMapperException {
 		return jsonFactory.getJsonElementAdapter().read(dao.getHead());
 	}
 
@@ -140,12 +140,12 @@ public class Commit implements Comparable<Commit> {
 	}
 
 	public Object getObject() throws JsonSyntaxException, StoreException,
-			VisitorException {
-		return jsonFactory.getJsonObjectAdapter().read(dao.getHead());
+			TreeMapperException {
+		return jsonFactory.getJavaObjectAdapter().read(dao.getHead());
 	}
 
 	public Set<Commit> getParents() throws JsonSyntaxException, StoreException,
-			VisitorException {
+			TreeMapperException {
 		Set<Commit> parents = new TreeSet<>();
 		for (Key parent : dao.getParents()) {
 			Commit wrap = wrap(store.get(parent, CommitDao.class), parent);
@@ -155,7 +155,7 @@ public class Commit implements Comparable<Commit> {
 	}
 
 	public List<Commit> getShortestHistory() throws JsonSyntaxException,
-			StoreException, VisitorException {
+			StoreException, TreeMapperException {
 
 		List<Commit> shortest = null;
 		for (Commit c : getParents()) {
@@ -187,7 +187,7 @@ public class Commit implements Comparable<Commit> {
 	}
 
 	public Object navigate(String path) throws JsonSyntaxException,
-			StoreException, VisitorException {
+			StoreException, TreeMapperException {
 		JsonPath compiledPath = new JsonPath(path, new Filter[] {});
 		return compiledPath.read(getObject());
 	}
@@ -208,10 +208,10 @@ public class Commit implements Comparable<Commit> {
 	 * @throws StoreException
 	 * @throws UnsupportedEncodingException
 	 * @throws JsonSyntaxException
-	 * @throws VisitorException
+	 * @throws TreeMapperException
 	 */
 	protected Commit findRoot() throws JsonSyntaxException, StoreException,
-			VisitorException {
+			TreeMapperException {
 		List<Commit> shortestHistory = getShortestHistory();
 		return shortestHistory.get(shortestHistory.size() - 1);
 	}
@@ -219,7 +219,7 @@ public class Commit implements Comparable<Commit> {
 	private void addCommitToTreeMap(Graph<Commit, DefaultEdge> x,
 			ThreeWayDiff<Object> twd,
 			Collection<GraphPath<Commit, DefaultEdge>> paths)
-			throws StoreException, JsonSyntaxException, VisitorException {
+			throws StoreException, JsonSyntaxException, TreeMapperException {
 		Multimap<Date, Snapshot<Object>> multimap = Multimaps.newListMultimap(
 				Maps.<Date, Collection<Snapshot<Object>>> newTreeMap(),
 				new Supplier<List<Snapshot<Object>>>() {

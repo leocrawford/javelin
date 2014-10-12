@@ -1,6 +1,6 @@
 package com.crypticbit.javelin.merkle;
 
-import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.TreeMapperException;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
@@ -39,13 +39,13 @@ public class ExtendedAnchor<T> extends Anchor {
 	}
 
 	public T readEndPoint(AddressableStorage store) throws JsonSyntaxException,
-			StoreException, VisitorException {
+			StoreException, TreeMapperException {
 		cachedValue = store.get(getValue(store), clazz);
 		return cachedValue;
 	}
 
 	public T writeEndPoint(AddressableStorage store, T value)
-			throws StoreException, VisitorException {
+			throws StoreException, TreeMapperException {
 		cachedValue = value;
 		setValue(store, store.store(value, clazz));
 		return value;

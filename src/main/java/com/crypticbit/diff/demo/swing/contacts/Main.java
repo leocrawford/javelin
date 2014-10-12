@@ -1,6 +1,6 @@
 package com.crypticbit.diff.demo.swing.contacts;
 
-import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.TreeMapperException;
 import com.crypticbit.javelin.merkle.Commit;
 import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.merkle.MerkleTree.MergeType;
@@ -26,7 +26,7 @@ public class Main extends JFrame {
 
 	public Main() throws StoreException, JsonSyntaxException,
 			PatchFailedException, IOException, InterruptedException,
-			VisitorException {
+			TreeMapperException {
 		super("Contacts");
 
 		final Server.StreamCallback exported = new Server.StreamCallback() {
@@ -193,7 +193,7 @@ public class Main extends JFrame {
 	}
 
 	private void commitChange() throws JsonSyntaxException,
-			UnsupportedEncodingException, StoreException, VisitorException {
+			UnsupportedEncodingException, StoreException, TreeMapperException {
 		namePanel.refresh();
 		commitGraphPanel.show(new Commit[] { jsonStore.getCommit() });
 	}

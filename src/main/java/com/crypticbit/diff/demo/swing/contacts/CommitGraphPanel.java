@@ -7,7 +7,7 @@ import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.ListenableDirectedGraph;
 
-import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.TreeMapperException;
 import com.crypticbit.javelin.merkle.Commit;
 import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.store.StoreException;
@@ -21,14 +21,14 @@ import difflib.PatchFailedException;
 public class CommitGraphPanel extends mxGraphComponent {
 
 	public CommitGraphPanel(Commit... commits) throws JsonSyntaxException,
-			StoreException, VisitorException {
+			StoreException, TreeMapperException {
 
 		super(getAdapter(commits));
 
 	}
 
 	private static JGraphXAdapter getAdapter(Commit... commits)
-			throws JsonSyntaxException, StoreException, VisitorException {
+			throws JsonSyntaxException, StoreException, TreeMapperException {
 		JGraphXAdapter adapter = new JGraphXAdapter(
 				Commit.getAsGraphToRoots(commits));
 		/*
@@ -51,7 +51,7 @@ public class CommitGraphPanel extends mxGraphComponent {
 
 	public CommitGraphPanel(MerkleTree jca) throws StoreException, IOException,
 			JsonSyntaxException, PatchFailedException, InterruptedException,
-			VisitorException {
+			TreeMapperException {
 
 		this(new Commit[] { jca.getCommit() });
 	}

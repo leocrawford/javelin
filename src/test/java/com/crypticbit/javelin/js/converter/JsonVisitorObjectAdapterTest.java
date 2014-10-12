@@ -12,8 +12,8 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.convert.TreeCopy;
-import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.TreeMapper;
+import com.crypticbit.javelin.convert.TreeMapperException;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
@@ -26,11 +26,11 @@ public class JsonVisitorObjectAdapterTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, VisitorException {
+    public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, TreeMapperException {
 
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
 
-	TreeCopy<Key,Object> jsonObjectAdapter = store.getJsonObjectAdapter();
+	TreeMapper<Key,Object> jsonObjectAdapter = store.getJavaObjectAdapter();
 	Key stringIdentity = jsonObjectAdapter.write("String");
 	Key nullIdentity = jsonObjectAdapter.write(null);
 	Key integerIdentity = jsonObjectAdapter.write(100);

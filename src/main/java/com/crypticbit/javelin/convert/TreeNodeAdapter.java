@@ -15,18 +15,18 @@ public interface TreeNodeAdapter<S> {
      * 
      * @param node
      * @return
-     * @throws VisitorException
+     * @throws TreeMapperException
      */
-    public Object read(S node) throws VisitorException;
+    public Object read(S node) throws TreeMapperException;
 
     /**
      * Write the given object, and return a reference to it which could be recovered with read.
      * 
      * @param toWrite
      * @return
-     * @throws VisitorException
+     * @throws TreeMapperException
      */
 
-    public S write(Object toWrite) throws VisitorException;
+    public S write(Object toWrite) throws TreeMapperException;
 
 }

@@ -3,7 +3,7 @@ package com.crypticbit.javelin.convert;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 
-public class TreeVisitorSourceObjectAdapter implements TreeNodeAdapter<Object> {
+public class ObjectTreeNodeConverter implements TreeNodeAdapter<Object> {
 
     @Override
     public Object write(Object element) {

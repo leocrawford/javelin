@@ -4,27 +4,42 @@ import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.google.gson.JsonElement;
 
+/**
+ * A factory that returns converters between the store and either java objects or JsonElements
+ * 
+ * @author leo
+ */
 public class JsonStoreAdapterFactory {
 
-    private TreeCopy<Key, JsonElement> jea;
-    private TreeCopy<Key, Object> joa;
+    private TreeMapper<Key, JsonElement> jea;
+    private TreeMapper<Key, Object> joa;
 
     public JsonStoreAdapterFactory(AddressableStorage store) {
 
-	TreeVisitorBothStoreAdapter sa = new TreeVisitorBothStoreAdapter(store);
-	TreeVisitorBothElementAdapter ea = new TreeVisitorBothElementAdapter();
-	TreeVisitorSourceObjectAdapter oa = new TreeVisitorSourceObjectAdapter();
+	StoreTreeNodeConverter sa = new StoreTreeNodeConverter(store);
+	JsonElementTreeNodeConverter ea = new JsonElementTreeNodeConverter();
+	ObjectTreeNodeConverter oa = new ObjectTreeNodeConverter();
 
-	jea = new TreeCopy<>(sa, ea);
-	joa = new TreeCopy<>(sa, oa);
+	jea = new TreeMapper<>(sa, ea);
+	joa = new TreeMapper<>(sa, oa);
 
     }
 
-    public TreeCopy<Key,JsonElement> getJsonElementAdapter() {
+    /**
+     * Return a converter that converts to and from JsonElement to Keys in the store
+     * 
+     * @return converter
+     */
+    public TreeMapper<Key, JsonElement> getJsonElementAdapter() {
 	return jea;
     }
 
-    public TreeCopy<Key, Object> getJsonObjectAdapter() {
+    /**
+     * Return a converter that converts to and from Object to Keys in the store
+     * 
+     * @return
+     */
+    public TreeMapper<Key, Object> getJavaObjectAdapter() {
 	return joa;
     }
 

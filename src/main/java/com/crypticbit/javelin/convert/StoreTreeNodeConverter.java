@@ -15,17 +15,17 @@ import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.gson.*;
 
-public class TreeVisitorBothStoreAdapter implements TreeNodeAdapter<Key> {
+public class StoreTreeNodeConverter implements TreeNodeAdapter<Key> {
 
     private AddressableStorage store;
     private static Gson gson = new Gson();
 
-    public TreeVisitorBothStoreAdapter(AddressableStorage store) {
+    public StoreTreeNodeConverter(AddressableStorage store) {
 	this.store = store;
     }
 
     @Override
-    public Key write(Object unpackedElement) throws VisitorException {
+    public Key write(Object unpackedElement) throws TreeMapperException {
 	try {
 	    if (unpackedElement == null)
 		return save(JsonNull.INSTANCE);
@@ -45,7 +45,7 @@ public class TreeVisitorBothStoreAdapter implements TreeNodeAdapter<Key> {
 	    return save(gson.toJsonTree(unpackedElement));
 	}
 	catch (StoreException se) {
-	    throw new VisitorException("Can't write to store", se);
+	    throw new TreeMapperException("Can't write to store", se);
 	}
     }
 
@@ -53,7 +53,7 @@ public class TreeVisitorBothStoreAdapter implements TreeNodeAdapter<Key> {
 	return store.store(toSave, JsonElement.class);
     }
 
-    private JsonElement convertObjectToKey(Object entry) throws VisitorException {
+    private JsonElement convertObjectToKey(Object entry) throws TreeMapperException {
 	return gson.toJsonTree(write(entry).getKeyAsString());
     }
 
@@ -82,7 +82,7 @@ public class TreeVisitorBothStoreAdapter implements TreeNodeAdapter<Key> {
     }
 
     @Override
-    public Object read(Key element) throws VisitorException {
+    public Object read(Key element) throws TreeMapperException {
 	try {
 	    JsonElement input = store.get(element, JsonElement.class);
 
@@ -111,7 +111,7 @@ public class TreeVisitorBothStoreAdapter implements TreeNodeAdapter<Key> {
 		return null;
 	}
 	catch (StoreException e) {
-	    throw new VisitorException("unable to copy the tree referenced by key " + element, e);
+	    throw new TreeMapperException("unable to copy the tree referenced by key " + element, e);
 	}
     }
 
@@ -128,7 +128,7 @@ public class TreeVisitorBothStoreAdapter implements TreeNodeAdapter<Key> {
 	    try {
 		return read(key);
 	    }
-	    catch (VisitorException e) {
+	    catch (TreeMapperException e) {
 		// FIXME
 		throw new Error(e);
 	    }

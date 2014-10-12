@@ -10,7 +10,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.TreeMapperException;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.JsonAdapter;
@@ -54,11 +54,11 @@ public class MerkleTree {
 	 * Create a new json data structure with a random anchor, which can be
 	 * retrieved using <code>getCommitAnchor</code>
 	 * 
-	 * @throws VisitorException
+	 * @throws TreeMapperException
 	 * @throws StoreException
 	 */
 	public MerkleTree(AddressableStorage store) throws StoreException,
-			VisitorException {
+			TreeMapperException {
 		setup(store);
 		labelsAnchor = new ExtendedAnchor<>(store, LabelsDao.class);
 		LabelsDao labels = new LabelsDao();
@@ -75,12 +75,12 @@ public class MerkleTree {
 	 * ds by name
 	 * 
 	 * @throws Error
-	 * @throws VisitorException
+	 * @throws TreeMapperException
 	 * @throws StoreException
 	 * @throws JsonSyntaxException
 	 */
 	MerkleTree(AddressableStorage store, Key labelsAddress, String label)
-			throws JsonSyntaxException, StoreException, VisitorException, Error {
+			throws JsonSyntaxException, StoreException, TreeMapperException, Error {
 		setup(store);
 		this.labelsAnchor = new ExtendedAnchor<>(labelsAddress, store,
 				LabelsDao.class);
@@ -123,7 +123,7 @@ public class MerkleTree {
 	 */
 
 	public synchronized MerkleTree checkout() throws StoreException,
-			JsonSyntaxException, VisitorException {
+			JsonSyntaxException, TreeMapperException {
 		commit = new Commit(selectedAnchor.readEndPoint(store),
 				selectedAnchor.getValue(), jsonFactory, store);
 		element = commit.getElement();
@@ -134,14 +134,14 @@ public class MerkleTree {
 	}
 
 	public synchronized MerkleTree commit() throws StoreException,
-			VisitorException {
+			TreeMapperException {
 		Key write = jsonFactory.getJsonElementAdapter().write(element);
 		commit = createCommit(write, selectedAnchor.getValue());
 		return checkout();
 	}
 
 	public void exportAll(OutputStream outputStream)
-			throws JsonSyntaxException, StoreException, VisitorException,
+			throws JsonSyntaxException, StoreException, TreeMapperException,
 			IOException {
 
 		/*
@@ -197,7 +197,7 @@ public class MerkleTree {
 
 	public void importAll(InputStream inputStream, MergeType mergeType)
 			throws IOException, ClassNotFoundException, StoreException,
-			JsonSyntaxException, VisitorException {
+			JsonSyntaxException, TreeMapperException {
 		/*
 		 * ObjectInputStream ois = new ObjectInputStream(inputStream);
 		 * Map<String, Key> labelToCommitMap = (Map<String, Key>)
@@ -277,13 +277,13 @@ public class MerkleTree {
 	}
 
 	public Object lazyRead() throws JsonSyntaxException, StoreException,
-			VisitorException {
+			TreeMapperException {
 		return commit.getObject();
 	}
 
 	public synchronized MerkleTree merge(MerkleTree other)
 			throws JsonSyntaxException, StoreException, PatchFailedException,
-			VisitorException {
+			TreeMapperException {
 		// FIXME factor out code for creating change set to Commit and make work
 		// for multiple labels
 		commit = merge(selectedAnchor,
@@ -294,10 +294,10 @@ public class MerkleTree {
 
 	private Commit merge(ExtendedAnchor<CommitDao> commitAnchorToMergeA,
 			Commit commitB, Key addressB) throws JsonSyntaxException,
-			StoreException, PatchFailedException, VisitorException {
+			StoreException, PatchFailedException, TreeMapperException {
 		ThreeWayDiff patch = getCommitFromAnchor(commitAnchorToMergeA)
 				.createChangeSet(commitB);
-		Key valueIdentity = jsonFactory.getJsonObjectAdapter().write(
+		Key valueIdentity = jsonFactory.getJavaObjectAdapter().write(
 				patch.apply());
 		return createCommit(valueIdentity, commitAnchorToMergeA.getValue(),
 				addressB);
@@ -307,7 +307,7 @@ public class MerkleTree {
 		return element;
 	}
 
-	public void saveLabel(String label) throws StoreException, VisitorException {
+	public void saveLabel(String label) throws StoreException, TreeMapperException {
 		labelsAnchor.readEndPoint(store).addAnchor(label, this.selectedAnchor);
 		labelsAnchor.writeEndPoint(store, labelsAnchor.getEndPoint());
 	}
@@ -319,7 +319,7 @@ public class MerkleTree {
 	}
 
 	public void write(String path, String json) throws JsonSyntaxException,
-			StoreException, VisitorException {
+			StoreException, TreeMapperException {
 		HackedJsonPath compiledPath = new HackedJsonPath(path, new Filter[] {});
 		// code copied from jsonpath
 		// FIXME reuse JSON
@@ -345,7 +345,7 @@ public class MerkleTree {
 			((Map) result).put(lastToken.getFragment(), jsonObject);
 		}
 
-		Key valueIdentity = jsonFactory.getJsonObjectAdapter().write(
+		Key valueIdentity = jsonFactory.getJavaObjectAdapter().write(
 				originalResult);
 		// FIXME patterm of commit = create then checkout repeated several times
 		commit = createCommit(valueIdentity, selectedAnchor.getValue());
@@ -363,7 +363,7 @@ public class MerkleTree {
 	}
 
 	private Commit createCommit(Key valueIdentity, Key... parents)
-			throws StoreException, VisitorException {
+			throws StoreException, TreeMapperException {
 		// FIXME hardcoded user
 		if (LOG.isLoggable(Level.FINEST)) {
 			LOG.log(Level.FINEST, "Updating id -> " + selectedAnchor.getValue());

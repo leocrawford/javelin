@@ -8,8 +8,8 @@ import java.io.IOException;
 import org.junit.Test;
 
 import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.convert.TreeCopy;
-import com.crypticbit.javelin.convert.VisitorException;
+import com.crypticbit.javelin.convert.TreeMapper;
+import com.crypticbit.javelin.convert.TreeMapperException;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
@@ -22,9 +22,9 @@ public class JsonVisitorElementAdpaterTest {
     private static final Gson GSON = new Gson();
 
     @Test
-    public void testConvertPrimitive() throws JsonSyntaxException, StoreException, VisitorException {
+    public void testConvertPrimitive() throws JsonSyntaxException, StoreException, TreeMapperException {
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
-	TreeCopy<Key,JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
+	TreeMapper<Key,JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
 
 	final String jsonFloat = "2.1";
 	final JsonElement json = GSON.fromJson(jsonFloat, JsonElement.class);
@@ -34,11 +34,11 @@ public class JsonVisitorElementAdpaterTest {
     }
 
     @Test
-    public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, VisitorException {
+    public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, TreeMapperException {
 
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
 
-	TreeCopy<Key,JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
+	TreeMapper<Key,JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
 	Key stringIdentity = jsonElementAdapter.write(GSON.fromJson("\"String\"", JsonElement.class));
 	Key nullIdentity = jsonElementAdapter.write(GSON.fromJson("null", JsonElement.class));
 	Key integerIdentity = jsonElementAdapter.write(GSON.fromJson("100", JsonElement.class));

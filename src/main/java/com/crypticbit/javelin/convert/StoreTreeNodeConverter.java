@@ -84,7 +84,7 @@ public class StoreTreeNodeConverter implements TreeNodeAdapter<Key> {
     @Override
     public Object read(Key element) throws TreeMapperException {
 	try {
-	    JsonElement input = store.get(element, JsonElement.class);
+	    JsonElement input = store.getCas(element, JsonElement.class);
 
 	    if (input.isJsonObject()) {
 		return new LazyMap(Maps

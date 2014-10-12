@@ -40,7 +40,7 @@ public class ExtendedAnchor<T> extends Anchor {
 
 	public T readEndPoint(AddressableStorage store) throws JsonSyntaxException,
 			StoreException, TreeMapperException {
-		cachedValue = store.get(getValue(store), clazz);
+		cachedValue = store.getCas(getValue(store), clazz);
 		return cachedValue;
 	}
 

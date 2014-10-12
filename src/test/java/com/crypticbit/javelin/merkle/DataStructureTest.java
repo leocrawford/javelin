@@ -228,8 +228,8 @@ public class DataStructureTest extends TestUtils{
     }
 
     private void dump(AddressableStorage cas) throws StoreException {
-	for (Key d : cas.list()) {
-	    System.out.println(d + "->" + cas.get(d,JsonElement.class));
+	for (Key d : cas.listCas()) {
+	    System.out.println(d + "->" + cas.getCas(d,JsonElement.class));
 	}
     }
 

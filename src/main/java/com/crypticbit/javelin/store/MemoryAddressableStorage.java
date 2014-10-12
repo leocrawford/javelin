@@ -15,7 +15,8 @@ class MemoryAddressableStorage implements AddressableStorage {
 
 	private static final Logger LOG = Logger
 			.getLogger("com.crypticbit.javelin.cas");
-	private final TreeMap<Key, byte[]> backingMap = new TreeMap<>();
+	private final TreeMap<Key, byte[]> casMap = new TreeMap<>();
+	private final TreeMap<Key, byte[]> kasMap = new TreeMap<>();
 	private final Map<Class<?>, Adapter<?>> adapters = new HashMap<>();
 
 	@Override
@@ -24,18 +25,18 @@ class MemoryAddressableStorage implements AddressableStorage {
 	}
 
 	@Override
-	public List<Key> list() {
-		return new LinkedList<Key>(backingMap.keySet());
+	public List<Key> listCas() {
+		return new LinkedList<Key>(casMap.keySet());
 	}
 
 	@Override
-	public List<Key> list(Key start) {
-		return new LinkedList<Key>(backingMap.tailMap(start).keySet());
+	public List<Key> listCas(Key start) {
+		return new LinkedList<Key>(casMap.tailMap(start).keySet());
 	}
 
 	@Override
 	public String toString() {
-		return backingMap.toString();
+		return casMap.toString();
 	}
 
 	@Override
@@ -47,12 +48,12 @@ class MemoryAddressableStorage implements AddressableStorage {
 	@Override
 	public <S> void store(Key key, S oldValue, S newValue, Class<S> clazz)
 			throws StoreException {
-		if (!check(key) || get(key, clazz).equals(oldValue)) {
-			backingMap.put(key,
+		if (!checkKas(key) || getKas(key, clazz).equals(oldValue)) {
+			kasMap.put(key,
 					((Adapter<S>) adapters.get(clazz)).toByteArray(newValue));
 		} else {
 			throw new StoreException("Concurrent modification. Expected "
-					+ oldValue + " but got " + get(key, oldValue.getClass()));
+					+ oldValue + " but got " + getCas(key, oldValue.getClass()));
 		}
 
 	}
@@ -64,7 +65,7 @@ class MemoryAddressableStorage implements AddressableStorage {
 		if (LOG.isLoggable(Level.FINEST)) {
 			LOG.log(Level.FINEST, "Adding " + key + " = " + value);
 		}
-		backingMap.put(key, adapter.toByteArray(value));
+		casMap.put(key, adapter.toByteArray(value));
 		return key;
 	}
 
@@ -76,22 +77,44 @@ class MemoryAddressableStorage implements AddressableStorage {
 	}
 
 	@Override
-	public <S> S get(Key key, Class<S> clazz) throws StoreException {
+	public <S> S getCas(Key key, Class<S> clazz) throws StoreException {
 		Adapter<S> adapter = (Adapter<S>) adapters.get(clazz);
-		if (!check(key))
+		if (!checkCas(key))
 			throw new StoreException("The key " + key + " does not exist");
 
-		S result = adapter.fromByteArray(backingMap.get(key));
+		S result = adapter.fromByteArray(casMap.get(key));
 
 		if (LOG.isLoggable(Level.FINEST)) {
-			LOG.log(Level.FINEST, "Read " + result + " bytes from " + key);
+			LOG.log(Level.FINEST, "Read " + result + " bytes from cas " + key);
 		}
 		return result;
 	}
+	
 
 	@Override
-	public boolean check(Key key) throws StoreException {
-		return backingMap.containsKey(key);
+	public <S> S getKas(Key key, Class<S> clazz) throws StoreException {
+		Adapter<S> adapter = (Adapter<S>) adapters.get(clazz);
+		if (!checkKas(key))
+			throw new StoreException("The key " + key + " does not exist");
+
+		S result = adapter.fromByteArray(kasMap.get(key));
+
+		if (LOG.isLoggable(Level.FINEST)) {
+			LOG.log(Level.FINEST, "Read " + result + " bytes from kas " + key);
+		}
+		return result;
+	}
+	
+	
+
+	@Override
+	public boolean checkCas(Key key) throws StoreException {
+		return casMap.containsKey(key);
+	}
+	
+	@Override
+	public boolean checkKas(Key key) throws StoreException {
+		return kasMap.containsKey(key);
 	}
 
 }

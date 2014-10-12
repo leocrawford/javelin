@@ -41,8 +41,8 @@ public class Anchor implements Serializable {
 	}
 
 	public Key getValue(AddressableStorage store) throws StoreException {
-		if (store.check(address)) {
-			value = store.get(address, Key.class);
+		if (store.checkKas(address)) {
+			value = store.getKas(address, Key.class);
 			return value;
 		} else {
 			return null;

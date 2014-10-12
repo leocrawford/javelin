@@ -15,13 +15,14 @@ public interface AddressableStorage {
 	public <T> void registerAdapter(Adapter<T> adapter, Class<T> clazz);
 
 	/** Check if digest exists, if not return <code>null</code> */
-	public boolean check(Key key) throws StoreException;
+	public boolean checkCas(Key key) throws StoreException;
+	public boolean checkKas(Key key) throws StoreException;
 
 	/** List all keys */
-	public List<Key> list();
+	public List<Key> listCas();
 
 	/** list every item with a key >= start */
-	public List<Key> list(Key key) throws StoreException;
+	public List<Key> listCas(Key key) throws StoreException;
 
 	/**
 	 * Store newValue using argument key as the key. Utilities optimistic
@@ -40,7 +41,8 @@ public interface AddressableStorage {
 	 * Get the value of the resource identified by argument key, and convert it
 	 * to class of type clazz, assuming an adapter is registered
 	 */
-	public <S> S get(Key digest, Class<S> clazz) throws StoreException;
+	public <S> S getCas(Key digest, Class<S> clazz) throws StoreException;
+	public <S> S getKas(Key digest, Class<S> clazz) throws StoreException;
 
 	/**
 	 * Return the name of the instantiation of this interface in a human

@@ -148,7 +148,7 @@ public class Commit implements Comparable<Commit> {
 			TreeMapperException {
 		Set<Commit> parents = new TreeSet<>();
 		for (Key parent : dao.getParents()) {
-			Commit wrap = wrap(store.get(parent, CommitDao.class), parent);
+			Commit wrap = wrap(store.getCas(parent, CommitDao.class), parent);
 			parents.add(wrap);
 		}
 		return parents;

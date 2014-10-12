@@ -32,9 +32,9 @@ public class MemoryAddressableStorageTest {
 		Key md2 = cas.store(prFromString("\"message 2\""), JsonElement.class);
 
 		assertEquals("\"message 1\"",
-				prToString(cas.get(md1, JsonElement.class)));
+				prToString(cas.getCas(md1, JsonElement.class)));
 		assertEquals("\"message 2\"",
-				prToString(cas.get(md2, JsonElement.class)));
+				prToString(cas.getCas(md2, JsonElement.class)));
 	}
 
 	@Test
@@ -46,14 +46,14 @@ public class MemoryAddressableStorageTest {
 			md[loop] = cas.store(prFromString("message" + loop),
 					JsonElement.class);
 		}
-		List<Key> list = cas.list();
+		List<Key> list = cas.listCas();
 		assertEquals(10, list.size());
 		// check they're in ascehnding order - and they exist
 		for (int loop = 0; loop < 10; loop++) {
 			if (loop >= 1) {
 				assertTrue(list.get(loop - 1).compareTo(list.get(loop)) < 0);
 			}
-			assertTrue(cas.check(list.get(loop)));
+			assertTrue(cas.checkCas(list.get(loop)));
 		}
 	}
 
@@ -67,14 +67,14 @@ public class MemoryAddressableStorageTest {
 					JsonElement.class));
 		}
 		Collections.sort(createList);
-		List<Key> list = cas.list(createList.get(5));
+		List<Key> list = cas.listCas(createList.get(5));
 		assertEquals(5, list.size());
 		// check they're in ascending order - and they exist
 		for (int loop = 0; loop < 5; loop++) {
 			if (loop >= 1) {
 				assertTrue(list.get(loop - 1).compareTo(list.get(loop)) < 0);
 			}
-			assertTrue(cas.check(list.get(loop)));
+			assertTrue(cas.checkCas(list.get(loop)));
 		}
 	}
 

@@ -1,8 +1,12 @@
 package com.crypticbit.javelin.convert;
 
+import java.util.*;
+
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
-import com.google.gson.JsonElement;
+import com.crypticbit.javelin.store.StoreException;
+import com.google.common.base.Function;
+import com.google.gson.*;
 
 /**
  * A factory that returns converters between the store and either java objects or JsonElements
@@ -11,11 +15,11 @@ import com.google.gson.JsonElement;
  */
 public class JsonStoreAdapterFactory {
 
-    private StoreTreeNodeConverter sa;
+    protected AddressableStorage store;
+    protected static Gson gson = new Gson();
 
     public JsonStoreAdapterFactory(AddressableStorage store) {
-
-	sa = new StoreTreeNodeConverter(store);
+	this.store = store;
     }
 
     /**
@@ -24,18 +28,7 @@ public class JsonStoreAdapterFactory {
      * @return converter
      */
     public TreeMapper<Key, JsonElement> getJsonElementAdapter() {
-	return new TreeMapper<Key, JsonElement>() {
-
-	    @Override
-	    public Key write(JsonElement value) throws TreeMapperException {
-		return sa.writeAsJsonElement(value);
-	    }
-
-	    @Override
-	    public JsonElement read(Key element) throws TreeMapperException {
-		return sa.readAsJsonElement(element);
-	    }
-	};
+	return new JsonElementStoreAdapter(store);
     }
 
     /**
@@ -44,18 +37,42 @@ public class JsonStoreAdapterFactory {
      * @return
      */
     public TreeMapper<Key, Object> getJavaObjectAdapter() {
-	return new TreeMapper<Key, Object>() {
+	return new ObjectStoreAdapter(store);
+    }
 
-	    @Override
-	    public Key write(Object value) throws TreeMapperException {
-		return sa.writeAsObject(value);
-	    }
+    protected Key save(JsonElement toSave) throws StoreException {
+	return store.store(toSave, JsonElement.class);
+    }
 
-	    @Override
-	    public Object read(Key element) throws TreeMapperException {
-		return sa.readAsObject(element);
-	    }
-	};
+    protected  <S> JsonObject createJsonObject(Set<Map.Entry<String, S>> entries,
+	    Function<S, JsonElement> elementTransformer) {
+	JsonObject result = new JsonObject();
+	for (Map.Entry<String, S> entry : entries)
+	    result.add(entry.getKey(), elementTransformer.apply(entry.getValue()));
+	return result;
+    }
+
+    protected  <S> JsonArray createJsonArray(List<S> entries, Function<S, JsonElement> elementTransformer) {
+	JsonArray result = new JsonArray();
+	for (S entry : entries)
+	    result.add(elementTransformer.apply(entry));
+	return result;
+    }
+
+    protected Map<String, JsonElement> asMap(JsonObject jo) {
+	Map<String, JsonElement> result = new HashMap<>();
+	for (Map.Entry<String, JsonElement> entry : jo.entrySet()) {
+	    result.put(entry.getKey(), entry.getValue());
+	}
+	return result;
+    }
+
+    protected List<JsonElement> asArray(JsonArray ja) {
+	List<JsonElement> result = new ArrayList<>();
+	for (JsonElement entry : ja) {
+	    result.add(entry);
+	}
+	return result;
     }
 
 }

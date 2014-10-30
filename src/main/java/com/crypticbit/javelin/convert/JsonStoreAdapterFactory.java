@@ -11,18 +11,11 @@ import com.google.gson.JsonElement;
  */
 public class JsonStoreAdapterFactory {
 
-    private TreeMapper<Key, JsonElement> jea;
-    private TreeMapper<Key, Object> joa;
+    private StoreTreeNodeConverter sa;
 
     public JsonStoreAdapterFactory(AddressableStorage store) {
 
-	StoreTreeNodeConverter sa = new StoreTreeNodeConverter(store);
-	JsonElementTreeNodeConverter ea = new JsonElementTreeNodeConverter();
-	ObjectTreeNodeConverter oa = new ObjectTreeNodeConverter();
-
-	jea = new TreeMapper<>(sa, ea);
-	joa = new TreeMapper<>(sa, oa);
-
+	sa = new StoreTreeNodeConverter(store);
     }
 
     /**
@@ -31,7 +24,18 @@ public class JsonStoreAdapterFactory {
      * @return converter
      */
     public TreeMapper<Key, JsonElement> getJsonElementAdapter() {
-	return jea;
+	return new TreeMapper<Key, JsonElement>() {
+
+	    @Override
+	    public Key write(JsonElement value) throws TreeMapperException {
+		return sa.writeAsJsonElement(value);
+	    }
+
+	    @Override
+	    public JsonElement read(Key element) throws TreeMapperException {
+		return sa.readAsJsonElement(element);
+	    }
+	};
     }
 
     /**
@@ -40,7 +44,18 @@ public class JsonStoreAdapterFactory {
      * @return
      */
     public TreeMapper<Key, Object> getJavaObjectAdapter() {
-	return joa;
+	return new TreeMapper<Key, Object>() {
+
+	    @Override
+	    public Key write(Object value) throws TreeMapperException {
+		return sa.writeAsObject(value);
+	    }
+
+	    @Override
+	    public Object read(Key element) throws TreeMapperException {
+		return sa.readAsObject(element);
+	    }
+	};
     }
 
 }

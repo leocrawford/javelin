@@ -10,9 +10,7 @@ import org.junit.Test;
 import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.convert.TreeMapper;
 import com.crypticbit.javelin.convert.TreeMapperException;
-import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.StorageFactory;
-import com.crypticbit.javelin.store.StoreException;
+import com.crypticbit.javelin.store.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
@@ -36,7 +34,8 @@ public class JsonElementTreeNodeConverterTest {
     @Test
     public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, TreeMapperException {
 
-	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
+	AddressableStorage memoryStore = new StorageFactory().createMemoryCas();
+	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(memoryStore);
 
 	TreeMapper<Key,JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
 	Key stringIdentity = jsonElementAdapter.write(GSON.fromJson("\"String\"", JsonElement.class));
@@ -48,6 +47,7 @@ public class JsonElementTreeNodeConverterTest {
 	Key mapIdentity = jsonElementAdapter.write(GSON.fromJson("{\"a\":1,\"b\":null,\"c\":FALSE}",
 		JsonElement.class));
 
+	
 	assertTrue(jsonElementAdapter.read(stringIdentity).getAsJsonPrimitive().isString());
 	assertTrue(jsonElementAdapter.read(nullIdentity).isJsonNull());
 	assertTrue(jsonElementAdapter.read(integerIdentity).getAsJsonPrimitive().getAsJsonPrimitive().isNumber());
@@ -61,6 +61,7 @@ public class JsonElementTreeNodeConverterTest {
 	assertEquals(3, jsonElementAdapter.read(arrayIdentity).getAsJsonArray().size());
 	assertEquals(1, jsonElementAdapter.read(arrayIdentity).getAsJsonArray().get(0).getAsInt());
 
+	
 	assertTrue(jsonElementAdapter.read(mapIdentity).isJsonObject());
 	assertEquals(3, jsonElementAdapter.read(mapIdentity).getAsJsonObject().entrySet().size());
 	assertTrue(jsonElementAdapter.read(mapIdentity).getAsJsonObject().get("b").isJsonNull());

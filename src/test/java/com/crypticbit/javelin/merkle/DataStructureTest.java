@@ -16,10 +16,7 @@ import com.crypticbit.javelin.convert.TreeMapperException;
 import com.crypticbit.javelin.merkle.Commit;
 import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.merkle.MerkleTree.MergeType;
-import com.crypticbit.javelin.store.AddressableStorage;
-import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.StorageFactory;
-import com.crypticbit.javelin.store.StoreException;
+import com.crypticbit.javelin.store.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -53,6 +50,7 @@ public class DataStructureTest extends TestUtils{
 	AddressableStorage  memoryStore = new StorageFactory().createMemoryCas();
 	MerkleTree jca = new MerkleTree(memoryStore);
 	jca.write(JSON_EXAMPLEa).commit();
+	
 	MerkleTree jca2 = jca.branch();
 
 	jca.write(JSON_EXAMPLE_2a).commit();
@@ -69,6 +67,7 @@ public class DataStructureTest extends TestUtils{
 	//
 	// System.out.println("A="+jca.read());
 	// System.out.println(jca.getCommit().getShortestHistory());
+	
 	jca.merge(jca2);
 	// System.out.println("B="+jca.read());
 	// System.out.println(jca.getCommit().getShortestHistory());
@@ -105,7 +104,7 @@ public class DataStructureTest extends TestUtils{
 
 	Assert.assertEquals(3, c3.getShortestHistory().size());
 
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE), c3.getElement());
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE).toString(), c3.getElement().toString());
     }
 
     @Test
@@ -122,8 +121,8 @@ public class DataStructureTest extends TestUtils{
 	Assert.assertEquals(0, c1.getParents().size());
 	Assert.assertEquals(1, c2.getParents().size());
 
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE), c3.getShortestHistory().get(2).getElement());
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_3), c3.getShortestHistory().get(0).getElement());
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE).toString(), c3.getShortestHistory().get(2).getElement().toString());
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_3).toString(), c3.getShortestHistory().get(0).getElement().toString());
     }
 
     @Test
@@ -163,12 +162,12 @@ public class DataStructureTest extends TestUtils{
 	d3.write(JSON_EXAMPLE_4).commit().saveLabel("Branch3");
 	d2.write(JSON_EXAMPLE_5).commit();
 
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_2), new MerkleTree(store, d1.getLabelsAddress(),
-		"Branch1").checkout().read());
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_5), new MerkleTree(store, d1.getLabelsAddress(),
-		"Branch2").checkout().read());
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_4), new MerkleTree(store, d1.getLabelsAddress(),
-		"Branch3").checkout().read());
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_2).toString(), new MerkleTree(store, d1.getLabelsAddress(),
+		"Branch1").checkout().read().toString());
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_5).toString(), new MerkleTree(store, d1.getLabelsAddress(),
+		"Branch2").checkout().read().toString());
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_4).toString(), new MerkleTree(store, d1.getLabelsAddress(),
+		"Branch3").checkout().read().toString());
 
     }
 
@@ -183,7 +182,7 @@ public class DataStructureTest extends TestUtils{
 
 	MerkleTree jca2 = new MerkleTree(store, new Key(labelsAddress), "HEAD");
 	jca2.checkout();
-	Assert.assertEquals(jca.read(), jca2.read());
+	Assert.assertEquals(jca.read().toString(), jca2.read().toString());
     }
 
     @Test

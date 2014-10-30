@@ -11,21 +11,20 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.StorageFactory;
-import com.crypticbit.javelin.store.StoreException;
+import com.crypticbit.javelin.store.*;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 
 public class ObjectTreeNodeConverterTest {
 
-    private static final Gson GSON = new Gson();
 
     @SuppressWarnings("unchecked")
     @Test
     public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, TreeMapperException {
 
-	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
+	AddressableStorage memoryStore = new StorageFactory().createMemoryCas();
+	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(memoryStore);
 
 	TreeMapper<Key,Object> jsonObjectAdapter = store.getJavaObjectAdapter();
 	Key stringIdentity = jsonObjectAdapter.write("String");
@@ -40,8 +39,6 @@ public class ObjectTreeNodeConverterTest {
 	m.put("c", false);
 	Key mapIdentity = jsonObjectAdapter.write(m);
 
-	System.out.println(jsonObjectAdapter.read(integerIdentity).getClass());
-	
 	assertEquals(String.class,jsonObjectAdapter.read(stringIdentity).getClass());
 	assertTrue(jsonObjectAdapter.read(nullIdentity) == null);
 	assertTrue(jsonObjectAdapter.read(integerIdentity) instanceof Number);
@@ -53,18 +50,18 @@ public class ObjectTreeNodeConverterTest {
 
 	assertTrue(jsonObjectAdapter.read(arrayIdentity) instanceof List);
 	assertEquals(3, ((List<Object>) jsonObjectAdapter.read(arrayIdentity)).size());
-//	assertEquals(1, ((List<Object>) jsonObjectAdapter.read(arrayIdentity)).get(0));
+	assertEquals(1, ((List<Object>) jsonObjectAdapter.read(arrayIdentity)).get(0));
 
 	assertTrue(jsonObjectAdapter.read(mapIdentity) instanceof Map);
 	assertEquals(3, ((Map<String, Object>) jsonObjectAdapter.read(mapIdentity)).size());
 	assertTrue(((Map<String, Object>) jsonObjectAdapter.read(mapIdentity)).get("b") == null);
 
-//	Map<String, Object> x = (Map<String, Object>) jsonObjectAdapter.read(mapIdentity);
-//	x.remove("a");
-//	x.put("b", "B");
-//	jsonObjectAdapter.write(x);
-//	assertEquals(2, x.size());
-//	assertEquals("B", x.get("b"));
+	Map<String, Object> x = (Map<String, Object>) jsonObjectAdapter.read(mapIdentity);
+	x.remove("a");
+	x.put("b", "B");
+	jsonObjectAdapter.write(x);
+	assertEquals(2, x.size());
+	assertEquals("B", x.get("b"));
 
     }
 

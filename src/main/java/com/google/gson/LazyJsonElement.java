@@ -18,7 +18,6 @@ public class LazyJsonElement extends JsonElement {
 
     @Override
     JsonElement deepCopy() {
-//	return new LazyJsonElement(backingElement.deepCopy(),wrapper);
 	throw new UnsupportedOperationException();
     }
 

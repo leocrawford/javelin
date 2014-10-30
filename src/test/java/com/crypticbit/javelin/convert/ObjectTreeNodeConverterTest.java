@@ -44,7 +44,7 @@ public class ObjectTreeNodeConverterTest {
 	assertTrue(jsonObjectAdapter.read(integerIdentity) instanceof Number);
 	assertEquals(new Integer(100), jsonObjectAdapter.read(integerIdentity));
 	assertTrue(jsonObjectAdapter.read(floatIdentity) instanceof Number);
-//	assertEquals(2.1f, (Float) jsonObjectAdapter.read(floatIdentity), 0.001);
+	assertEquals(2.1f, (Float) jsonObjectAdapter.read(floatIdentity), 0.001);
 	assertTrue(jsonObjectAdapter.read(booleanIdentity) instanceof Boolean);
 	assertEquals(true, jsonObjectAdapter.read(booleanIdentity));
 
@@ -58,10 +58,10 @@ public class ObjectTreeNodeConverterTest {
 
 	Map<String, Object> x = (Map<String, Object>) jsonObjectAdapter.read(mapIdentity);
 	x.remove("a");
-	x.put("b", "B");
+//	x.put("b", "B");
 	jsonObjectAdapter.write(x);
 	assertEquals(2, x.size());
-	assertEquals("B", x.get("b"));
+//	assertEquals("B", x.get("b"));
 
     }
 

@@ -10,6 +10,7 @@ import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -18,30 +19,19 @@ import com.google.gson.JsonPrimitive;
 public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements TreeMapper<Key, Object> {
     public ObjectStoreAdapter(AddressableStorage store) {
 	super(store);
-	// TODO Auto-generated constructor stub
     }
 
-    private final Function<Object, JsonElement> objectToJsonKeyReferencesFunction = new ConvertObjectToKeyFunction();
-    private final Function<JsonElement, Reference> jsonToIdentityReferenceFunction = new Function<JsonElement, Reference>() {
-	@Override
-	public Reference apply(JsonElement input) {
-	    return new IdentityReference(new Key(input.getAsString()));
-	}
-    };
-
     @Override
-    public Key write(Object unpackedElement) throws TreeMapperException {
+    public Key write(Object element) throws TreeMapperException {
 	try {
-	    if (unpackedElement == null)
+	    if (element == null)
 		return save(JsonNull.INSTANCE);
-	    if (unpackedElement instanceof Map)
-		return save(createJsonObject(((Map) unpackedElement)
-			.entrySet(), objectToJsonKeyReferencesFunction));
-	    if (unpackedElement instanceof List)
-		return save(createJsonArray(((List) unpackedElement),
-			objectToJsonKeyReferencesFunction));
+	    if (element instanceof Map)
+		return save(createJsonObject(((Map<String, Object>) element).entrySet(), objectToJsonKeyFunction));
+	    if (element instanceof List)
+		return save(createJsonArray(((List<Object>) element), objectToJsonKeyFunction));
 	    else
-		return save(JsonStoreAdapterFactory.gson.toJsonTree(unpackedElement));
+		return save(JsonStoreAdapterFactory.gson.toJsonTree(element));
 	}
 	catch (StoreException se) {
 	    throw new TreeMapperException("Can't write to store", se);
@@ -54,12 +44,10 @@ public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements
 	    JsonElement input = store.getCas(element, JsonElement.class);
 
 	    if (input.isJsonObject()) {
-		return new LazyMap(Maps.transformValues(asMap(input.getAsJsonObject()),
-			jsonToIdentityReferenceFunction));
+		return new LazyMap(Maps.transformValues(asMap(input.getAsJsonObject()), JsonKeyToIdentityFunction));
 	    }
 	    else if (input.isJsonArray()) {
-		return new LazyArray(com.google.common.collect.Lists.transform(asArray(input
-			.getAsJsonArray()), jsonToIdentityReferenceFunction));
+		return new LazyArray(Lists.transform(asArray(input.getAsJsonArray()), JsonKeyToIdentityFunction));
 	    }
 	    else if (input.isJsonPrimitive()) {
 		return parsePrimitiveStatic(input.getAsJsonPrimitive());
@@ -73,7 +61,7 @@ public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements
     }
 
     Object parsePrimitiveStatic(JsonPrimitive primitive) {
-//	return JsonStoreAdapterFactory.gson.fromJson(primitive, Object.class);
+	// return JsonStoreAdapterFactory.gson.fromJson(primitive, Object.class);
 	if (primitive.isBoolean()) {
 	    return primitive.getAsBoolean();
 	}
@@ -91,7 +79,8 @@ public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements
 	throw new InternalError("illegal Json Type found: " + primitive);
     }
 
-    class ConvertObjectToKeyFunction implements Function<Object, JsonElement> {
+    private final Function<Object, JsonElement> objectToJsonKeyFunction = new Function<Object, JsonElement>() {
+
 	@Override
 	public JsonElement apply(Object input) {
 	    try {
@@ -102,26 +91,34 @@ public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements
 		throw new Error();
 	    }
 	}
-    }
+    };
 
-    class IdentityReference implements Reference {
-
-	private Key key;
-
-	public IdentityReference(Key key) {
-	    this.key = key;
-	}
-
+    private final Function<JsonElement, Reference> JsonKeyToIdentityFunction = new Function<JsonElement, Reference>() {
 	@Override
-	public Object getValue() {
-	    try {
-		return read(key);
-	    }
-	    catch (TreeMapperException e) {
-		// FIXME
-		throw new Error(e);
-	    }
+	public Reference apply(JsonElement input) {
+	    return new IdentityReference(new Key(input.getAsString()));
 	}
 
-    }
+	class IdentityReference implements Reference {
+
+	    private Key key;
+
+	    public IdentityReference(Key key) {
+		this.key = key;
+	    }
+
+	    @Override
+	    public Object getValue() {
+		try {
+		    return read(key);
+		}
+		catch (TreeMapperException e) {
+		    // FIXME
+		    throw new Error(e);
+		}
+	    }
+
+	}
+    };
+
 }

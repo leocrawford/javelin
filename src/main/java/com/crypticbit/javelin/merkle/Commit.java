@@ -12,7 +12,9 @@ import org.jgrapht.alg.NaiveLcaFinder;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
+import com.crypticbit.javelin.convert.JsonElementStoreAdapter;
 import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
+import com.crypticbit.javelin.convert.ObjectStoreAdapter;
 import com.crypticbit.javelin.diff.Snapshot;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.store.AddressableStorage;
@@ -31,21 +33,23 @@ import com.jayway.jsonpath.JsonPath;
 public class Commit implements Comparable<Commit> {
 
 	/** The data access object representing this commit */
-	private CommitDao dao;
+	private final CommitDao dao;
 	/** The location that this commit is stored at (its hash) */
 	private Key daoKey;
-	private JsonStoreAdapterFactory jsonFactory;
-	private AddressableStorage store;
+	private final CommitFactory commitFactory;
 
-	Commit(CommitDao dao, Key daoDigest, JsonStoreAdapterFactory jsonFactory,
-			AddressableStorage store) {
+
+
+	Commit(CommitDao dao, Key daoDigest,
+			CommitFactory commitFactory) {
 		assert (dao != null);
 		assert (daoDigest != null);
 
 		this.dao = dao;
 		this.daoKey = daoDigest;
-		this.jsonFactory = jsonFactory;
-		this.store = store;
+		this.commitFactory = commitFactory;
+		
+
 	}
 
 	@Override
@@ -119,7 +123,7 @@ public class Commit implements Comparable<Commit> {
 	}
 
 	public JsonElement getElement() throws JsonSyntaxException, StoreException {
-		return jsonFactory.getJsonElementAdapter().read(dao.getHead());
+		return commitFactory.getJsonElementStoreAdapter().read(dao.getHead());
 	}
 
 	public Key getHead() {
@@ -131,14 +135,14 @@ public class Commit implements Comparable<Commit> {
 	}
 
 	public Object getObject() throws JsonSyntaxException, StoreException {
-		return jsonFactory.getJavaObjectAdapter().read(dao.getHead());
+		return commitFactory.getObjectStoreAdapter().read(dao.getHead());
 	}
 
 	public Set<Commit> getParents() throws JsonSyntaxException, StoreException {
 		Set<Commit> parents = new TreeSet<>();
 		for (Key parent : dao.getParents()) {
-			Commit wrap = wrap(store.getCas(parent, CommitDao.class), parent);
-			parents.add(wrap);
+			
+			parents.add(commitFactory.getCommit(parent));
 		}
 		return parents;
 	}
@@ -186,10 +190,7 @@ public class Commit implements Comparable<Commit> {
 		return "Commit: " + this.getKey();
 	}
 
-	// FIXME - should we try and find an existing instance?
-	Commit wrap(CommitDao dao, Key digest) {
-		return new Commit(dao, digest, jsonFactory, store);
-	}
+
 
 	/**
 	 * Find very first commit in tree

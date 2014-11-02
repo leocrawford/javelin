@@ -1,13 +1,11 @@
 package com.crypticbit.javelin.merkle;
 
-import java.io.Serializable;
-
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 
 /**
- * The "anchor" represents an address and its associated value (which is also as address). This is used when we have
+ * The "anchor" represents an address and it's associated value (which is also as address). This is used when we have
  * content addressable storage but we need to preserve a permanent link to it.
  */
 

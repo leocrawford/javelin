@@ -34,7 +34,7 @@ import difflib.PatchFailedException;
 public class MerkleTree {
 
 	private static final Logger LOG = Logger
-			.getLogger("com.crypticbit.javelin.js");
+			.getLogger("com.crypticbit.javelin.merkle");
 
 	/** The current head of the Json data structure */
 	private ExtendedAnchor<CommitDao> selectedAnchor;
@@ -48,6 +48,7 @@ public class MerkleTree {
 	/** The underlying data store */
 	private AddressableStorage store;
 	private JsonStoreAdapterFactory jsonFactory;
+	private CommitFactory commitFactory;
 
 	/**
 	 * Create a new json data structure with a random anchor, which can be
@@ -62,9 +63,19 @@ public class MerkleTree {
 		LabelsDao labels = new LabelsDao();
 		selectedAnchor = labels.addCommitAnchor("HEAD", store);
 		labelsAnchor.setDestinationValue(labels);
-
 		// see if this works - FIXME
 		// labelsAnchor.readEndPoint(store).getCommitAnchor("HEAD",jsonFactory).readEndPoint(store);
+
+	}
+	
+	private void setup(AddressableStorage store) {
+		this.store = store;
+		store.registerAdapter(new JsonAdapter<LabelsDao>(LabelsDao.class),
+				LabelsDao.class);
+		store.registerAdapter(new JsonAdapter<CommitDao>(CommitDao.class),
+				CommitDao.class);
+		jsonFactory = new JsonStoreAdapterFactory(store);
+		commitFactory = new CommitFactory(store);
 
 	}
 
@@ -122,8 +133,7 @@ public class MerkleTree {
 
 	public synchronized MerkleTree checkout() throws StoreException,
 			JsonSyntaxException {
-		commit = new Commit(selectedAnchor.getDestinationValue(),
-				selectedAnchor.getDestinationAddress(), jsonFactory, store);
+		commit = commitFactory.getCommitFromAnchor(selectedAnchor);
 		element = commit.getElement();
 		if (LOG.isLoggable(Level.FINER)) {
 			LOG.log(Level.FINER, "Reading commit: " + commit);
@@ -133,7 +143,7 @@ public class MerkleTree {
 
 	public synchronized MerkleTree commit() throws StoreException {
 		Key write = jsonFactory.getJsonElementAdapter().write(element);
-		commit = createCommit(write, selectedAnchor.getDestinationAddress());
+		commit = commitFactory.createCommit(selectedAnchor, write, selectedAnchor.getDestinationAddress());
 		return checkout();
 	}
 
@@ -268,10 +278,7 @@ public class MerkleTree {
 
 	}
 
-	private Commit getCommitFromAnchor(ExtendedAnchor<CommitDao> anchor) throws StoreException {
-		return new Commit(anchor.getDestinationValue(), anchor.getDestinationAddress(), jsonFactory,
-				store);
-	}
+
 
 	public Object lazyRead() throws JsonSyntaxException, StoreException {
 		return commit.getObject();
@@ -282,7 +289,7 @@ public class MerkleTree {
 		// FIXME factor out code for creating change set to Commit and make work
 		// for multiple labels
 		commit = merge(selectedAnchor,
-				getCommitFromAnchor(other.selectedAnchor),
+				commitFactory.getCommitFromAnchor(other.selectedAnchor),
 				other.selectedAnchor.getDestinationAddress());
 		return checkout();
 	}
@@ -290,11 +297,11 @@ public class MerkleTree {
 	private Commit merge(ExtendedAnchor<CommitDao> commitAnchorToMergeA,
 			Commit commitB, Key addressB) throws JsonSyntaxException,
 			StoreException, PatchFailedException {
-		ThreeWayDiff patch = getCommitFromAnchor(commitAnchorToMergeA)
+		ThreeWayDiff patch = commitFactory.getCommitFromAnchor(commitAnchorToMergeA)
 				.createChangeSet(commitB);
 		Key valueIdentity = jsonFactory.getJavaObjectAdapter().write(
 				patch.apply());
-		return createCommit(valueIdentity, commitAnchorToMergeA.getDestinationAddress(),
+		return commitFactory.createCommit(selectedAnchor,valueIdentity, commitAnchorToMergeA.getDestinationAddress(),
 				addressB);
 	}
 
@@ -344,29 +351,11 @@ public class MerkleTree {
 		Key valueIdentity = jsonFactory.getJavaObjectAdapter().write(
 				originalResult);
 		// FIXME patterm of commit = create then checkout repeated several times
-		commit = createCommit(valueIdentity, selectedAnchor.getDestinationAddress());
+		commit = commitFactory.createCommit(selectedAnchor,valueIdentity, selectedAnchor.getDestinationAddress());
 		checkout();
 	}
 
-	private void setup(AddressableStorage store) {
-		this.store = store;
-		store.registerAdapter(new JsonAdapter<LabelsDao>(LabelsDao.class),
-				LabelsDao.class);
-		store.registerAdapter(new JsonAdapter<CommitDao>(CommitDao.class),
-				CommitDao.class);
-		jsonFactory = new JsonStoreAdapterFactory(store);
 
-	}
 
-	private Commit createCommit(Key valueIdentity, Key... parents)
-			throws StoreException {
-		// FIXME hardcoded user
-		if (LOG.isLoggable(Level.FINEST)) {
-			LOG.log(Level.FINEST, "Updating id -> " + selectedAnchor.getDestinationAddress());
-		}
-		return new Commit(selectedAnchor.setDestinationValue(new CommitDao(
-				valueIdentity, new Date(), "auser", parents)),
-				selectedAnchor.getDestinationAddress(), jsonFactory, store);
 
-	}
 }

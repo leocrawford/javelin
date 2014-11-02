@@ -40,7 +40,7 @@ public class JsonStoreAdapterFactory {
 	return new ObjectStoreAdapter(store);
     }
 
-    protected Key save(JsonElement toSave) throws StoreException {
+    protected Key save(JsonElement toSave)  {
 	return store.store(toSave, JsonElement.class);
     }
 
@@ -73,6 +73,11 @@ public class JsonStoreAdapterFactory {
 	    result.add(entry);
 	}
 	return result;
+    }
+    
+
+    protected Key keyFromJsonElement(JsonElement element) {
+	return new Key(element.getAsString());
     }
 
 }

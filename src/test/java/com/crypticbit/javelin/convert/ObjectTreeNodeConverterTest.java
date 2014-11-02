@@ -21,7 +21,7 @@ public class ObjectTreeNodeConverterTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, TreeMapperException {
+    public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException {
 
 	AddressableStorage memoryStore = new StorageFactory().createMemoryCas();
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(memoryStore);

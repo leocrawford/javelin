@@ -1,7 +1,10 @@
 package com.google.gson;
 
+import com.crypticbit.javelin.store.Key;
+
 public interface AddressToJsonElementWrapper {
 
-    public JsonElement wrap(JsonElement input);
+    public JsonElement wrap(Key key);
+    public JsonElement unwrap(JsonElement element);
     
 }

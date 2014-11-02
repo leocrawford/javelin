@@ -22,20 +22,20 @@ public interface AddressableStorage {
 	public List<Key> listCas();
 
 	/** list every item with a key >= start */
-	public List<Key> listCas(Key key) throws StoreException;
+	public List<Key> listCas(Key key) ;
 
 	/**
 	 * Store newValue using argument key as the key. Utilities optimistic
 	 * locking by demanding that you know the latest "old" value. If you don't
 	 * an exception is thrown
 	 */
-	public <S> void store(Key key, S oldValue, S newValue, Class<S> clazz)
-			throws StoreException;
+	public <S> void store(Key key, S oldValue, S newValue, Class<S> clazz)  throws StoreException;
+			;
 
 	/**
 	 * Store the data against against its key, and return that key
 	 */
-	public <S> Key store(S po, Class<S> clazz) throws StoreException;
+	public <S> Key store(S po, Class<S> clazz);
 
 	/**
 	 * Get the value of the resource identified by argument key, and convert it

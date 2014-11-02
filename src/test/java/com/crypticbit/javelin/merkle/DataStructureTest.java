@@ -12,11 +12,11 @@ import java.util.logging.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.crypticbit.javelin.convert.TreeMapperException;
-import com.crypticbit.javelin.merkle.Commit;
-import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.merkle.MerkleTree.MergeType;
-import com.crypticbit.javelin.store.*;
+import com.crypticbit.javelin.store.AddressableStorage;
+import com.crypticbit.javelin.store.Key;
+import com.crypticbit.javelin.store.StorageFactory;
+import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -40,8 +40,7 @@ public class DataStructureTest extends TestUtils{
     private static final String JSON_EXAMPLE_5 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,[1,2,3,7,8]]";
 
     @Test
-    public void testBasicBranch() throws IOException, StoreException, JsonSyntaxException, PatchFailedException,
-	    TreeMapperException {
+    public void testBasicBranch() throws IOException, StoreException, JsonSyntaxException, PatchFailedException {
 	String JSON_EXAMPLEa = "[\"foo\",{\"a\":1,\"b\":TRUE}]";
 	String JSON_EXAMPLE_2a = "[\"foo\",{\"a\":2,\"b\":FALSE}]";
 	String JSON_EXAMPLE_3a = "[\"a\",{\"a\":1,\"b\":TRUE,\"c\":2.1}]";
@@ -80,7 +79,7 @@ public class DataStructureTest extends TestUtils{
     }
 
     @Test
-    public void testBasicReadWrite() throws IOException, StoreException, JsonSyntaxException, TreeMapperException {
+    public void testBasicReadWrite() throws IOException, StoreException, JsonSyntaxException {
 	enableLog();
 	MerkleTree jca = new MerkleTree(new StorageFactory().createMemoryCas());
 	jca.write(JSON_EXAMPLE);
@@ -90,8 +89,7 @@ public class DataStructureTest extends TestUtils{
     }
 
     @Test
-    public void testCommitForComplexMultipleReadWrite() throws IOException, StoreException, JsonSyntaxException,
-	    TreeMapperException {
+    public void testCommitForComplexMultipleReadWrite() throws IOException, StoreException, JsonSyntaxException {
 	// enableLog();
 	MerkleTree jca = new MerkleTree(new StorageFactory().createMemoryCas());
 	jca.write(JSON_EXAMPLE).commit().getCommit();
@@ -108,7 +106,7 @@ public class DataStructureTest extends TestUtils{
     }
 
     @Test
-    public void testCommitForMultipleReadWrite() throws IOException, StoreException, TreeMapperException {
+    public void testCommitForMultipleReadWrite() throws IOException, StoreException {
 	// enableLog();
 	MerkleTree jca = new MerkleTree(new StorageFactory().createMemoryCas());
 	Commit c1 = jca.write(JSON_EXAMPLE).commit().getCommit();
@@ -126,7 +124,7 @@ public class DataStructureTest extends TestUtils{
     }
 
     @Test
-    public void testConcurrentWriteUsingTwoObjects() throws IOException, StoreException, TreeMapperException {
+    public void testConcurrentWriteUsingTwoObjects() throws IOException, StoreException {
 	AddressableStorage store = new StorageFactory().createMemoryCas();
 	MerkleTree jca = new MerkleTree(store);
 	jca.write(JSON_EXAMPLE);
@@ -152,7 +150,7 @@ public class DataStructureTest extends TestUtils{
     }
 
     @Test
-    public void testMultiplBranches() throws StoreException, TreeMapperException {
+    public void testMultiplBranches() throws StoreException {
 	AddressableStorage store = new StorageFactory().createMemoryCas();
 	MerkleTree d1 = new MerkleTree(store).write(JSON_EXAMPLE).commit();
 	MerkleTree d2 = d1.branch();
@@ -172,8 +170,7 @@ public class DataStructureTest extends TestUtils{
     }
 
     @Test
-    public void testReadWriteUsingTwoObjects() throws IOException, StoreException, JsonSyntaxException,
-	    TreeMapperException {
+    public void testReadWriteUsingTwoObjects() throws IOException, StoreException, JsonSyntaxException {
 	AddressableStorage store = new StorageFactory().createMemoryCas();
 	MerkleTree jca = new MerkleTree(store);
 	jca.write(JSON_EXAMPLE);
@@ -186,7 +183,7 @@ public class DataStructureTest extends TestUtils{
     }
 
     @Test
-    public void testImportExport() throws IOException, StoreException, JsonSyntaxException, TreeMapperException,
+    public void testImportExport() throws IOException, StoreException, JsonSyntaxException,
 	    ClassNotFoundException, PatchFailedException, InterruptedException {
 	MerkleTree ds1 = new MerkleTree(new StorageFactory().createMemoryCas());
 	MerkleTree ds2 = new MerkleTree(new StorageFactory().createMemoryCas());
@@ -218,7 +215,7 @@ public class DataStructureTest extends TestUtils{
 //	Thread.sleep(1000*1000);
     }
 
-    private void copy(MerkleTree ds1, MerkleTree ds2, MergeType mt) throws StoreException, TreeMapperException,
+    private void copy(MerkleTree ds1, MerkleTree ds2, MergeType mt) throws StoreException,
 	    IOException, ClassNotFoundException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	ds1.exportAll(out);

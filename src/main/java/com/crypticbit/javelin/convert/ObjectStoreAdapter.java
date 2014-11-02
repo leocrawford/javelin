@@ -22,8 +22,7 @@ public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements
     }
 
     @Override
-    public Key write(Object element) throws TreeMapperException {
-	try {
+    public Key write(Object element) {
 	    if (element == null)
 		return save(JsonNull.INSTANCE);
 	    if (element instanceof Map)
@@ -32,14 +31,11 @@ public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements
 		return save(createJsonArray(((List<Object>) element), objectToJsonKeyFunction));
 	    else
 		return save(JsonStoreAdapterFactory.gson.toJsonTree(element));
-	}
-	catch (StoreException se) {
-	    throw new TreeMapperException("Can't write to store", se);
-	}
+
     }
 
     @Override
-    public Object read(Key element) throws TreeMapperException {
+    public Object read(Key element) {
 	try {
 	    JsonElement input = store.getCas(element, JsonElement.class);
 
@@ -56,7 +52,7 @@ public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements
 		return null;
 	}
 	catch (StoreException e) {
-	    throw new TreeMapperException("unable to copy the tree referenced by key " + element, e);
+	    throw new IllegalStateException("unable to copy the tree referenced by key " + element, e);
 	}
     }
 
@@ -76,27 +72,22 @@ public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements
 	if (primitive.isString()) {
 	    return primitive.getAsString();
 	}
-	throw new InternalError("illegal Json Type found: " + primitive);
+	throw new IllegalStateException("illegal Json Type found: " + primitive);
     }
 
     private final Function<Object, JsonElement> objectToJsonKeyFunction = new Function<Object, JsonElement>() {
 
 	@Override
 	public JsonElement apply(Object input) {
-	    try {
 		return JsonStoreAdapterFactory.gson.toJsonTree(write(input).getKeyAsString());
-	    }
-	    catch (TreeMapperException e) {
-		// FIXME
-		throw new Error();
-	    }
+	
 	}
     };
 
     private final Function<JsonElement, Reference> JsonKeyToIdentityFunction = new Function<JsonElement, Reference>() {
 	@Override
 	public Reference apply(JsonElement input) {
-	    return new IdentityReference(new Key(input.getAsString()));
+	    return new IdentityReference(keyFromJsonElement(input));
 	}
 
 	class IdentityReference implements Reference {
@@ -109,13 +100,7 @@ public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements
 
 	    @Override
 	    public Object getValue() {
-		try {
 		    return read(key);
-		}
-		catch (TreeMapperException e) {
-		    // FIXME
-		    throw new Error(e);
-		}
 	    }
 
 	}

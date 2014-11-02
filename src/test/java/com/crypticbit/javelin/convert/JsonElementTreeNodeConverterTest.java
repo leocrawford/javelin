@@ -7,10 +7,10 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.convert.TreeMapper;
-import com.crypticbit.javelin.convert.TreeMapperException;
-import com.crypticbit.javelin.store.*;
+import com.crypticbit.javelin.store.AddressableStorage;
+import com.crypticbit.javelin.store.Key;
+import com.crypticbit.javelin.store.StorageFactory;
+import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
@@ -20,7 +20,7 @@ public class JsonElementTreeNodeConverterTest {
     private static final Gson GSON = new Gson();
 
     @Test
-    public void testConvertPrimitive() throws JsonSyntaxException, StoreException, TreeMapperException {
+    public void testConvertPrimitive() throws JsonSyntaxException, StoreException {
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
 	TreeMapper<Key,JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
 
@@ -32,7 +32,7 @@ public class JsonElementTreeNodeConverterTest {
     }
 
     @Test
-    public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException, TreeMapperException {
+    public void testReadWriteJsonElement() throws JsonSyntaxException, StoreException, IOException {
 
 	AddressableStorage memoryStore = new StorageFactory().createMemoryCas();
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(memoryStore);

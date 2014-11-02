@@ -11,11 +11,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.convert.TreeMapperException;
-import com.crypticbit.javelin.store.AddressableStorage;
-import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.StorageFactory;
-import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
@@ -92,7 +87,7 @@ public class MemoryAddressableStorageTest {
 
 	@Test
 	public void testTypes() throws StoreException, IOException,
-			JsonSyntaxException, TreeMapperException {
+			JsonSyntaxException {
 		// enableLog("com.crypticbit.javelin.js", Level.FINEST);
 		//
 		// DataAccessInterface<CommitDao> a = new JsonStoreAdapterFactory(new

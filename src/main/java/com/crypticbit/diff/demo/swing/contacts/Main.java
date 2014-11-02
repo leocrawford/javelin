@@ -1,6 +1,13 @@
 package com.crypticbit.diff.demo.swing.contacts;
 
-import com.crypticbit.javelin.convert.TreeMapperException;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.io.*;
+import java.net.Socket;
+
+import javax.swing.*;
+
 import com.crypticbit.javelin.merkle.Commit;
 import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.merkle.MerkleTree.MergeType;
@@ -10,13 +17,6 @@ import com.google.gson.JsonSyntaxException;
 
 import difflib.PatchFailedException;
 
-import javax.swing.*;
-
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.io.*;
-import java.net.Socket;
-
 public class Main extends JFrame {
 
 	private String lastPath = null;
@@ -25,8 +25,7 @@ public class Main extends JFrame {
 	private MerkleTree jsonStore;
 
 	public Main() throws StoreException, JsonSyntaxException,
-			PatchFailedException, IOException, InterruptedException,
-			TreeMapperException {
+			PatchFailedException, IOException, InterruptedException {
 		super("Contacts");
 
 		final Server.StreamCallback exported = new Server.StreamCallback() {
@@ -193,7 +192,7 @@ public class Main extends JFrame {
 	}
 
 	private void commitChange() throws JsonSyntaxException,
-			UnsupportedEncodingException, StoreException, TreeMapperException {
+			UnsupportedEncodingException, StoreException {
 		namePanel.refresh();
 		commitGraphPanel.show(new Commit[] { jsonStore.getCommit() });
 	}

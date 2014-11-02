@@ -10,7 +10,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.convert.TreeMapperException;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.JsonAdapter;
@@ -57,8 +56,7 @@ public class MerkleTree {
 	 * @throws TreeMapperException
 	 * @throws StoreException
 	 */
-	public MerkleTree(AddressableStorage store) throws StoreException,
-			TreeMapperException {
+	public MerkleTree(AddressableStorage store) throws StoreException {
 		setup(store);
 		labelsAnchor = new ExtendedAnchor<>(store, LabelsDao.class);
 		LabelsDao labels = new LabelsDao();
@@ -80,7 +78,7 @@ public class MerkleTree {
 	 * @throws JsonSyntaxException
 	 */
 	MerkleTree(AddressableStorage store, Key labelsAddress, String label)
-			throws JsonSyntaxException, StoreException, TreeMapperException, Error {
+			throws JsonSyntaxException, StoreException, Error {
 		setup(store);
 		this.labelsAnchor = new ExtendedAnchor<>(labelsAddress, store,
 				LabelsDao.class);
@@ -123,7 +121,7 @@ public class MerkleTree {
 	 */
 
 	public synchronized MerkleTree checkout() throws StoreException,
-			JsonSyntaxException, TreeMapperException {
+			JsonSyntaxException {
 		commit = new Commit(selectedAnchor.readEndPoint(store),
 				selectedAnchor.getValue(), jsonFactory, store);
 		element = commit.getElement();
@@ -133,15 +131,14 @@ public class MerkleTree {
 		return this;
 	}
 
-	public synchronized MerkleTree commit() throws StoreException,
-			TreeMapperException {
+	public synchronized MerkleTree commit() throws StoreException {
 		Key write = jsonFactory.getJsonElementAdapter().write(element);
 		commit = createCommit(write, selectedAnchor.getValue());
 		return checkout();
 	}
 
 	public void exportAll(OutputStream outputStream)
-			throws JsonSyntaxException, StoreException, TreeMapperException,
+			throws JsonSyntaxException, StoreException,
 			IOException {
 
 		/*
@@ -197,7 +194,7 @@ public class MerkleTree {
 
 	public void importAll(InputStream inputStream, MergeType mergeType)
 			throws IOException, ClassNotFoundException, StoreException,
-			JsonSyntaxException, TreeMapperException {
+			JsonSyntaxException {
 		/*
 		 * ObjectInputStream ois = new ObjectInputStream(inputStream);
 		 * Map<String, Key> labelToCommitMap = (Map<String, Key>)
@@ -276,14 +273,12 @@ public class MerkleTree {
 				store);
 	}
 
-	public Object lazyRead() throws JsonSyntaxException, StoreException,
-			TreeMapperException {
+	public Object lazyRead() throws JsonSyntaxException, StoreException {
 		return commit.getObject();
 	}
 
 	public synchronized MerkleTree merge(MerkleTree other)
-			throws JsonSyntaxException, StoreException, PatchFailedException,
-			TreeMapperException {
+			throws JsonSyntaxException, StoreException, PatchFailedException {
 		// FIXME factor out code for creating change set to Commit and make work
 		// for multiple labels
 		commit = merge(selectedAnchor,
@@ -294,7 +289,7 @@ public class MerkleTree {
 
 	private Commit merge(ExtendedAnchor<CommitDao> commitAnchorToMergeA,
 			Commit commitB, Key addressB) throws JsonSyntaxException,
-			StoreException, PatchFailedException, TreeMapperException {
+			StoreException, PatchFailedException {
 		ThreeWayDiff patch = getCommitFromAnchor(commitAnchorToMergeA)
 				.createChangeSet(commitB);
 		Key valueIdentity = jsonFactory.getJavaObjectAdapter().write(
@@ -307,7 +302,7 @@ public class MerkleTree {
 		return element;
 	}
 
-	public void saveLabel(String label) throws StoreException, TreeMapperException {
+	public void saveLabel(String label) throws StoreException {
 		labelsAnchor.readEndPoint(store).addAnchor(label, this.selectedAnchor);
 		labelsAnchor.writeEndPoint(store, labelsAnchor.getEndPoint());
 	}
@@ -319,7 +314,7 @@ public class MerkleTree {
 	}
 
 	public void write(String path, String json) throws JsonSyntaxException,
-			StoreException, TreeMapperException {
+			StoreException {
 		HackedJsonPath compiledPath = new HackedJsonPath(path, new Filter[] {});
 		// code copied from jsonpath
 		// FIXME reuse JSON
@@ -363,7 +358,7 @@ public class MerkleTree {
 	}
 
 	private Commit createCommit(Key valueIdentity, Key... parents)
-			throws StoreException, TreeMapperException {
+			throws StoreException {
 		// FIXME hardcoded user
 		if (LOG.isLoggable(Level.FINEST)) {
 			LOG.log(Level.FINEST, "Updating id -> " + selectedAnchor.getValue());

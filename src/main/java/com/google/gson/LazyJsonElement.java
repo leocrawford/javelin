@@ -4,15 +4,16 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map.Entry;
 
-import com.google.gson.JsonElement;
+import com.crypticbit.javelin.store.Key;
 
 public class LazyJsonElement extends JsonElement {
 
     private JsonElement backingElement;
+    private Key key;
     private AddressToJsonElementWrapper wrapper;
     
-    public LazyJsonElement(JsonElement backingElement, AddressToJsonElementWrapper wrapper) {
-	this.backingElement = backingElement;
+    public LazyJsonElement(Key key, AddressToJsonElementWrapper wrapper) {
+	this.key = key;
 	this.wrapper = wrapper;
     }
 
@@ -24,138 +25,142 @@ public class LazyJsonElement extends JsonElement {
     @Override
     public boolean isJsonArray() {
 	
-	return backingElement.isJsonArray();
+	return getBackingElement().isJsonArray();
     }
 
     @Override
     public boolean isJsonObject() {
 	
-	return backingElement.isJsonObject();
+	return getBackingElement().isJsonObject();
     }
 
     @Override
     public boolean isJsonPrimitive() {
 	
-	return backingElement.isJsonPrimitive();
+	return getBackingElement().isJsonPrimitive();
     }
 
     @Override
     public boolean isJsonNull() {
 	
-	return backingElement.isJsonNull();
+	return getBackingElement().isJsonNull();
     }
 
     @Override
     public JsonObject getAsJsonObject() {
-	JsonObject result = backingElement.getAsJsonObject();
+	JsonObject result = getBackingElement().getAsJsonObject();
 	for(Entry<String, JsonElement> entry : result.entrySet()) {
-	    entry.setValue(wrap(entry.getValue()));
+	    entry.setValue(wrapper.unwrap(entry.getValue()));
 	}
 	return result;
-    }
-
-    private JsonElement wrap(JsonElement value) {
-	return wrapper.wrap(value);
     }
 
     @Override
     public JsonArray getAsJsonArray() {
 	
-	JsonArray original = backingElement.getAsJsonArray();
+	JsonArray original = getBackingElement().getAsJsonArray();
 	JsonArray replace = new JsonArray();
 	for(JsonElement element : original) {
-	    replace.add(wrap(element));
+	    replace.add(wrapper.unwrap(element));
 	}
 	return replace;
     }
 
     @Override
     public JsonPrimitive getAsJsonPrimitive() {
-	return backingElement.getAsJsonPrimitive();
+	return getBackingElement().getAsJsonPrimitive();
     }
 
     @Override
     public JsonNull getAsJsonNull() {
 	
-	return backingElement.getAsJsonNull();
+	return getBackingElement().getAsJsonNull();
     }
 
     @Override
     public boolean getAsBoolean() {
 	
-	return backingElement.getAsBoolean();
+	return getBackingElement().getAsBoolean();
     }
 
     @Override
     Boolean getAsBooleanWrapper() {
 	
-	return backingElement.getAsBooleanWrapper();
+	return getBackingElement().getAsBooleanWrapper();
     }
 
     @Override
     public Number getAsNumber() {
 	
-	return backingElement.getAsNumber();
+	return getBackingElement().getAsNumber();
     }
 
     @Override
     public String getAsString() {
 	
-	return backingElement.getAsString();
+	return getBackingElement().getAsString();
     }
 
     @Override
     public double getAsDouble() {
 	
-	return backingElement.getAsDouble();
+	return getBackingElement().getAsDouble();
     }
 
     @Override
     public float getAsFloat() {
 	
-	return backingElement.getAsFloat();
+	return getBackingElement().getAsFloat();
     }
 
     @Override
     public long getAsLong() {
 	
-	return backingElement.getAsLong();
+	return getBackingElement().getAsLong();
     }
 
     @Override
     public int getAsInt() {
 	
-	return backingElement.getAsInt();
+	return getBackingElement().getAsInt();
     }
 
     @Override
     public byte getAsByte() {
 	
-	return backingElement.getAsByte();
+	return getBackingElement().getAsByte();
     }
 
     @Override
     public char getAsCharacter() {
 	
-	return backingElement.getAsCharacter();
+	return getBackingElement().getAsCharacter();
     }
 
     @Override
     public BigDecimal getAsBigDecimal() {
 	
-	return backingElement.getAsBigDecimal();
+	return getBackingElement().getAsBigDecimal();
     }
 
     @Override
     public BigInteger getAsBigInteger() {
 	
-	return backingElement.getAsBigInteger();
+	return getBackingElement().getAsBigInteger();
     }
 
     @Override
     public short getAsShort() {
 	
-	return backingElement.getAsShort();
+	return getBackingElement().getAsShort();
+    }
+
+    private JsonElement getBackingElement() {
+	if(backingElement == null)
+	{
+		backingElement = wrapper.wrap(key);
+	}
+	return backingElement;
     }
 
     

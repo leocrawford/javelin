@@ -16,63 +16,47 @@ public class JsonElementStoreAdapter extends JsonStoreAdapterFactory implements 
     }
 
     @Override
-    public Key write(JsonElement element) throws TreeMapperException {
+    public Key write(JsonElement element) {
 
-	try {
-	    if (element.isJsonNull() || element.isJsonPrimitive())
-		return save(element);
-	    if (element.isJsonObject())
-		return save(createJsonObject(element.getAsJsonObject().entrySet(),
-			jsonElementToJsonKeyReferencesFunction));
-	    if (element.isJsonArray())
-		return save(createJsonArray(asArray(element.getAsJsonArray()), jsonElementToJsonKeyReferencesFunction));
-	    throw new TreeMapperException("JsonElement(" + element.getClass() + ") was not a recognised type",
-		    new IllegalStateException());
-	}
-	catch (StoreException se) {
-	    throw new TreeMapperException("Can't write to store", se);
-	}
+	if (element.isJsonNull() || element.isJsonPrimitive())
+	    return save(element);
+	if (element.isJsonObject())
+	    return save(createJsonObject(element.getAsJsonObject().entrySet(), jsonElementToJsonKeyReferencesFunction));
+	if (element.isJsonArray())
+	    return save(createJsonArray(asArray(element.getAsJsonArray()), jsonElementToJsonKeyReferencesFunction));
+	throw new IllegalStateException("JsonElement(" + element.getClass() + ") was not a recognised type");
 
     }
 
     @Override
-    public JsonElement read(Key element) throws TreeMapperException {
-	try {
-	    JsonElement input = store.getCas(element, JsonElement.class);
-	    if (input.isJsonObject() || input.isJsonArray())
-		return new LazyJsonElement(input, this);
-	    else
-		return input;
-	}
-	catch (StoreException e) {
-	    throw new TreeMapperException("unable to copy the tree referenced by key " + element, e);
-	}
-    }
-
-    @Override
-    public JsonElement wrap(JsonElement input) {
-	try {
-	    return read(new Key(input.getAsString()));
-	}
-	catch (TreeMapperException e) {
-
-	    e.printStackTrace();
-	    // FIXME
-	    throw new Error();
-	}
+    public JsonElement read(Key element) {
+	return new LazyJsonElement(element, this);
     }
 
     private final Function<JsonElement, JsonElement> jsonElementToJsonKeyReferencesFunction = new Function<JsonElement, JsonElement>() {
 	@Override
 	public JsonElement apply(JsonElement input) {
-	    try {
-		return JsonStoreAdapterFactory.gson.toJsonTree(write(input).getKeyAsString());
-	    }
-	    catch (TreeMapperException e) {
-		// FIXME
-		throw new Error();
-	    }
+
+	    return JsonStoreAdapterFactory.gson.toJsonTree(write(input).getKeyAsString());
 	}
     };
+
+    @Override
+    public JsonElement wrap(Key key) {
+	try {
+	    return store.getCas(key, JsonElement.class);
+	}
+	catch (StoreException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	    throw new Error();
+	}
+
+    }
+
+    @Override
+    public JsonElement unwrap(JsonElement element) {
+	return new LazyJsonElement(keyFromJsonElement(element), this);
+    }
 
 }

@@ -9,8 +9,6 @@ import java.util.logging.Logger;
 import javax.swing.JDialog;
 
 import com.crypticbit.diff.demo.swing.contacts.CommitGraphPanel;
-import com.crypticbit.javelin.convert.TreeMapperException;
-import com.crypticbit.javelin.merkle.Commit;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 
@@ -27,7 +25,7 @@ public class TestUtils {
 	}
 
 	void show(Commit... commits) throws JsonSyntaxException, StoreException,
-			PatchFailedException, IOException, TreeMapperException {
+			PatchFailedException, IOException {
 		enableLog("com.crypticbit.javelin.js", Level.FINEST);
 		JDialog frame = new JDialog();
 		frame.setModal(true);

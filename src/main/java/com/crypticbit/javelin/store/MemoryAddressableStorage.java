@@ -68,7 +68,7 @@ class MemoryAddressableStorage implements AddressableStorage {
     }
 
     @Override
-    public <S> Key store(S value, Class<S> clazz) throws StoreException {
+    public <S> Key store(S value, Class<S> clazz) {
 	Adapter<S> adapter = getAdapter(clazz);
 	Key key = adapter.getContentDigest(value);
 	if (LOG.isLoggable(Level.FINEST)) {
@@ -78,10 +78,10 @@ class MemoryAddressableStorage implements AddressableStorage {
 	return key;
     }
 
-    private <S> Adapter<S> getAdapter(Class<S> clazz) throws StoreException {
+    private <S> Adapter<S> getAdapter(Class<S> clazz) {
 	Adapter<S> adapter = (Adapter<S>) adapters.get(clazz);
 	if (adapter == null)
-	    throw new StoreException("There is no adapter for type " + clazz);
+	    throw new IllegalStateException("There is no adapter for type " + clazz);
 	return adapter;
     }
 

@@ -1,15 +1,5 @@
 package com.crypticbit.javelin.merkle;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
-import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.convert.TreeMapperException;
-import com.crypticbit.javelin.merkle.MerkleTree;
-import com.crypticbit.javelin.store.AddressableStorage;
-import com.crypticbit.javelin.store.StorageFactory;
-import com.crypticbit.javelin.store.StoreException;
 
 public class JsonStoreAdapterFactoryTest {
 

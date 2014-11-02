@@ -6,8 +6,6 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.convert.TreeMapperException;
-import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -20,7 +18,7 @@ public class CommitTest extends TestUtils {
 
 	private MerkleTree jca1, jca2, jca3, jca4;
 
-	public CommitTest() throws StoreException, IOException, TreeMapperException {
+	public CommitTest() throws StoreException, IOException {
 		String c1 = "[\"a\"]";
 		String c2 = "[\"a\",\"b\"]";
 		String c3 = "[\"a\",\"b\",\"c1\"]";
@@ -42,7 +40,7 @@ public class CommitTest extends TestUtils {
 
 	@Test
 	public void testCreateChangeSet() throws JsonSyntaxException,
-			StoreException, PatchFailedException, IOException, TreeMapperException {
+			StoreException, PatchFailedException, IOException {
 		// ThreeWayDiff patch =
 		// jca1.getCommit().createChangeSet(jca4.getCommit());
 		// System.out.println("X-"+patch.apply());
@@ -62,7 +60,7 @@ public class CommitTest extends TestUtils {
 
 	@Test
 	public void testGetAsGraph() throws StoreException, IOException,
-			JsonSyntaxException, TreeMapperException {
+			JsonSyntaxException {
 		assertEquals(3, jca1.getCommit().getAsGraphToRoot().vertexSet().size());
 		assertEquals(3, jca2.getCommit().getAsGraphToRoot().vertexSet().size());
 		assertEquals(4, jca3.getCommit().getAsGraphToRoot().vertexSet().size());
@@ -70,8 +68,7 @@ public class CommitTest extends TestUtils {
 	}
 
 	@Test
-	public void testNavigate() throws JsonSyntaxException, StoreException,
-			TreeMapperException {
+	public void testNavigate() throws JsonSyntaxException, StoreException {
 		String c8 = "{\"a\":\"b\",\"c\":{\"d\":\"e\"},\"f\":[\"g\",1,2,3,{\"k\":true,\"l\":false}]}";
 		jca4.write(c8).commit();
 

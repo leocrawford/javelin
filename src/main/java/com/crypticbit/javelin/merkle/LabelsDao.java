@@ -13,7 +13,7 @@ public class LabelsDao implements Serializable {
 	private Map<String, Key> labels = new HashMap<>();
 
 	public void addAnchor(String label, ExtendedAnchor<CommitDao> anchor) {
-		labels.put(label, anchor.getAddress());
+		labels.put(label, anchor.getSourceAddress());
 
 	}
 
@@ -21,7 +21,7 @@ public class LabelsDao implements Serializable {
 			AddressableStorage store) {
 		ExtendedAnchor<CommitDao> result = new ExtendedAnchor<>(store,
 				CommitDao.class);
-		labels.put(label, result.getAddress());
+		labels.put(label, result.getSourceAddress());
 		return result;
 	}
 

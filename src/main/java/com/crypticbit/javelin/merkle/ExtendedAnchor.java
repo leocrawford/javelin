@@ -30,25 +30,24 @@ public class ExtendedAnchor<T> extends Anchor {
     public ExtendedAnchor(AddressableStorage store, Anchor clone, Class<T> clazz) throws StoreException {
 
 	super(store, clone);
-	// FIXME - write called in super. why is this a problem?
 	this.clazz = clazz;
     }
 
-    public T readEndPoint() throws JsonSyntaxException, StoreException {
-	return getStore().getCas(getValue(), clazz);
+    public T getDestinationValue() throws JsonSyntaxException, StoreException {
+	return getStore().getCas(getDestinationAddress(), clazz);
     }
 
-    public T writeEndPoint(T value) throws StoreException {
-	setValue(getStore().store(value, clazz));
+    public T setDestinationValue(T value) throws StoreException {
+	setDestinationAddress(getStore().store(value, clazz));
 	return value;
     }
 
     public String toString() {
 	try {
-	    return super.getAddress()+"->"+super.getValue()+"("+readEndPoint()+")";
+	    return super.getSourceAddress()+"->"+super.getDestinationAddress()+"("+getDestinationValue()+")";
 	}
 	catch (StoreException | JsonSyntaxException e) {
-	    return super.getAddress()+"<error>";
+	    return super.getSourceAddress()+"<error>";
 	}
     }
 

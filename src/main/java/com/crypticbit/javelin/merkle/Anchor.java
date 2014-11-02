@@ -28,14 +28,14 @@ public class Anchor  {
 
     Anchor(AddressableStorage store, Anchor clone) throws StoreException {
 	this(store);
-	setValue(clone.getValue());
+	setDestinationAddress(clone.getDestinationAddress());
     }
 
-    public Key getAddress() {
+    public Key getSourceAddress() {
 	return address;
     }
 
-    public Key getValue() throws StoreException {
+    public Key getDestinationAddress() throws StoreException {
 	if (store.checkKas(address)) {
 	    return (value = store.getKas(address, Key.class));
 	}
@@ -45,12 +45,12 @@ public class Anchor  {
     }
 
     /** write a value to the anchor, but if the value has changed from the last read then throw Exception */
-    public void setValue(Key newValue) throws StoreException {
+    public void setDestinationAddress(Key newValue) throws StoreException {
 	store.store(address, value, newValue, Key.class);
 	value = newValue;
     }
     
-    public AddressableStorage getStore() {
+    protected AddressableStorage getStore() {
 	return store;
     }
 

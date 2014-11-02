@@ -61,7 +61,7 @@ public class MerkleTree {
 		labelsAnchor = new ExtendedAnchor<>(store, LabelsDao.class);
 		LabelsDao labels = new LabelsDao();
 		selectedAnchor = labels.addCommitAnchor("HEAD", store);
-		labelsAnchor.writeEndPoint(labels);
+		labelsAnchor.setDestinationValue(labels);
 
 		// see if this works - FIXME
 		// labelsAnchor.readEndPoint(store).getCommitAnchor("HEAD",jsonFactory).readEndPoint(store);
@@ -82,13 +82,13 @@ public class MerkleTree {
 		setup(store);
 		this.labelsAnchor = new ExtendedAnchor<>(store, labelsAddress,
 				LabelsDao.class);
-		if (labelsAnchor.readEndPoint().hasCommitAnchor(label)) {
-			this.selectedAnchor = labelsAnchor.readEndPoint().getCommitAnchor(
+		if (labelsAnchor.getDestinationValue().hasCommitAnchor(label)) {
+			this.selectedAnchor = labelsAnchor.getDestinationValue().getCommitAnchor(
 					label, store);
 		} else {
 			// FIXME exception handling, and thought about changing to unknown
 			// branch
-			throw new Error("Labels don't exist: " + labelsAnchor.readEndPoint());
+			throw new Error("Labels don't exist: " + labelsAnchor.getDestinationValue());
 			// this.selectedAnchor = labels.addCommitAnchor(label);
 		}
 	}
@@ -122,8 +122,8 @@ public class MerkleTree {
 
 	public synchronized MerkleTree checkout() throws StoreException,
 			JsonSyntaxException {
-		commit = new Commit(selectedAnchor.readEndPoint(),
-				selectedAnchor.getValue(), jsonFactory, store);
+		commit = new Commit(selectedAnchor.getDestinationValue(),
+				selectedAnchor.getDestinationAddress(), jsonFactory, store);
 		element = commit.getElement();
 		if (LOG.isLoggable(Level.FINER)) {
 			LOG.log(Level.FINER, "Reading commit: " + commit);
@@ -133,7 +133,7 @@ public class MerkleTree {
 
 	public synchronized MerkleTree commit() throws StoreException {
 		Key write = jsonFactory.getJsonElementAdapter().write(element);
-		commit = createCommit(write, selectedAnchor.getValue());
+		commit = createCommit(write, selectedAnchor.getDestinationAddress());
 		return checkout();
 	}
 
@@ -185,7 +185,7 @@ public class MerkleTree {
 	 */
 
 	public Key getLabelsAddress() {
-		return labelsAnchor.getAddress();
+		return labelsAnchor.getSourceAddress();
 	}
 
 	public enum MergeType {
@@ -269,7 +269,7 @@ public class MerkleTree {
 	}
 
 	private Commit getCommitFromAnchor(ExtendedAnchor<CommitDao> anchor) throws StoreException {
-		return new Commit(anchor.readEndPoint(), anchor.getValue(), jsonFactory,
+		return new Commit(anchor.getDestinationValue(), anchor.getDestinationAddress(), jsonFactory,
 				store);
 	}
 
@@ -283,7 +283,7 @@ public class MerkleTree {
 		// for multiple labels
 		commit = merge(selectedAnchor,
 				getCommitFromAnchor(other.selectedAnchor),
-				other.selectedAnchor.getValue());
+				other.selectedAnchor.getDestinationAddress());
 		return checkout();
 	}
 
@@ -294,7 +294,7 @@ public class MerkleTree {
 				.createChangeSet(commitB);
 		Key valueIdentity = jsonFactory.getJavaObjectAdapter().write(
 				patch.apply());
-		return createCommit(valueIdentity, commitAnchorToMergeA.getValue(),
+		return createCommit(valueIdentity, commitAnchorToMergeA.getDestinationAddress(),
 				addressB);
 	}
 
@@ -303,9 +303,9 @@ public class MerkleTree {
 	}
 
 	public void saveLabel(String label) throws StoreException {
-		LabelsDao value = labelsAnchor.readEndPoint();
+		LabelsDao value = labelsAnchor.getDestinationValue();
 		value.addAnchor(label, this.selectedAnchor);
-		labelsAnchor.writeEndPoint(value);
+		labelsAnchor.setDestinationValue(value);
 	}
 
 	public MerkleTree write(String string) {
@@ -344,7 +344,7 @@ public class MerkleTree {
 		Key valueIdentity = jsonFactory.getJavaObjectAdapter().write(
 				originalResult);
 		// FIXME patterm of commit = create then checkout repeated several times
-		commit = createCommit(valueIdentity, selectedAnchor.getValue());
+		commit = createCommit(valueIdentity, selectedAnchor.getDestinationAddress());
 		checkout();
 	}
 
@@ -362,11 +362,11 @@ public class MerkleTree {
 			throws StoreException {
 		// FIXME hardcoded user
 		if (LOG.isLoggable(Level.FINEST)) {
-			LOG.log(Level.FINEST, "Updating id -> " + selectedAnchor.getValue());
+			LOG.log(Level.FINEST, "Updating id -> " + selectedAnchor.getDestinationAddress());
 		}
-		return new Commit(selectedAnchor.writeEndPoint(new CommitDao(
+		return new Commit(selectedAnchor.setDestinationValue(new CommitDao(
 				valueIdentity, new Date(), "auser", parents)),
-				selectedAnchor.getValue(), jsonFactory, store);
+				selectedAnchor.getDestinationAddress(), jsonFactory, store);
 
 	}
 }

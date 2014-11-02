@@ -7,7 +7,7 @@
  * This may seem like a complicated way of creating a key value store, but the
  * the fact that the types that need to be stored aren't all Serializable means
  * we have to handle those differently.
- * 
+ *
  * @author leo
  *
  */

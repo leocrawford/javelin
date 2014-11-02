@@ -2,7 +2,6 @@ package com.crypticbit.javelin.merkle;
 
 import java.util.Date;
 import java.util.WeakHashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.crypticbit.javelin.convert.JsonElementStoreAdapter;
@@ -29,12 +28,19 @@ class CommitFactory {
 	objectStoreAdapter = new ObjectStoreAdapter(store);
     }
 
-    JsonElementStoreAdapter getJsonElementStoreAdapter() {
-	return jsonElementStoreAdapter;
-    }
+    Commit createCommit(ExtendedAnchor<CommitDao> anchor, Key valueIdentity, Key... parents)
+	    throws CorruptTreeException {
+	// FIXME hardcoded user
 
-    ObjectStoreAdapter getObjectStoreAdapter() {
-	return objectStoreAdapter;
+	try {
+	    return new Commit(this, anchor.getDestinationAddress(), anchor.setDestinationValue(new CommitDao(
+		    valueIdentity, new Date(), "auser", parents)));
+	}
+	catch (StoreException e) {
+	    throw new CorruptTreeException("The anchor " + anchor
+		    + " was supposed to point at a Commit, but was broken", e);
+	}
+
     }
 
     // FIXME Shouldn't load if in cache
@@ -43,8 +49,26 @@ class CommitFactory {
 	    return getCommit(address, store.getCas(address, CommitDao.class));
 	}
 	catch (StoreException e) {
-	    throw new CorruptTreeException("A commit was expected at address "+address,e);
+	    throw new CorruptTreeException("A commit was expected at address " + address, e);
 	}
+    }
+
+    Commit getCommitFromAnchor(ExtendedAnchor<CommitDao> anchor) throws CorruptTreeException {
+	try {
+	    return getCommit(anchor.getDestinationAddress(), anchor.getDestinationValue());
+	}
+	catch (JsonSyntaxException | StoreException e) {
+	    throw new CorruptTreeException("The anchor " + anchor
+		    + " was supposed to point at a Commit, but was broken", e);
+	}
+    }
+
+    JsonElementStoreAdapter getJsonElementStoreAdapter() {
+	return jsonElementStoreAdapter;
+    }
+
+    ObjectStoreAdapter getObjectStoreAdapter() {
+	return objectStoreAdapter;
     }
 
     /**
@@ -58,28 +82,6 @@ class CommitFactory {
 	    cache.put(key, result);
 	}
 	return result;
-    }
-
-    Commit getCommitFromAnchor(ExtendedAnchor<CommitDao> anchor) throws CorruptTreeException {
-	try {
-	    return getCommit(anchor.getDestinationAddress(), anchor.getDestinationValue());
-	}
-	catch (JsonSyntaxException | StoreException e) {
-	    throw new CorruptTreeException("The anchor "+anchor+" was supposed to point at a Commit, but was broken",e);
-	}
-    }
-
-    Commit createCommit(ExtendedAnchor<CommitDao> anchor, Key valueIdentity, Key... parents) throws CorruptTreeException  {
-	// FIXME hardcoded user
-
-	try {
-	    return new Commit(this, anchor.getDestinationAddress(), anchor.setDestinationValue(new CommitDao(valueIdentity,
-	    	new Date(), "auser", parents)));
-	}
-	catch (StoreException e) {
-	    throw new CorruptTreeException("The anchor "+anchor+" was supposed to point at a Commit, but was broken",e);
-	}
-
     }
 
 }

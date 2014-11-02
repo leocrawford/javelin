@@ -23,7 +23,7 @@ public class JsonElementTreeNodeConverterTest {
     @Test
     public void testConvertPrimitive() throws JsonSyntaxException, StoreException {
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(new StorageFactory().createMemoryCas());
-	TreeMapper<Key,JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
+	TreeMapper<Key, JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
 
 	final String jsonFloat = "2.1";
 	final JsonElement json = GSON.fromJson(jsonFloat, JsonElement.class);
@@ -38,17 +38,16 @@ public class JsonElementTreeNodeConverterTest {
 	AddressableStorage memoryStore = new StorageFactory().createMemoryCas();
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(memoryStore);
 
-	TreeMapper<Key,JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
+	TreeMapper<Key, JsonElement> jsonElementAdapter = store.getJsonElementAdapter();
 	Key stringIdentity = jsonElementAdapter.write(GSON.fromJson("\"String\"", JsonElement.class));
 	Key nullIdentity = jsonElementAdapter.write(GSON.fromJson("null", JsonElement.class));
 	Key integerIdentity = jsonElementAdapter.write(GSON.fromJson("100", JsonElement.class));
 	Key floatIdentity = jsonElementAdapter.write(GSON.fromJson("2.1", JsonElement.class));
 	Key booleanIdentity = jsonElementAdapter.write(GSON.fromJson("TRUE", JsonElement.class));
 	Key arrayIdentity = jsonElementAdapter.write(GSON.fromJson("[1,2,3]", JsonElement.class));
-	Key mapIdentity = jsonElementAdapter.write(GSON.fromJson("{\"a\":1,\"b\":null,\"c\":FALSE}",
-		JsonElement.class));
+	Key mapIdentity = jsonElementAdapter
+		.write(GSON.fromJson("{\"a\":1,\"b\":null,\"c\":FALSE}", JsonElement.class));
 
-	
 	assertTrue(jsonElementAdapter.read(stringIdentity).getAsJsonPrimitive().isString());
 	assertTrue(jsonElementAdapter.read(nullIdentity).isJsonNull());
 	assertTrue(jsonElementAdapter.read(integerIdentity).getAsJsonPrimitive().getAsJsonPrimitive().isNumber());
@@ -62,7 +61,6 @@ public class JsonElementTreeNodeConverterTest {
 	assertEquals(3, jsonElementAdapter.read(arrayIdentity).getAsJsonArray().size());
 	assertEquals(1, jsonElementAdapter.read(arrayIdentity).getAsJsonArray().get(0).getAsInt());
 
-	
 	assertTrue(jsonElementAdapter.read(mapIdentity).isJsonObject());
 	assertEquals(3, jsonElementAdapter.read(mapIdentity).getAsJsonObject().entrySet().size());
 	assertTrue(jsonElementAdapter.read(mapIdentity).getAsJsonObject().get("b").isJsonNull());

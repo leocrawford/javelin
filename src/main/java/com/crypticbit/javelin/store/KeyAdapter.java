@@ -4,8 +4,8 @@ package com.crypticbit.javelin.store;
 
 public class KeyAdapter extends JsonAdapter<Key> {
 
-	public KeyAdapter() {
-		super(Key.class);
-	}
+    public KeyAdapter() {
+	super(Key.class);
+    }
 
 }

@@ -5,10 +5,6 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.convert.lazy.LazyMap;
-import com.crypticbit.javelin.convert.lazy.Reference;
-import com.crypticbit.javelin.convert.lazy.ValueReference;
-
 public class LazyMapTest {
 
     @Test

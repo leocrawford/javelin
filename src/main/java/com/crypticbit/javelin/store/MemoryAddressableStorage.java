@@ -1,10 +1,6 @@
 package com.crypticbit.javelin.store;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +13,57 @@ class MemoryAddressableStorage implements AddressableStorage {
     private final TreeMap<Key, byte[]> casMap = new TreeMap<>();
     private final TreeMap<Key, byte[]> kasMap = new TreeMap<>();
     private final Map<Class<?>, Adapter<?>> adapters = new HashMap<>();
+
+    @Override
+    public boolean checkCas(Key key) {
+	return casMap.containsKey(key);
+    }
+
+    @Override
+    public boolean checkKas(Key key) {
+	return kasMap.containsKey(key);
+    }
+
+    @Override
+    public <S> S getCas(Key key, Class<S> clazz) throws StoreException {
+	Adapter<S> adapter = (Adapter<S>) adapters.get(clazz);
+	if (!checkCas(key)) {
+	    throw new StoreException("The key " + key + " does not exist");
+	}
+
+	S result = adapter.fromByteArray(casMap.get(key));
+
+	if (LOG.isLoggable(Level.FINEST)) {
+	    LOG.log(Level.FINEST, "Read " + result + " bytes from cas " + key);
+	}
+	return result;
+    }
+
+    @Override
+    public <S> S getKas(Key key, Class<S> clazz) throws StoreException {
+	Adapter<S> adapter = (Adapter<S>) adapters.get(clazz);
+	if (!checkKas(key)) {
+	    throw new StoreException("The key " + key + " does not exist");
+	}
+
+	S result = adapter.fromByteArray(kasMap.get(key));
+
+	if (LOG.isLoggable(Level.FINEST)) {
+	    LOG.log(Level.FINEST, "Read " + result + " bytes from kas " + key);
+	}
+	return result;
+    }
+
+    // public <S> String toString(Class<S> adapterClass) {
+    // Adapter<S> adapter = (Adapter<S>) adapters.get(adapterClass);
+    //
+    // StringBuffer result = new StringBuffer();
+    //
+    // for (Map.Entry<Key, byte[]> entry : casMap.entrySet()) {
+    // result.append(entry.getKey() + "," + adapter.fromByteArray(entry.getValue()) + "\n");
+    // }
+    // return result.toString();
+    // }
 
     @Override
     public String getName() {
@@ -32,22 +79,6 @@ class MemoryAddressableStorage implements AddressableStorage {
     public List<Key> listCas(Key start) {
 	return new LinkedList<Key>(casMap.tailMap(start).keySet());
     }
-
-    @Override
-    public String toString() {
-	return casMap.toString();
-    }
-
-//    public <S> String toString(Class<S> adapterClass) {
-//	Adapter<S> adapter = (Adapter<S>) adapters.get(adapterClass);
-//
-//	StringBuffer result = new StringBuffer();
-//
-//	for (Map.Entry<Key, byte[]> entry : casMap.entrySet()) {
-//	    result.append(entry.getKey() + "," + adapter.fromByteArray(entry.getValue()) + "\n");
-//	}
-//	return result.toString();
-//    }
 
     @Override
     public <T> void registerAdapter(Adapter<T> adapter, Class<T> clazz) {
@@ -78,49 +109,17 @@ class MemoryAddressableStorage implements AddressableStorage {
 	return key;
     }
 
+    @Override
+    public String toString() {
+	return casMap.toString();
+    }
+
     private <S> Adapter<S> getAdapter(Class<S> clazz) {
 	Adapter<S> adapter = (Adapter<S>) adapters.get(clazz);
-	if (adapter == null)
+	if (adapter == null) {
 	    throw new IllegalStateException("There is no adapter for type " + clazz);
+	}
 	return adapter;
-    }
-
-    @Override
-    public <S> S getCas(Key key, Class<S> clazz) throws StoreException {
-	Adapter<S> adapter = (Adapter<S>) adapters.get(clazz);
-	if (!checkCas(key))
-	    throw new StoreException("The key " + key + " does not exist");
-
-	S result = adapter.fromByteArray(casMap.get(key));
-
-	if (LOG.isLoggable(Level.FINEST)) {
-	    LOG.log(Level.FINEST, "Read " + result + " bytes from cas " + key);
-	}
-	return result;
-    }
-
-    @Override
-    public <S> S getKas(Key key, Class<S> clazz) throws StoreException {
-	Adapter<S> adapter = (Adapter<S>) adapters.get(clazz);
-	if (!checkKas(key))
-	    throw new StoreException("The key " + key + " does not exist");
-
-	S result = adapter.fromByteArray(kasMap.get(key));
-
-	if (LOG.isLoggable(Level.FINEST)) {
-	    LOG.log(Level.FINEST, "Read " + result + " bytes from kas " + key);
-	}
-	return result;
-    }
-
-    @Override
-    public boolean checkCas(Key key)  {
-	return casMap.containsKey(key);
-    }
-
-    @Override
-    public boolean checkKas(Key key) {
-	return kasMap.containsKey(key);
     }
 
 }

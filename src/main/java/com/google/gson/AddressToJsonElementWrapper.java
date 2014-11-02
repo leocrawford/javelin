@@ -4,7 +4,8 @@ import com.crypticbit.javelin.store.Key;
 
 public interface AddressToJsonElementWrapper {
 
-    public JsonElement wrap(Key key);
     public JsonElement unwrap(JsonElement element);
-    
+
+    public JsonElement wrap(Key key);
+
 }

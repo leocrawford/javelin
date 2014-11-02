@@ -11,13 +11,13 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.crypticbit.javelin.store.*;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+import com.crypticbit.javelin.store.AddressableStorage;
+import com.crypticbit.javelin.store.Key;
+import com.crypticbit.javelin.store.StorageFactory;
+import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 
 public class ObjectTreeNodeConverterTest {
-
 
     @SuppressWarnings("unchecked")
     @Test
@@ -26,7 +26,7 @@ public class ObjectTreeNodeConverterTest {
 	AddressableStorage memoryStore = new StorageFactory().createMemoryCas();
 	JsonStoreAdapterFactory store = new JsonStoreAdapterFactory(memoryStore);
 
-	TreeMapper<Key,Object> jsonObjectAdapter = store.getJavaObjectAdapter();
+	TreeMapper<Key, Object> jsonObjectAdapter = store.getJavaObjectAdapter();
 	Key stringIdentity = jsonObjectAdapter.write("String");
 	Key nullIdentity = jsonObjectAdapter.write(null);
 	Key integerIdentity = jsonObjectAdapter.write(100);
@@ -39,7 +39,7 @@ public class ObjectTreeNodeConverterTest {
 	m.put("c", false);
 	Key mapIdentity = jsonObjectAdapter.write(m);
 
-	assertEquals(String.class,jsonObjectAdapter.read(stringIdentity).getClass());
+	assertEquals(String.class, jsonObjectAdapter.read(stringIdentity).getClass());
 	assertTrue(jsonObjectAdapter.read(nullIdentity) == null);
 	assertTrue(jsonObjectAdapter.read(integerIdentity) instanceof Number);
 	assertEquals(new Integer(100), jsonObjectAdapter.read(integerIdentity));
@@ -58,10 +58,10 @@ public class ObjectTreeNodeConverterTest {
 
 	Map<String, Object> x = (Map<String, Object>) jsonObjectAdapter.read(mapIdentity);
 	x.remove("a");
-//	x.put("b", "B");
+	// x.put("b", "B");
 	jsonObjectAdapter.write(x);
 	assertEquals(2, x.size());
-//	assertEquals("B", x.get("b"));
+	// assertEquals("B", x.get("b"));
 
     }
 

@@ -5,11 +5,10 @@ import com.google.gson.JsonElement;
 /* Create or access any of the standard CAS types (memory, disk, remote, etc) */
 public class StorageFactory {
 
-	public AddressableStorage createMemoryCas() {
-		AddressableStorage as = new MemoryAddressableStorage();
-		as.registerAdapter(new JsonAdapter<JsonElement>(JsonElement.class),
-				JsonElement.class);
-		as.registerAdapter(new KeyAdapter(), Key.class);
-		return as;
-	}
+    public AddressableStorage createMemoryCas() {
+	AddressableStorage as = new MemoryAddressableStorage();
+	as.registerAdapter(new JsonAdapter<JsonElement>(JsonElement.class), JsonElement.class);
+	as.registerAdapter(new KeyAdapter(), Key.class);
+	return as;
+    }
 }

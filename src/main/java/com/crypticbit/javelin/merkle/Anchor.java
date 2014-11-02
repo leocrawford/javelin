@@ -35,10 +35,6 @@ public abstract class Anchor {
 	setDestinationAddress(clone.getDestinationAddress());
     }
 
-    public Key getSourceAddress() {
-	return address;
-    }
-
     public Key getDestinationAddress() throws StoreException {
 	if (store.checkKas(address)) {
 	    return (value = store.getKas(address, Key.class));
@@ -48,10 +44,15 @@ public abstract class Anchor {
 	}
     }
 
+    public Key getSourceAddress() {
+	return address;
+    }
+
     /** write a value to the anchor, but if the value has changed from the last read then throw Exception */
     public void setDestinationAddress(Key newValue) throws StoreException {
-	if (LOG.isLoggable(Level.FINE))
-	    LOG.log(Level.FINE, "Updating Anchor "+this+" to value "+ newValue);
+	if (LOG.isLoggable(Level.FINE)) {
+	    LOG.log(Level.FINE, "Updating Anchor " + this + " to value " + newValue);
+	}
 
 	store.store(address, value, newValue, Key.class);
 	value = newValue;

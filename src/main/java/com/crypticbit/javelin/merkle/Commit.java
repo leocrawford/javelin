@@ -1,6 +1,5 @@
 package com.crypticbit.javelin.merkle;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -22,7 +21,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonSyntaxException;
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
 
@@ -48,15 +46,21 @@ public class Commit implements Comparable<Commit> {
 
     }
 
+    @Override
+    public int compareTo(Commit o) {
+	return commitDaoKey.compareTo(o.commitDaoKey);
+    }
+
     public ThreeWayDiff createChangeSet(Commit other) throws MergeException, CorruptTreeException {
 
 	DirectedGraph<Commit, DefaultEdge> x = getAsGraphToRoots(new Commit[] { this, other });
 
 	Commit lca = new NaiveLcaFinder<Commit, DefaultEdge>(x).findLca(this, other);
 
-	if (lca == null)
+	if (lca == null) {
 	    throw new MergeException("No common ancestor: " + x.toString() + "," + other + "," + this + ","
 		    + findRoot() + "," + other.equals(this));
+	}
 
 	Collection<GraphPath<Commit, DefaultEdge>> pathsToValues = new LinkedList<>();
 	pathsToValues.add(getShortestPath(x, lca, this));
@@ -67,27 +71,28 @@ public class Commit implements Comparable<Commit> {
 	return diff;
     }
 
+    public void debug() {
+	debug(0);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+	return obj instanceof Commit && commitDaoKey.equals(((Commit) obj).commitDaoKey);
+    }
+
+    public JsonElement getAsElement() {
+	return commitFactory.getJsonElementStoreAdapter().read(commitDao.getHead());
+    }
+
     /**
      * Generate a graph from this node to root. This allows us to treat the commit tree like a graph, and use standard
      * graph operations rather than coding our own
-     * 
+     *
      * @throws CorruptTreeException
      * @throws TreeMapperException
      */
     public DirectedGraph<Commit, DefaultEdge> getAsGraphToRoot() throws CorruptTreeException {
 	return getAsGraphToRoots(this);
-    }
-
-    public static DirectedGraph<Commit, DefaultEdge> getAsGraphToRoots(Commit... commits) throws CorruptTreeException {
-	DirectedGraph<Commit, DefaultEdge> graph = new SimpleDirectedGraph<Commit, DefaultEdge>(DefaultEdge.class);
-	for (Commit c : commits) {
-	    addToGraph(graph, c);
-	}
-	return graph;
-    }
-
-    public JsonElement getAsElement() {
-	return commitFactory.getJsonElementStoreAdapter().read(commitDao.getHead());
     }
 
     public Object getAsObject() {
@@ -118,11 +123,6 @@ public class Commit implements Comparable<Commit> {
 	return shortest;
     }
 
-    private static GraphPath<Commit, DefaultEdge> getShortestPath(Graph<Commit, DefaultEdge> graph, Commit start,
-	    Commit end) {
-	return new DijkstraShortestPath<Commit, DefaultEdge>(graph, start, end).getPath();
-    }
-
     public String getUser() {
 	return commitDao.getUser();
     }
@@ -142,16 +142,9 @@ public class Commit implements Comparable<Commit> {
 	return commitDao.toString();
     }
 
-    /**
-     * Find very first commit in tree
-     */
-    private Commit findRoot() throws CorruptTreeException {
-	return getShortestHistory().getLast();
-    }
-
     private void addCommitToTreeMap(Graph<Commit, DefaultEdge> x, ThreeWayDiff<Object> twd,
 	    Collection<GraphPath<Commit, DefaultEdge>> paths) {
-	
+
 	Multimap<Date, Snapshot<Object>> multimap = Multimaps.newListMultimap(Maps
 		.<Date, Collection<Snapshot<Object>>> newTreeMap(), new Supplier<List<Snapshot<Object>>>() {
 	    @Override
@@ -173,24 +166,6 @@ public class Commit implements Comparable<Commit> {
 
     }
 
-    private CommitDao getDao() {
-	return commitDao;
-    }
-
-    @Override
-    public int compareTo(Commit o) {
-	return commitDaoKey.compareTo(o.commitDaoKey);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-	return obj instanceof Commit && commitDaoKey.equals(((Commit) obj).commitDaoKey);
-    }
-
-    private static String indent(int indent) {
-	return new String(new char[indent]).replace("\0", " ");
-    }
-
     private void debug(int indent) {
 	try {
 	    System.out.print(indent(indent) + "Commit " + commitDao.getHead() + ": ");
@@ -205,13 +180,28 @@ public class Commit implements Comparable<Commit> {
 	}
     }
 
-    public void debug() {
-	debug(0);
+    /**
+     * Find very first commit in tree
+     */
+    private Commit findRoot() throws CorruptTreeException {
+	return getShortestHistory().getLast();
+    }
+
+    private CommitDao getDao() {
+	return commitDao;
+    }
+
+    public static DirectedGraph<Commit, DefaultEdge> getAsGraphToRoots(Commit... commits) throws CorruptTreeException {
+	DirectedGraph<Commit, DefaultEdge> graph = new SimpleDirectedGraph<Commit, DefaultEdge>(DefaultEdge.class);
+	for (Commit c : commits) {
+	    addToGraph(graph, c);
+	}
+	return graph;
     }
 
     /**
      * Recursive method to add a node to a graph - and all parents nodes (together with links between them)
-     * 
+     *
      * @throws CorruptTreeException
      * @throws StoreException
      */
@@ -221,6 +211,15 @@ public class Commit implements Comparable<Commit> {
 	    addToGraph(graph, c);
 	    graph.addEdge(c, commit);
 	}
+    }
+
+    private static GraphPath<Commit, DefaultEdge> getShortestPath(Graph<Commit, DefaultEdge> graph, Commit start,
+	    Commit end) {
+	return new DijkstraShortestPath<Commit, DefaultEdge>(graph, start, end).getPath();
+    }
+
+    private static String indent(int indent) {
+	return new String(new char[indent]).replace("\0", " ");
     }
 
 }

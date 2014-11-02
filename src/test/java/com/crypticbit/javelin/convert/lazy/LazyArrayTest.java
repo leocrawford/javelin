@@ -6,10 +6,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.crypticbit.javelin.convert.lazy.LazyArray;
-import com.crypticbit.javelin.convert.lazy.Reference;
-import com.crypticbit.javelin.convert.lazy.ValueReference;
-
 public class LazyArrayTest {
 
     @Test

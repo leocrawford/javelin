@@ -17,21 +17,39 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
 
 public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements TreeMapper<Key, Object> {
+    private final Function<Object, JsonElement> objectToJsonKeyFunction = new Function<Object, JsonElement>() {
+
+	@Override
+	public JsonElement apply(Object input) {
+	    return JsonStoreAdapterFactory.gson.toJsonTree(write(input).getKeyAsString());
+
+	}
+    };
+
+    private final Function<JsonElement, Reference> JsonKeyToIdentityFunction = new Function<JsonElement, Reference>() {
+	@Override
+	public Reference apply(JsonElement input) {
+	    return new IdentityReference(keyFromJsonElement(input));
+	}
+
+	class IdentityReference implements Reference {
+
+	    private Key key;
+
+	    public IdentityReference(Key key) {
+		this.key = key;
+	    }
+
+	    @Override
+	    public Object getValue() {
+		return read(key);
+	    }
+
+	}
+    };
+
     public ObjectStoreAdapter(AddressableStorage store) {
 	super(store);
-    }
-
-    @Override
-    public Key write(Object element) {
-	    if (element == null)
-		return save(JsonNull.INSTANCE);
-	    if (element instanceof Map)
-		return save(createJsonObject(((Map<String, Object>) element).entrySet(), objectToJsonKeyFunction));
-	    if (element instanceof List)
-		return save(createJsonArray(((List<Object>) element), objectToJsonKeyFunction));
-	    else
-		return save(JsonStoreAdapterFactory.gson.toJsonTree(element));
-
     }
 
     @Override
@@ -48,12 +66,30 @@ public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements
 	    else if (input.isJsonPrimitive()) {
 		return parsePrimitiveStatic(input.getAsJsonPrimitive());
 	    }
-	    else
+	    else {
 		return null;
+	    }
 	}
 	catch (StoreException e) {
 	    throw new IllegalStateException("unable to copy the tree referenced by key " + element, e);
 	}
+    }
+
+    @Override
+    public Key write(Object element) {
+	if (element == null) {
+	    return save(JsonNull.INSTANCE);
+	}
+	if (element instanceof Map) {
+	    return save(createJsonObject(((Map<String, Object>) element).entrySet(), objectToJsonKeyFunction));
+	}
+	if (element instanceof List) {
+	    return save(createJsonArray(((List<Object>) element), objectToJsonKeyFunction));
+	}
+	else {
+	    return save(JsonStoreAdapterFactory.gson.toJsonTree(element));
+	}
+
     }
 
     Object parsePrimitiveStatic(JsonPrimitive primitive) {
@@ -74,36 +110,5 @@ public final class ObjectStoreAdapter extends JsonStoreAdapterFactory implements
 	}
 	throw new IllegalStateException("illegal Json Type found: " + primitive);
     }
-
-    private final Function<Object, JsonElement> objectToJsonKeyFunction = new Function<Object, JsonElement>() {
-
-	@Override
-	public JsonElement apply(Object input) {
-		return JsonStoreAdapterFactory.gson.toJsonTree(write(input).getKeyAsString());
-	
-	}
-    };
-
-    private final Function<JsonElement, Reference> JsonKeyToIdentityFunction = new Function<JsonElement, Reference>() {
-	@Override
-	public Reference apply(JsonElement input) {
-	    return new IdentityReference(keyFromJsonElement(input));
-	}
-
-	class IdentityReference implements Reference {
-
-	    private Key key;
-
-	    public IdentityReference(Key key) {
-		this.key = key;
-	    }
-
-	    @Override
-	    public Object getValue() {
-		    return read(key);
-	    }
-
-	}
-    };
 
 }

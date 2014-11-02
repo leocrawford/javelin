@@ -23,16 +23,16 @@ import com.google.gson.JsonSyntaxException;
 
 import difflib.PatchFailedException;
 
-public class DataStructureTest extends TestUtils{
-// FIXME reinstate null
-    /* 
-    private static final String JSON_EXAMPLE = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]";
-    private static final String JSON_EXAMPLE_2 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,4]]";
-    private static final String JSON_EXAMPLE_3 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,5]]";
-    private static final String JSON_EXAMPLE_4 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,7]]";
-    private static final String JSON_EXAMPLE_5 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,7,8]]";
-*/
-    
+public class DataStructureTest extends TestUtils {
+    // FIXME reinstate null
+    /*
+     * private static final String JSON_EXAMPLE = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]"; private
+     * static final String JSON_EXAMPLE_2 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,4]]"; private static
+     * final String JSON_EXAMPLE_3 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,5]]"; private static final
+     * String JSON_EXAMPLE_4 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,7]]"; private static final String
+     * JSON_EXAMPLE_5 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3,7,8]]";
+     */
+
     private static final String JSON_EXAMPLE = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,[1,2,3]]";
     private static final String JSON_EXAMPLE_2 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,[1,2,3,4]]";
     private static final String JSON_EXAMPLE_3 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,[1,2,3,5]]";
@@ -40,16 +40,17 @@ public class DataStructureTest extends TestUtils{
     private static final String JSON_EXAMPLE_5 = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,[1,2,3,7,8]]";
 
     @Test
-    public void testBasicBranch() throws IOException, StoreException, JsonSyntaxException, PatchFailedException, MergeException, CorruptTreeException {
+    public void testBasicBranch() throws IOException, StoreException, JsonSyntaxException, PatchFailedException,
+	    MergeException, CorruptTreeException {
 	String JSON_EXAMPLEa = "[\"foo\",{\"a\":1,\"b\":TRUE}]";
 	String JSON_EXAMPLE_2a = "[\"foo\",{\"a\":2,\"b\":FALSE}]";
 	String JSON_EXAMPLE_3a = "[\"a\",{\"a\":1,\"b\":TRUE,\"c\":2.1}]";
 
 	enableLog();
-	AddressableStorage  memoryStore = new StorageFactory().createMemoryCas();
+	AddressableStorage memoryStore = new StorageFactory().createMemoryCas();
 	MerkleTree jca = new MerkleTree(memoryStore);
 	jca.write(JSON_EXAMPLEa).commit();
-	
+
 	MerkleTree jca2 = jca.branch();
 
 	jca.write(JSON_EXAMPLE_2a).commit();
@@ -66,7 +67,7 @@ public class DataStructureTest extends TestUtils{
 	//
 	// System.out.println("A="+jca.read());
 	// System.out.println(jca.getCommit().getShortestHistory());
-	
+
 	jca.merge(jca2);
 	// System.out.println("B="+jca.read());
 	// System.out.println(jca.getCommit().getShortestHistory());
@@ -89,7 +90,8 @@ public class DataStructureTest extends TestUtils{
     }
 
     @Test
-    public void testCommitForComplexMultipleReadWrite() throws IOException, StoreException, JsonSyntaxException, CorruptTreeException {
+    public void testCommitForComplexMultipleReadWrite() throws IOException, StoreException, JsonSyntaxException,
+	    CorruptTreeException {
 	// enableLog();
 	MerkleTree jca = new MerkleTree(new StorageFactory().createMemoryCas());
 	jca.write(JSON_EXAMPLE).commit().getCommit();
@@ -107,7 +109,7 @@ public class DataStructureTest extends TestUtils{
 
     @Test
     public void testCommitForMultipleReadWrite() throws IOException, StoreException, CorruptTreeException {
-	// enableLog();
+	enableLog();
 	MerkleTree jca = new MerkleTree(new StorageFactory().createMemoryCas());
 	Commit c1 = jca.write(JSON_EXAMPLE).commit().getCommit();
 	Commit c2 = jca.write(JSON_EXAMPLE_2).commit().getCommit();
@@ -119,12 +121,15 @@ public class DataStructureTest extends TestUtils{
 	Assert.assertEquals(0, c1.getParents().size());
 	Assert.assertEquals(1, c2.getParents().size());
 
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE).toString(), c3.getShortestHistory().get(2).getAsElement().toString());
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_3).toString(), c3.getShortestHistory().get(0).getAsElement().toString());
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE).toString(), c3.getShortestHistory().get(2)
+		.getAsElement().toString());
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_3).toString(), c3.getShortestHistory().get(0)
+		.getAsElement().toString());
     }
 
     @Test
     public void testConcurrentWriteUsingTwoObjects() throws IOException, StoreException, CorruptTreeException {
+	enableLog();
 	AddressableStorage store = new StorageFactory().createMemoryCas();
 	MerkleTree jca = new MerkleTree(store);
 	jca.write(JSON_EXAMPLE);
@@ -150,7 +155,42 @@ public class DataStructureTest extends TestUtils{
     }
 
     @Test
+    public void testImportExport() throws IOException, StoreException, JsonSyntaxException, ClassNotFoundException,
+	    PatchFailedException, InterruptedException, CorruptTreeException {
+	MerkleTree ds1 = new MerkleTree(new StorageFactory().createMemoryCas());
+	MerkleTree ds2 = new MerkleTree(new StorageFactory().createMemoryCas());
+
+	ds1.write(JSON_EXAMPLE);
+	ds1.commit();
+
+	copy(ds1, ds2, MergeType.OVERWRITE);
+	Assert.assertEquals(ds1.read(), ds2.read());
+
+	ds1.write(JSON_EXAMPLE_2);
+	ds1.commit();
+
+	copy(ds1, ds2, MergeType.MERGE);
+	Assert.assertEquals(ds1.read(), ds2.read());
+
+	ds2.write(JSON_EXAMPLE_3);
+	ds2.commit();
+
+	ds1.write(JSON_EXAMPLE_5);
+	ds1.commit();
+
+	copy(ds1, ds2, MergeType.MERGE);
+
+	System.out.println(ds1.getCommit().getAsGraphToRoot());
+	System.out.println(ds2.getCommit().getAsGraphToRoot());
+
+	// show(ds1.getCommit(),ds2.getCommit());
+	// Thread.sleep(1000*1000);
+    }
+
+    @Test
     public void testMultiplBranches() throws StoreException, CorruptTreeException {
+	enableLog();
+
 	AddressableStorage store = new StorageFactory().createMemoryCas();
 	MerkleTree d1 = new MerkleTree(store).write(JSON_EXAMPLE).commit();
 	MerkleTree d2 = d1.branch();
@@ -159,18 +199,19 @@ public class DataStructureTest extends TestUtils{
 	MerkleTree d3 = d2.branch();
 	d3.write(JSON_EXAMPLE_4).commit().saveLabel("Branch3");
 	d2.write(JSON_EXAMPLE_5).commit();
-	
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_2).toString(), new MerkleTree(store, d1.getLabelsAddress(),
-		"Branch1").checkout().read().toString());
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_5).toString(), new MerkleTree(store, d1.getLabelsAddress(),
-		"Branch2").checkout().read().toString());
-	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_4).toString(), new MerkleTree(store, d1.getLabelsAddress(),
-		"Branch3").checkout().read().toString());
+
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_2).toString(), new MerkleTree(store, d1
+		.getLabelsAddress(), "Branch1").checkout().read().toString());
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_5).toString(), new MerkleTree(store, d1
+		.getLabelsAddress(), "Branch2").checkout().read().toString());
+	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_4).toString(), new MerkleTree(store, d1
+		.getLabelsAddress(), "Branch3").checkout().read().toString());
 
     }
 
     @Test
-    public void testReadWriteUsingTwoObjects() throws IOException, StoreException, JsonSyntaxException, CorruptTreeException {
+    public void testReadWriteUsingTwoObjects() throws IOException, StoreException, JsonSyntaxException,
+	    CorruptTreeException {
 	AddressableStorage store = new StorageFactory().createMemoryCas();
 	MerkleTree jca = new MerkleTree(store);
 	jca.write(JSON_EXAMPLE);
@@ -182,41 +223,8 @@ public class DataStructureTest extends TestUtils{
 	Assert.assertEquals(jca.read().toString(), jca2.read().toString());
     }
 
-    @Test
-    public void testImportExport() throws IOException, StoreException, JsonSyntaxException,
-	    ClassNotFoundException, PatchFailedException, InterruptedException, CorruptTreeException {
-	MerkleTree ds1 = new MerkleTree(new StorageFactory().createMemoryCas());
-	MerkleTree ds2 = new MerkleTree(new StorageFactory().createMemoryCas());
-
-	ds1.write(JSON_EXAMPLE);
-	ds1.commit();
-
-	copy(ds1, ds2, MergeType.OVERWRITE);
-	Assert.assertEquals(ds1.read(), ds2.read());
-	
-	ds1.write(JSON_EXAMPLE_2);
-	ds1.commit();
-
-	copy(ds1, ds2, MergeType.MERGE);
-	Assert.assertEquals(ds1.read(), ds2.read());
-	
-	ds2.write(JSON_EXAMPLE_3);
-	ds2.commit();
-	
-	ds1.write(JSON_EXAMPLE_5);
-	ds1.commit();
-	
-	copy(ds1, ds2, MergeType.MERGE);
-	
-	System.out.println(ds1.getCommit().getAsGraphToRoot());
-	System.out.println(ds2.getCommit().getAsGraphToRoot());
-	
-//	show(ds1.getCommit(),ds2.getCommit());
-//	Thread.sleep(1000*1000);
-    }
-
-    private void copy(MerkleTree ds1, MerkleTree ds2, MergeType mt) throws StoreException,
-	    IOException, ClassNotFoundException, CorruptTreeException {
+    private void copy(MerkleTree ds1, MerkleTree ds2, MergeType mt) throws StoreException, IOException,
+	    ClassNotFoundException, CorruptTreeException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	ds1.exportAll(out);
 	ds2.importAll(new ByteArrayInputStream(out.toByteArray()), mt);
@@ -225,7 +233,7 @@ public class DataStructureTest extends TestUtils{
 
     private void dump(AddressableStorage cas) throws StoreException {
 	for (Key d : cas.listCas()) {
-	    System.out.println(d + "->" + cas.getCas(d,JsonElement.class));
+	    System.out.println(d + "->" + cas.getCas(d, JsonElement.class));
 	}
     }
 

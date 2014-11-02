@@ -9,6 +9,7 @@ import java.net.Socket;
 import javax.swing.*;
 
 import com.crypticbit.javelin.merkle.Commit;
+import com.crypticbit.javelin.merkle.CorruptTreeException;
 import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.merkle.MerkleTree.MergeType;
 import com.crypticbit.javelin.store.StorageFactory;
@@ -25,7 +26,7 @@ public class Main extends JFrame {
 	private MerkleTree jsonStore;
 
 	public Main() throws StoreException, JsonSyntaxException,
-			PatchFailedException, IOException, InterruptedException {
+			PatchFailedException, IOException, InterruptedException, CorruptTreeException {
 		super("Contacts");
 
 		final Server.StreamCallback exported = new Server.StreamCallback() {

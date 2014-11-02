@@ -49,5 +49,9 @@ public class CommitDao {
 	public Date getWhen() {
 		return when;
 	}
+	
+	public String toString() {
+	    return "Commit: "+getHead()+"@"+SIMPLE_DATE_FORMAT.format(when);
+	}
 
 }

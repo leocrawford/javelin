@@ -7,6 +7,8 @@ import javax.swing.JSplitPane;
 
 import com.crypticbit.diff.demo.swing.contacts.CommitGraphPanel;
 import com.crypticbit.javelin.merkle.Commit;
+import com.crypticbit.javelin.merkle.CorruptTreeException;
+import com.crypticbit.javelin.merkle.MergeException;
 import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
@@ -21,7 +23,7 @@ public class CommitBuilder extends JFrame {
 	private CommitGraphPanel commitPanel;
 
 	public CommitBuilder() throws StoreException, IOException,
-			JsonSyntaxException, PatchFailedException, InterruptedException {
+			JsonSyntaxException, PatchFailedException, InterruptedException, MergeException, CorruptTreeException {
 		addDummyData();
 
 		commitPanel = new CommitGraphPanel(jca4.getCommit(), jca1.getCommit());
@@ -56,7 +58,7 @@ public class CommitBuilder extends JFrame {
 		demo();
 	}
 
-	private void addDummyData() throws StoreException, IOException {
+	private void addDummyData() throws StoreException, IOException, CorruptTreeException {
 		String c1 = "[\"a\"]";
 		String c2 = "[\"a\",\"b\"]";
 		String c3 = "[\"a\",\"b\",\"c1\"]";
@@ -77,7 +79,7 @@ public class CommitBuilder extends JFrame {
 	}
 
 	private void demo() throws JsonSyntaxException, StoreException,
-			PatchFailedException, IOException, InterruptedException {
+			PatchFailedException, IOException, InterruptedException, MergeException, CorruptTreeException {
 		Thread.sleep(4000);
 
 		jca1.merge(jca4);
@@ -93,7 +95,7 @@ public class CommitBuilder extends JFrame {
 
 	public static void main(String args[]) throws JsonSyntaxException,
 			PatchFailedException, StoreException, IOException,
-			InterruptedException {
+			InterruptedException, MergeException, CorruptTreeException {
 		new CommitBuilder();
 	}
 

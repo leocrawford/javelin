@@ -12,12 +12,8 @@ import org.jgrapht.alg.NaiveLcaFinder;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleDirectedGraph;
 
-import com.crypticbit.javelin.convert.JsonElementStoreAdapter;
-import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
-import com.crypticbit.javelin.convert.ObjectStoreAdapter;
 import com.crypticbit.javelin.diff.Snapshot;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
-import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.common.base.Supplier;
@@ -30,231 +26,201 @@ import com.google.gson.JsonSyntaxException;
 import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
 
+/**
+ * Immutable class representing a Commit, backed by CommitDao. This class adds all the logic that requires access to the
+ * database and other services
+ */
 public class Commit implements Comparable<Commit> {
 
-	/** The data access object representing this commit */
-	private final CommitDao dao;
-	/** The location that this commit is stored at (its hash) */
-	private Key daoKey;
-	private final CommitFactory commitFactory;
+    /** The data access object representing this commit */
+    private final CommitDao commitDao;
+    /** The location that this commit is stored at (its hash) */
+    private final Key commitDaoKey;
+    private final CommitFactory commitFactory;
 
+    Commit(CommitFactory commitFactory, Key commitDaoKey, CommitDao commitDao) {
+	assert (commitDao != null);
+	assert (commitDaoKey != null);
 
+	this.commitDao = commitDao;
+	this.commitDaoKey = commitDaoKey;
+	this.commitFactory = commitFactory;
 
-	Commit(CommitDao dao, Key daoDigest,
-			CommitFactory commitFactory) {
-		assert (dao != null);
-		assert (daoDigest != null);
+    }
 
-		this.dao = dao;
-		this.daoKey = daoDigest;
-		this.commitFactory = commitFactory;
-		
+    public ThreeWayDiff createChangeSet(Commit other) throws MergeException, CorruptTreeException {
 
+	DirectedGraph<Commit, DefaultEdge> x = getAsGraphToRoots(new Commit[] { this, other });
+
+	Commit lca = new NaiveLcaFinder<Commit, DefaultEdge>(x).findLca(this, other);
+
+	if (lca == null)
+	    throw new MergeException("No common ancestor: " + x.toString() + "," + other + "," + this + ","
+		    + findRoot() + "," + other.equals(this));
+
+	Collection<GraphPath<Commit, DefaultEdge>> pathsToValues = new LinkedList<>();
+	pathsToValues.add(getShortestPath(x, lca, this));
+	pathsToValues.add(getShortestPath(x, lca, other));
+
+	ThreeWayDiff diff = new ThreeWayDiff(lca.getAsObject());
+	addCommitToTreeMap(x, diff, pathsToValues);
+	return diff;
+    }
+
+    /**
+     * Generate a graph from this node to root. This allows us to treat the commit tree like a graph, and use standard
+     * graph operations rather than coding our own
+     * 
+     * @throws CorruptTreeException
+     * @throws TreeMapperException
+     */
+    public DirectedGraph<Commit, DefaultEdge> getAsGraphToRoot() throws CorruptTreeException {
+	return getAsGraphToRoots(this);
+    }
+
+    public static DirectedGraph<Commit, DefaultEdge> getAsGraphToRoots(Commit... commits) throws CorruptTreeException {
+	DirectedGraph<Commit, DefaultEdge> graph = new SimpleDirectedGraph<Commit, DefaultEdge>(DefaultEdge.class);
+	for (Commit c : commits) {
+	    addToGraph(graph, c);
+	}
+	return graph;
+    }
+
+    public JsonElement getAsElement() {
+	return commitFactory.getJsonElementStoreAdapter().read(commitDao.getHead());
+    }
+
+    public Object getAsObject() {
+	return commitFactory.getObjectStoreAdapter().read(commitDao.getHead());
+    }
+
+    public Set<Commit> getParents() throws CorruptTreeException {
+	Set<Commit> parents = new TreeSet<>();
+	for (Key parent : commitDao.getParents()) {
+	    parents.add(commitFactory.getCommit(parent));
+	}
+	return parents;
+    }
+
+    /** Return the shortest history from the root to this commit, i.e. the fewest commits in between */
+    public LinkedList<Commit> getShortestHistory() throws CorruptTreeException {
+	LinkedList<Commit> shortest = null;
+	for (Commit c : getParents()) {
+	    LinkedList<Commit> consider = c.getShortestHistory();
+	    if (shortest == null || shortest.size() > consider.size()) {
+		shortest = consider;
+	    }
+	}
+	if (shortest == null) {
+	    shortest = new LinkedList<>();
+	}
+	shortest.addFirst(this);
+	return shortest;
+    }
+
+    private static GraphPath<Commit, DefaultEdge> getShortestPath(Graph<Commit, DefaultEdge> graph, Commit start,
+	    Commit end) {
+	return new DijkstraShortestPath<Commit, DefaultEdge>(graph, start, end).getPath();
+    }
+
+    public String getUser() {
+	return commitDao.getUser();
+    }
+
+    @Override
+    public int hashCode() {
+	return commitDaoKey.hashCode();
+    }
+
+    public Object navigate(String path) {
+	JsonPath compiledPath = new JsonPath(path, new Filter[] {});
+	return compiledPath.read(getAsObject());
+    }
+
+    @Override
+    public String toString() {
+	return commitDao.toString();
+    }
+
+    /**
+     * Find very first commit in tree
+     */
+    private Commit findRoot() throws CorruptTreeException {
+	return getShortestHistory().getLast();
+    }
+
+    private void addCommitToTreeMap(Graph<Commit, DefaultEdge> x, ThreeWayDiff<Object> twd,
+	    Collection<GraphPath<Commit, DefaultEdge>> paths) {
+	
+	Multimap<Date, Snapshot<Object>> multimap = Multimaps.newListMultimap(Maps
+		.<Date, Collection<Snapshot<Object>>> newTreeMap(), new Supplier<List<Snapshot<Object>>>() {
+	    @Override
+	    public List<Snapshot<Object>> get() {
+		return Lists.newLinkedList();
+	    }
+	});
+
+	for (GraphPath<Commit, DefaultEdge> path : paths) {
+	    for (DefaultEdge e : path.getEdgeList()) {
+		Commit end = x.getEdgeTarget(e);
+		multimap.put(end.commitDao.getWhen(), new Snapshot<Object>(end.getAsObject(), path));
+	    }
 	}
 
-	@Override
-	public int compareTo(Commit o) {
-		return daoKey.compareTo(o.daoKey);
+	for (Entry<Date, Snapshot<Object>> entry : multimap.entries()) {
+	    twd.addBranchSnapshot(entry.getValue());
 	}
 
-	public ThreeWayDiff createChangeSet(Commit other)
-			throws JsonSyntaxException, StoreException {
+    }
 
-		DirectedGraph<Commit, DefaultEdge> x = getAsGraphToRoots(new Commit[] {
-				this, other });
+    private CommitDao getDao() {
+	return commitDao;
+    }
 
-		Commit lca = new NaiveLcaFinder<Commit, DefaultEdge>(x).findLca(this,
-				other);
+    @Override
+    public int compareTo(Commit o) {
+	return commitDaoKey.compareTo(o.commitDaoKey);
+    }
 
-		if (lca == null)
-			// FIXME - better exception
-			throw new RuntimeException("No common ancestor: " + x.toString()
-					+ "," + other + "," + this + "," + findRoot() + ","
-					+ other.equals(this));
+    @Override
+    public boolean equals(Object obj) {
+	return obj instanceof Commit && commitDaoKey.equals(((Commit) obj).commitDaoKey);
+    }
 
-		Collection<GraphPath<Commit, DefaultEdge>> pathsToValues = new LinkedList<>();
-		pathsToValues.add(getShortestPath(x, lca, this));
-		pathsToValues.add(getShortestPath(x, lca, other));
+    private static String indent(int indent) {
+	return new String(new char[indent]).replace("\0", " ");
+    }
 
-		ThreeWayDiff twd = new ThreeWayDiff(lca.getObject());
-		addCommitToTreeMap(x, twd, pathsToValues);
-		return twd;
+    private void debug(int indent) {
+	try {
+	    System.out.print(indent(indent) + "Commit " + commitDao.getHead() + ": ");
+	    System.out.println(getAsElement().toString());
+	    for (Commit parent : getParents()) {
+		parent.debug(indent + 1);
+	    }
 	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return obj instanceof Commit && daoKey.equals(((Commit) obj).daoKey);
+	catch (Exception e) {
+	    System.out.println("<Error>");
+	    e.printStackTrace();
 	}
+    }
 
-	/**
-	 * Generate a graph from this node to root. This allows us to treat the
-	 * commit tree like a graph, and use standard graph operations rather than
-	 * coding our own
-	 * 
-	 * @throws TreeMapperException
-	 */
-	public DirectedGraph<Commit, DefaultEdge> getAsGraphToRoot()
-			throws JsonSyntaxException, StoreException {
-		return getAsGraphToRoots(this);
+    public void debug() {
+	debug(0);
+    }
+
+    /**
+     * Recursive method to add a node to a graph - and all parents nodes (together with links between them)
+     * 
+     * @throws CorruptTreeException
+     * @throws StoreException
+     */
+    private static void addToGraph(DirectedGraph<Commit, DefaultEdge> graph, Commit commit) throws CorruptTreeException {
+	graph.addVertex(commit);
+	for (Commit c : commit.getParents()) {
+	    addToGraph(graph, c);
+	    graph.addEdge(c, commit);
 	}
-
-	public static DirectedGraph<Commit, DefaultEdge> getAsGraphToRoots(
-			Commit... commits) throws JsonSyntaxException, StoreException {
-
-		DirectedGraph<Commit, DefaultEdge> graph = new SimpleDirectedGraph<Commit, DefaultEdge>(
-				DefaultEdge.class);
-		for (Commit c : commits) {
-			addToGraph(graph, c);
-		}
-		return graph;
-	}
-
-	/**
-	 * Recursive method to add a node to a graph - and all parents nodes
-	 * (together with links between them)
-	 */
-	private static void addToGraph(DirectedGraph<Commit, DefaultEdge> graph,
-			Commit commit) throws JsonSyntaxException, StoreException {
-		graph.addVertex(commit);
-		for (Commit c : commit.getParents()) {
-			addToGraph(graph, c);
-			graph.addEdge(c, commit);
-		}
-	}
-
-	public JsonElement getElement() throws JsonSyntaxException, StoreException {
-		return commitFactory.getJsonElementStoreAdapter().read(dao.getHead());
-	}
-
-	public Key getHead() {
-		return dao.getHead();
-	}
-
-	public Key getKey() {
-		return daoKey;
-	}
-
-	public Object getObject() throws JsonSyntaxException, StoreException {
-		return commitFactory.getObjectStoreAdapter().read(dao.getHead());
-	}
-
-	public Set<Commit> getParents() throws JsonSyntaxException, StoreException {
-		Set<Commit> parents = new TreeSet<>();
-		for (Key parent : dao.getParents()) {
-			
-			parents.add(commitFactory.getCommit(parent));
-		}
-		return parents;
-	}
-
-	public List<Commit> getShortestHistory() throws JsonSyntaxException,
-			StoreException {
-
-		List<Commit> shortest = null;
-		for (Commit c : getParents()) {
-			List<Commit> consider = c.getShortestHistory();
-			if (shortest == null || shortest.size() > consider.size()) {
-				shortest = consider;
-			}
-		}
-		if (shortest == null) {
-			shortest = new LinkedList<>();
-		}
-		shortest.add(0, this);
-		return shortest;
-	}
-
-	public GraphPath<Commit, DefaultEdge> getShortestPath(
-			Graph<Commit, DefaultEdge> graph, Commit start, Commit end) {
-		return new DijkstraShortestPath<Commit, DefaultEdge>(graph, start, end)
-				.getPath();
-	}
-
-	public String getUser() {
-		return dao.getUser();
-	}
-
-	@Override
-	public int hashCode() {
-		return daoKey.hashCode();
-	}
-
-	public Object navigate(String path) throws JsonSyntaxException,
-			StoreException {
-		JsonPath compiledPath = new JsonPath(path, new Filter[] {});
-		return compiledPath.read(getObject());
-	}
-
-	@Override
-	public String toString() {
-		return "Commit: " + this.getKey();
-	}
-
-
-
-	/**
-	 * Find very first commit in tree
-	 * 
-	 * @throws StoreException
-	 * @throws UnsupportedEncodingException
-	 * @throws JsonSyntaxException
-	 * @throws TreeMapperException
-	 */
-	protected Commit findRoot() throws JsonSyntaxException, StoreException {
-		List<Commit> shortestHistory = getShortestHistory();
-		return shortestHistory.get(shortestHistory.size() - 1);
-	}
-
-	private void addCommitToTreeMap(Graph<Commit, DefaultEdge> x,
-			ThreeWayDiff<Object> twd,
-			Collection<GraphPath<Commit, DefaultEdge>> paths)
-			throws StoreException, JsonSyntaxException {
-		Multimap<Date, Snapshot<Object>> multimap = Multimaps.newListMultimap(
-				Maps.<Date, Collection<Snapshot<Object>>> newTreeMap(),
-				new Supplier<List<Snapshot<Object>>>() {
-					@Override
-					public List<Snapshot<Object>> get() {
-						return Lists.newLinkedList();
-					}
-				});
-
-		for (GraphPath<Commit, DefaultEdge> path : paths) {
-			for (DefaultEdge e : path.getEdgeList()) {
-				Commit end = x.getEdgeTarget(e);
-				multimap.put(end.dao.getWhen(),
-						new Snapshot<Object>(end.getObject(), path));
-			}
-		}
-
-		for (Entry<Date, Snapshot<Object>> entry : multimap.entries()) {
-			twd.addBranchSnapshot(entry.getValue());
-		}
-
-	}
-
-	CommitDao getDao() {
-		return dao;
-	}
-
-	private static String indent(int indent) {
-		return new String(new char[indent]).replace("\0", " ");
-	}
-
-	protected void debug(int indent) {
-		try {
-			System.out.print(indent(indent) + "Commit " + getHead() + ": ");
-			System.out.println(getElement().toString());
-			for (Commit parent : getParents()) {
-				parent.debug(indent + 1);
-			}
-		} catch (Exception e) {
-			System.out.println("<Error>");
-			e.printStackTrace();
-		}
-	}
-
-	public void debug() {
-		debug(0);
-	}
+    }
 
 }

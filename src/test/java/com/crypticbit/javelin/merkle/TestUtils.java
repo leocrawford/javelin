@@ -25,7 +25,7 @@ public class TestUtils {
 	}
 
 	void show(Commit... commits) throws JsonSyntaxException, StoreException,
-			PatchFailedException, IOException {
+			PatchFailedException, IOException, CorruptTreeException {
 		enableLog("com.crypticbit.javelin.js", Level.FINEST);
 		JDialog frame = new JDialog();
 		frame.setModal(true);

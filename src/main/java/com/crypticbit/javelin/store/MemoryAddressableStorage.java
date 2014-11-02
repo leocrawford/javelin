@@ -114,12 +114,12 @@ class MemoryAddressableStorage implements AddressableStorage {
     }
 
     @Override
-    public boolean checkCas(Key key) throws StoreException {
+    public boolean checkCas(Key key)  {
 	return casMap.containsKey(key);
     }
 
     @Override
-    public boolean checkKas(Key key) throws StoreException {
+    public boolean checkKas(Key key) {
 	return kasMap.containsKey(key);
     }
 

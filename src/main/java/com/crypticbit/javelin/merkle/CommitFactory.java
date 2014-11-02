@@ -1,6 +1,7 @@
 package com.crypticbit.javelin.merkle;
 
 import java.util.Date;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -9,17 +10,18 @@ import com.crypticbit.javelin.convert.ObjectStoreAdapter;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
+import com.google.gson.JsonSyntaxException;
 
-public class CommitFactory {
-    
-	private static final Logger LOG = Logger
-		.getLogger("com.crypticbit.javelin.merkle");
+class CommitFactory {
+
+    private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.merkle");
 
     private final JsonElementStoreAdapter jsonElementStoreAdapter;
     private final ObjectStoreAdapter objectStoreAdapter;
     private final AddressableStorage store;
+    private WeakHashMap<Key, Commit> cache = new WeakHashMap<>();
 
-    public CommitFactory(AddressableStorage store) {
+    CommitFactory(AddressableStorage store) {
 
 	this.store = store;
 
@@ -27,35 +29,56 @@ public class CommitFactory {
 	objectStoreAdapter = new ObjectStoreAdapter(store);
     }
 
-    public JsonElementStoreAdapter getJsonElementStoreAdapter() {
+    JsonElementStoreAdapter getJsonElementStoreAdapter() {
 	return jsonElementStoreAdapter;
     }
 
-    public ObjectStoreAdapter getObjectStoreAdapter() {
+    ObjectStoreAdapter getObjectStoreAdapter() {
 	return objectStoreAdapter;
     }
 
-    public Commit getCommit(Key address) throws StoreException {
-	return wrap(store.getCas(address, CommitDao.class), address);
-    }
-
-    // FIXME - should we try and find an existing instance?
-    Commit wrap(CommitDao dao, Key digest) {
-	return new Commit(dao, digest, this);
-    }
-
-    Commit getCommitFromAnchor(ExtendedAnchor<CommitDao> anchor) throws StoreException {
-	return new Commit(anchor.getDestinationValue(), anchor.getDestinationAddress(), this);
-    }
-
-    Commit createCommit(ExtendedAnchor<CommitDao> anchor, Key valueIdentity, Key... parents) throws StoreException {
-	// FIXME hardcoded user
-	if (LOG.isLoggable(Level.FINEST)) {
-	    LOG.log(Level.FINEST, "Updating id -> " + anchor.getDestinationAddress());
+    // FIXME Shouldn't load if in cache
+    Commit getCommit(Key address) throws CorruptTreeException {
+	try {
+	    return getCommit(address, store.getCas(address, CommitDao.class));
 	}
-	return new Commit(anchor
-		.setDestinationValue(new CommitDao(valueIdentity, new Date(), "auser", parents)), anchor
-		.getDestinationAddress(), this);
+	catch (StoreException e) {
+	    throw new CorruptTreeException("A commit was expected at address "+address,e);
+	}
+    }
+
+    /**
+     * Wrap a Commit DAO in a Commit, using a WeakHashMap as a cache.
+     */
+
+    private Commit getCommit(Key key, CommitDao dao) {
+	Commit result = cache.get(key);
+	if (result == null) {
+	    result = new Commit(this, key, dao);
+	    cache.put(key, result);
+	}
+	return result;
+    }
+
+    Commit getCommitFromAnchor(ExtendedAnchor<CommitDao> anchor) throws CorruptTreeException {
+	try {
+	    return getCommit(anchor.getDestinationAddress(), anchor.getDestinationValue());
+	}
+	catch (JsonSyntaxException | StoreException e) {
+	    throw new CorruptTreeException("The anchor "+anchor+" was supposed to point at a Commit, but was broken",e);
+	}
+    }
+
+    Commit createCommit(ExtendedAnchor<CommitDao> anchor, Key valueIdentity, Key... parents) throws CorruptTreeException  {
+	// FIXME hardcoded user
+
+	try {
+	    return new Commit(this, anchor.getDestinationAddress(), anchor.setDestinationValue(new CommitDao(valueIdentity,
+	    	new Date(), "auser", parents)));
+	}
+	catch (StoreException e) {
+	    throw new CorruptTreeException("The anchor "+anchor+" was supposed to point at a Commit, but was broken",e);
+	}
 
     }
 

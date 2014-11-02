@@ -131,17 +131,16 @@ public class MerkleTree {
 	 * return new DataStructure(store, labels, newLabel); }
 	 */
 
-	public synchronized MerkleTree checkout() throws StoreException,
-			JsonSyntaxException {
+	public synchronized MerkleTree checkout() throws CorruptTreeException  {
 		commit = commitFactory.getCommitFromAnchor(selectedAnchor);
-		element = commit.getElement();
+		element = commit.getAsElement();
 		if (LOG.isLoggable(Level.FINER)) {
 			LOG.log(Level.FINER, "Reading commit: " + commit);
 		}
 		return this;
 	}
 
-	public synchronized MerkleTree commit() throws StoreException {
+	public synchronized MerkleTree commit() throws StoreException, CorruptTreeException  {
 		Key write = jsonFactory.getJsonElementAdapter().write(element);
 		commit = commitFactory.createCommit(selectedAnchor, write, selectedAnchor.getDestinationAddress());
 		return checkout();
@@ -280,12 +279,12 @@ public class MerkleTree {
 
 
 
-	public Object lazyRead() throws JsonSyntaxException, StoreException {
-		return commit.getObject();
+	public Object lazyRead() {
+		return commit.getAsObject();
 	}
 
 	public synchronized MerkleTree merge(MerkleTree other)
-			throws JsonSyntaxException, StoreException, PatchFailedException {
+			throws PatchFailedException, MergeException, CorruptTreeException, StoreException {
 		// FIXME factor out code for creating change set to Commit and make work
 		// for multiple labels
 		commit = merge(selectedAnchor,
@@ -295,8 +294,7 @@ public class MerkleTree {
 	}
 
 	private Commit merge(ExtendedAnchor<CommitDao> commitAnchorToMergeA,
-			Commit commitB, Key addressB) throws JsonSyntaxException,
-			StoreException, PatchFailedException {
+			Commit commitB, Key addressB) throws PatchFailedException, MergeException, CorruptTreeException, StoreException {
 		ThreeWayDiff patch = commitFactory.getCommitFromAnchor(commitAnchorToMergeA)
 				.createChangeSet(commitB);
 		Key valueIdentity = jsonFactory.getJavaObjectAdapter().write(
@@ -321,8 +319,7 @@ public class MerkleTree {
 		return this;
 	}
 
-	public void write(String path, String json) throws JsonSyntaxException,
-			StoreException {
+	public void write(String path, String json) throws StoreException, CorruptTreeException {
 		HackedJsonPath compiledPath = new HackedJsonPath(path, new Filter[] {});
 		// code copied from jsonpath
 		// FIXME reuse JSON

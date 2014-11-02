@@ -15,8 +15,8 @@ public interface AddressableStorage {
 	public <T> void registerAdapter(Adapter<T> adapter, Class<T> clazz);
 
 	/** Check if digest exists, if not return <code>null</code> */
-	public boolean checkCas(Key key) throws StoreException;
-	public boolean checkKas(Key key) throws StoreException;
+	public boolean checkCas(Key key);
+	public boolean checkKas(Key key);
 
 	/** List all keys */
 	public List<Key> listCas();

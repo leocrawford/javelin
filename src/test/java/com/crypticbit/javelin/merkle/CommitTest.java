@@ -18,7 +18,7 @@ public class CommitTest extends TestUtils {
 
 	private MerkleTree jca1, jca2, jca3, jca4;
 
-	public CommitTest() throws StoreException, IOException {
+	public CommitTest() throws StoreException, IOException, CorruptTreeException {
 		String c1 = "[\"a\"]";
 		String c2 = "[\"a\",\"b\"]";
 		String c3 = "[\"a\",\"b\",\"c1\"]";
@@ -40,7 +40,7 @@ public class CommitTest extends TestUtils {
 
 	@Test
 	public void testCreateChangeSet() throws JsonSyntaxException,
-			StoreException, PatchFailedException, IOException {
+			StoreException, PatchFailedException, IOException, MergeException, CorruptTreeException {
 		// ThreeWayDiff patch =
 		// jca1.getCommit().createChangeSet(jca4.getCommit());
 		// System.out.println("X-"+patch.apply());
@@ -60,7 +60,7 @@ public class CommitTest extends TestUtils {
 
 	@Test
 	public void testGetAsGraph() throws StoreException, IOException,
-			JsonSyntaxException {
+			JsonSyntaxException, CorruptTreeException {
 		assertEquals(3, jca1.getCommit().getAsGraphToRoot().vertexSet().size());
 		assertEquals(3, jca2.getCommit().getAsGraphToRoot().vertexSet().size());
 		assertEquals(4, jca3.getCommit().getAsGraphToRoot().vertexSet().size());
@@ -68,7 +68,7 @@ public class CommitTest extends TestUtils {
 	}
 
 	@Test
-	public void testNavigate() throws JsonSyntaxException, StoreException {
+	public void testNavigate() throws JsonSyntaxException, StoreException, CorruptTreeException {
 		String c8 = "{\"a\":\"b\",\"c\":{\"d\":\"e\"},\"f\":[\"g\",1,2,3,{\"k\":true,\"l\":false}]}";
 		jca4.write(c8).commit();
 

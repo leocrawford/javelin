@@ -1,5 +1,8 @@
 package com.crypticbit.javelin.merkle;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
@@ -9,10 +12,13 @@ import com.crypticbit.javelin.store.StoreException;
  * content addressable storage but we need to preserve a permanent link to it.
  */
 
-public class Anchor  {
+public abstract class Anchor {
+
+    protected static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.merkle");
 
     private final Key address;
     private final AddressableStorage store;
+    // used only to make sure we have the freshest value on write
     private Key value;
 
     public Anchor(AddressableStorage store, Key address) {
@@ -44,10 +50,13 @@ public class Anchor  {
 
     /** write a value to the anchor, but if the value has changed from the last read then throw Exception */
     public void setDestinationAddress(Key newValue) throws StoreException {
+	if (LOG.isLoggable(Level.FINE))
+	    LOG.log(Level.FINE, "Updating Anchor "+this+" to value "+ newValue);
+
 	store.store(address, value, newValue, Key.class);
 	value = newValue;
     }
-    
+
     protected AddressableStorage getStore() {
 	return store;
     }

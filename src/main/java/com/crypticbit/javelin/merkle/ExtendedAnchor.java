@@ -1,5 +1,7 @@
 package com.crypticbit.javelin.merkle;
 
+import java.util.logging.Level;
+
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
@@ -38,15 +40,18 @@ public class ExtendedAnchor<T> extends Anchor {
     }
 
     public T setDestinationValue(T value) throws StoreException {
+	if (LOG.isLoggable(Level.FINE))
+	    LOG.log(Level.FINE, "Updating Anchor "+this+" to value "+ value);
+	
 	setDestinationAddress(getStore().store(value, clazz));
 	return value;
     }
 
     public String toString() {
 	try {
-	    return super.getSourceAddress()+"->"+super.getDestinationAddress()+"("+getDestinationValue()+")";
+	    return clazz.getSimpleName()+":"+super.getSourceAddress()+"->"+super.getDestinationAddress()+"("+getDestinationValue()+")";
 	}
-	catch (StoreException | JsonSyntaxException e) {
+	catch (Exception e) {
 	    return super.getSourceAddress()+"<error>";
 	}
     }

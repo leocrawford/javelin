@@ -29,7 +29,7 @@ public class JsonElementStoreAdapter extends JsonStoreAdapterFactory implements 
     }
 
     @Override
-    public JsonElement read(Key element) {
+    public LazyJsonElement read(Key element) {
 	return new LazyJsonElement(element, this);
     }
 

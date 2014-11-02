@@ -14,6 +14,7 @@ import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.LazyJsonElement;
 
 public class JsonElementTreeNodeConverterTest {
 
@@ -27,7 +28,7 @@ public class JsonElementTreeNodeConverterTest {
 	final String jsonFloat = "2.1";
 	final JsonElement json = GSON.fromJson(jsonFloat, JsonElement.class);
 	Key floatIdentity = jsonElementAdapter.write(json);
-	assertEquals(json, jsonElementAdapter.read(floatIdentity));
+	assertEquals(json, ((LazyJsonElement) jsonElementAdapter.read(floatIdentity)).deepCopy());
 
     }
 

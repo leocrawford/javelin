@@ -5,49 +5,52 @@ import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 
+/**
+ * An anchor relates a address (in non addressable storage, i.e. one that can be overwritten) to one in content
+ * addressable storage. That address in turn relates to a value, which this class helps you find.
+ * 
+ * @author leo
+ * @param <T>
+ */
 public class ExtendedAnchor<T> extends Anchor {
 
-	private AddressableStorage store;
-	private Class<T> clazz;
-	private T cachedValue;
+    private final Class<T> clazz;
 
-	public ExtendedAnchor(Key address, AddressableStorage store, Class<T> clazz) {
-		super(address);
-		this.store = store;
-		this.clazz = clazz;
+    public ExtendedAnchor(AddressableStorage store, Key address, Class<T> clazz) {
+	super(store, address);
+	this.clazz = clazz;
+    }
+
+    public ExtendedAnchor(AddressableStorage store, Class<T> clazz) {
+	super(store);
+	this.clazz = clazz;
+
+    }
+
+    public ExtendedAnchor(AddressableStorage store, Anchor clone, Class<T> clazz) throws StoreException {
+
+	super(store, clone);
+	// FIXME - write called in super. why is this a problem?
+	this.clazz = clazz;
+    }
+
+    public T readEndPoint() throws JsonSyntaxException, StoreException {
+	return getStore().getCas(getValue(), clazz);
+    }
+
+    public T writeEndPoint(T value) throws StoreException {
+	setValue(getStore().store(value, clazz));
+	return value;
+    }
+
+    public String toString() {
+	try {
+	    return super.getAddress()+"->"+super.getValue()+"("+readEndPoint()+")";
 	}
-
-	public ExtendedAnchor(AddressableStorage store, Class<T> clazz) {
-		super();
-		this.store = store;
-		this.clazz = clazz;
-
+	catch (StoreException | JsonSyntaxException e) {
+	    return super.getAddress()+"<error>";
 	}
+    }
 
-	public ExtendedAnchor(AddressableStorage store, Anchor clone, Class<T> clazz)
-			throws StoreException {
-		super(store, clone);
-		// FIXME - write called in super
-		this.store = store;
-		this.clazz = clazz;
-
-	}
-
-	public T getEndPoint() {
-		return cachedValue;
-	}
-
-	public T readEndPoint(AddressableStorage store) throws JsonSyntaxException,
-			StoreException {
-		cachedValue = store.getCas(getValue(store), clazz);
-		return cachedValue;
-	}
-
-	public T writeEndPoint(AddressableStorage store, T value)
-			throws StoreException {
-		cachedValue = value;
-		setValue(store, store.store(value, clazz));
-		return value;
-	}
-
+    
 }

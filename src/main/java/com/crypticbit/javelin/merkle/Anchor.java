@@ -7,52 +7,51 @@ import com.crypticbit.javelin.store.Key;
 import com.crypticbit.javelin.store.StoreException;
 
 /**
- * The "anchor" represents an address and its associated value (which is also as
- * address). This is used when we have content addressable storage but we need
- * to preserve a permanent link to it.
+ * The "anchor" represents an address and its associated value (which is also as address). This is used when we have
+ * content addressable storage but we need to preserve a permanent link to it.
  */
 
-@SuppressWarnings("serial")
-public class Anchor implements Serializable {
+public class Anchor  {
 
-	private Key address;
-	private transient Key value;
+    private final Key address;
+    private final AddressableStorage store;
+    private Key value;
 
-	public Anchor(Key address) {
-		this.address = address;
+    public Anchor(AddressableStorage store, Key address) {
+	this.store = store;
+	this.address = address;
+    }
+
+    Anchor(AddressableStorage store) {
+	this(store, new Key());
+    }
+
+    Anchor(AddressableStorage store, Anchor clone) throws StoreException {
+	this(store);
+	setValue(clone.getValue());
+    }
+
+    public Key getAddress() {
+	return address;
+    }
+
+    public Key getValue() throws StoreException {
+	if (store.checkKas(address)) {
+	    return (value = store.getKas(address, Key.class));
 	}
-
-	Anchor() {
-		address = new Key();
+	else {
+	    return null;
 	}
+    }
 
-	Anchor(AddressableStorage store, Anchor clone) throws StoreException {
-		this();
-		setValue(store, clone.getValue(store));
-	}
-
-	/** Same as read() but returns cached/last value */
-	public Key getValue() {
-		return value;
-	}
-
-	public Key getAddress() {
-		return address;
-	}
-
-	public Key getValue(AddressableStorage store) throws StoreException {
-		if (store.checkKas(address)) {
-			value = store.getKas(address, Key.class);
-			return value;
-		} else {
-			return null;
-		}
-	}
-
-	public void setValue(AddressableStorage store, Key newValue)
-			throws StoreException {
-		store.store(address, value, newValue, Key.class);
-		value = newValue;
-	}
+    /** write a value to the anchor, but if the value has changed from the last read then throw Exception */
+    public void setValue(Key newValue) throws StoreException {
+	store.store(address, value, newValue, Key.class);
+	value = newValue;
+    }
+    
+    public AddressableStorage getStore() {
+	return store;
+    }
 
 }

@@ -159,7 +159,7 @@ public class DataStructureTest extends TestUtils{
 	MerkleTree d3 = d2.branch();
 	d3.write(JSON_EXAMPLE_4).commit().saveLabel("Branch3");
 	d2.write(JSON_EXAMPLE_5).commit();
-
+	
 	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_2).toString(), new MerkleTree(store, d1.getLabelsAddress(),
 		"Branch1").checkout().read().toString());
 	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_5).toString(), new MerkleTree(store, d1.getLabelsAddress(),

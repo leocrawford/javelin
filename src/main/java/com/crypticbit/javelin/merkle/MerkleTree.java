@@ -61,7 +61,7 @@ public class MerkleTree {
 		labelsAnchor = new ExtendedAnchor<>(store, LabelsDao.class);
 		LabelsDao labels = new LabelsDao();
 		selectedAnchor = labels.addCommitAnchor("HEAD", store);
-		labelsAnchor.writeEndPoint(store, labels);
+		labelsAnchor.writeEndPoint(labels);
 
 		// see if this works - FIXME
 		// labelsAnchor.readEndPoint(store).getCommitAnchor("HEAD",jsonFactory).readEndPoint(store);
@@ -80,15 +80,15 @@ public class MerkleTree {
 	MerkleTree(AddressableStorage store, Key labelsAddress, String label)
 			throws JsonSyntaxException, StoreException, Error {
 		setup(store);
-		this.labelsAnchor = new ExtendedAnchor<>(labelsAddress, store,
+		this.labelsAnchor = new ExtendedAnchor<>(store, labelsAddress,
 				LabelsDao.class);
-		if (labelsAnchor.readEndPoint(store).hasCommitAnchor(label)) {
-			this.selectedAnchor = labelsAnchor.getEndPoint().getCommitAnchor(
+		if (labelsAnchor.readEndPoint().hasCommitAnchor(label)) {
+			this.selectedAnchor = labelsAnchor.readEndPoint().getCommitAnchor(
 					label, store);
 		} else {
 			// FIXME exception handling, and thought about changing to unknown
 			// branch
-			throw new Error("Labels don't exist: " + labelsAnchor.getEndPoint());
+			throw new Error("Labels don't exist: " + labelsAnchor.readEndPoint());
 			// this.selectedAnchor = labels.addCommitAnchor(label);
 		}
 	}
@@ -122,7 +122,7 @@ public class MerkleTree {
 
 	public synchronized MerkleTree checkout() throws StoreException,
 			JsonSyntaxException {
-		commit = new Commit(selectedAnchor.readEndPoint(store),
+		commit = new Commit(selectedAnchor.readEndPoint(),
 				selectedAnchor.getValue(), jsonFactory, store);
 		element = commit.getElement();
 		if (LOG.isLoggable(Level.FINER)) {
@@ -268,8 +268,8 @@ public class MerkleTree {
 
 	}
 
-	private Commit getCommitFromAnchor(ExtendedAnchor<CommitDao> anchor) {
-		return new Commit(anchor.getEndPoint(), anchor.getValue(), jsonFactory,
+	private Commit getCommitFromAnchor(ExtendedAnchor<CommitDao> anchor) throws StoreException {
+		return new Commit(anchor.readEndPoint(), anchor.getValue(), jsonFactory,
 				store);
 	}
 
@@ -303,8 +303,9 @@ public class MerkleTree {
 	}
 
 	public void saveLabel(String label) throws StoreException {
-		labelsAnchor.readEndPoint(store).addAnchor(label, this.selectedAnchor);
-		labelsAnchor.writeEndPoint(store, labelsAnchor.getEndPoint());
+		LabelsDao value = labelsAnchor.readEndPoint();
+		value.addAnchor(label, this.selectedAnchor);
+		labelsAnchor.writeEndPoint(value);
 	}
 
 	public MerkleTree write(String string) {
@@ -363,7 +364,7 @@ public class MerkleTree {
 		if (LOG.isLoggable(Level.FINEST)) {
 			LOG.log(Level.FINEST, "Updating id -> " + selectedAnchor.getValue());
 		}
-		return new Commit(selectedAnchor.writeEndPoint(store, new CommitDao(
+		return new Commit(selectedAnchor.writeEndPoint(new CommitDao(
 				valueIdentity, new Date(), "auser", parents)),
 				selectedAnchor.getValue(), jsonFactory, store);
 

@@ -27,7 +27,7 @@ public class LabelsDao implements Serializable {
 
 	public ExtendedAnchor<CommitDao> getCommitAnchor(String name,
 			AddressableStorage store) {
-		return new ExtendedAnchor<>(labels.get(name), store, CommitDao.class);
+		return new ExtendedAnchor<>(store, labels.get(name), CommitDao.class);
 	}
 
 	public boolean hasCommitAnchor(String label) {

@@ -142,6 +142,7 @@ public class Commit implements Comparable<Commit> {
 	return commitDao.toString();
     }
 
+    // FIXME - baffling method
     private void addCommitToTreeMap(Graph<Commit, DefaultEdge> x, ThreeWayDiff<Object> twd,
 	    Collection<GraphPath<Commit, DefaultEdge>> paths) {
 

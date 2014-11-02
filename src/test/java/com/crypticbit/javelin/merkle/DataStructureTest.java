@@ -74,7 +74,7 @@ public class DataStructureTest extends TestUtils {
 
 	// System.out.println(memoryStore);
 	// jca.checkout();
-	System.out.println("MERGE=" + jca.lazyRead());
+	System.out.println("MERGE=" + jca.getAsObject());
 	// Assert.assertEquals(new JsonParser().parse("[\"a\", {\"b\":FALSE, \"c\":2.1, \"a\":2}]"), jca.read());
 
     }
@@ -194,10 +194,10 @@ public class DataStructureTest extends TestUtils {
 	AddressableStorage store = new StorageFactory().createMemoryCas();
 	MerkleTree d1 = new MerkleTree(store).write(JSON_EXAMPLE).commit();
 	MerkleTree d2 = d1.branch();
-	d1.write(JSON_EXAMPLE_2).commit().saveLabel("Branch1");
-	d2.write(JSON_EXAMPLE_3).commit().saveLabel("Branch2");
+	d1.write(JSON_EXAMPLE_2).commit().createLabel("Branch1");
+	d2.write(JSON_EXAMPLE_3).commit().createLabel("Branch2");
 	MerkleTree d3 = d2.branch();
-	d3.write(JSON_EXAMPLE_4).commit().saveLabel("Branch3");
+	d3.write(JSON_EXAMPLE_4).commit().createLabel("Branch3");
 	d2.write(JSON_EXAMPLE_5).commit();
 
 	Assert.assertEquals(new JsonParser().parse(JSON_EXAMPLE_2).toString(), new MerkleTree(store, d1

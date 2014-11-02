@@ -2,6 +2,7 @@ package com.crypticbit.javelin.merkle;
 
 import java.util.Date;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.crypticbit.javelin.convert.JsonElementStoreAdapter;
@@ -76,6 +77,9 @@ class CommitFactory {
      */
 
     private Commit getCommit(Key key, CommitDao dao) {
+	if (LOG.isLoggable(Level.FINEST)) {
+	    LOG.log(Level.FINEST, "Reading commit: " + key);
+	}
 	Commit result = cache.get(key);
 	if (result == null) {
 	    result = new Commit(this, key, dao);

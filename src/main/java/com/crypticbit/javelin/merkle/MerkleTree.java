@@ -44,8 +44,9 @@ public class MerkleTree {
     private Commit commit;
     /** The underlying data store */
     private AddressableStorage store;
-    private JsonStoreAdapterFactory jsonFactory;
     private CommitFactory commitFactory;
+
+    private Gson gson = new Gson();
 
     /**
      * Create a new json data structure with a random anchor, which can be retrieved using <code>getCommitAnchor</code>
@@ -59,21 +60,28 @@ public class MerkleTree {
 	LabelsDao labels = new LabelsDao();
 	selectedAnchor = labels.addCommitAnchor("HEAD", store);
 	labelsAnchor.setDestinationValue(labels);
-	// see if this works - FIXME
-	// labelsAnchor.readEndPoint(store).getCommitAnchor("HEAD",jsonFactory).readEndPoint(store);
+
+    }
+    
+
+    private void setup(AddressableStorage store) {
+	this.store = store;
+	store.registerAdapter(new JsonAdapter<LabelsDao>(LabelsDao.class), LabelsDao.class);
+	store.registerAdapter(new JsonAdapter<CommitDao>(CommitDao.class), CommitDao.class);
+	commitFactory = new CommitFactory(store);
 
     }
 
     /**
      * Create a new json data structure - by selecting a label from an existing ds by name
+     * @throws CorruptTreeException 
      * 
      * @throws Error
      * @throws TreeMapperException
      * @throws StoreException
      * @throws JsonSyntaxException
      */
-    MerkleTree(AddressableStorage store, Key labelsAddress, String label) throws JsonSyntaxException, StoreException,
-	    Error {
+    MerkleTree(AddressableStorage store, Key labelsAddress, String label) throws JsonSyntaxException, CorruptTreeException, StoreException  {
 	setup(store);
 	this.labelsAnchor = new ExtendedAnchor<>(store, labelsAddress, LabelsDao.class);
 	if (labelsAnchor.getDestinationValue().hasCommitAnchor(label)) {
@@ -82,7 +90,7 @@ public class MerkleTree {
 	else {
 	    // FIXME exception handling, and thought about changing to unknown
 	    // branch
-	    throw new Error("Labels don't exist: " + labelsAnchor.getDestinationValue());
+	    throw new CorruptTreeException("Labels don't exist: " + labelsAnchor.getDestinationValue());
 	    // this.selectedAnchor = labels.addCommitAnchor(label);
 	}
     }
@@ -94,7 +102,6 @@ public class MerkleTree {
 	setup(parent.store);
 	this.labelsAnchor = parent.labelsAnchor;
 	this.selectedAnchor = new ExtendedAnchor<>(store, parent.selectedAnchor, CommitDao.class);
-
     }
 
     /*
@@ -123,7 +130,7 @@ public class MerkleTree {
      */
 
     public synchronized MerkleTree commit() throws StoreException, CorruptTreeException {
-	Key write = jsonFactory.getJsonElementAdapter().write(element);
+	Key write = commitFactory.getJsonElementStoreAdapter().write(element);
 	commit = commitFactory.createCommit(selectedAnchor, write, selectedAnchor.getDestinationAddress());
 	return checkout();
     }
@@ -212,7 +219,7 @@ public class MerkleTree {
 
     }
 
-    public Object lazyRead() {
+    public Object getAsObject() {
 	return commit.getAsObject();
     }
 
@@ -229,15 +236,14 @@ public class MerkleTree {
 	return element;
     }
 
-    public void saveLabel(String label) throws StoreException {
+    public void createLabel(String label) throws StoreException {
 	LabelsDao value = labelsAnchor.getDestinationValue();
 	value.addAnchor(label, this.selectedAnchor);
 	labelsAnchor.setDestinationValue(value);
     }
 
     public MerkleTree write(String string) {
-	// FIXME resue Gson
-	element = new Gson().fromJson(string, JsonElement.class);
+	element = gson.fromJson(string, JsonElement.class);
 	return this;
     }
 
@@ -252,7 +258,7 @@ public class MerkleTree {
 	}
 	JsonProvider jsonProvider = JsonProviderFactory.createProvider();
 	Object originalResult, result;
-	originalResult = result = lazyRead();
+	originalResult = result = getAsObject();
 
 	PathTokenizer tokenizer = compiledPath.getTokenizer();
 	PathToken lastToken = tokenizer.removeLastPathToken();
@@ -268,7 +274,7 @@ public class MerkleTree {
 	    ((Map) result).put(lastToken.getFragment(), jsonObject);
 	}
 
-	Key valueIdentity = jsonFactory.getJavaObjectAdapter().write(originalResult);
+	Key valueIdentity = commitFactory.getObjectStoreAdapter().write(originalResult);
 	// FIXME patterm of commit = create then checkout repeated several times
 	commit = commitFactory.createCommit(selectedAnchor, valueIdentity, selectedAnchor.getDestinationAddress());
 	checkout();
@@ -277,19 +283,11 @@ public class MerkleTree {
     private Commit merge(ExtendedAnchor<CommitDao> commitAnchorToMergeA, Commit commitB, Key addressB)
 	    throws PatchFailedException, MergeException, CorruptTreeException, StoreException {
 	ThreeWayDiff patch = commitFactory.getCommitFromAnchor(commitAnchorToMergeA).createChangeSet(commitB);
-	Key valueIdentity = jsonFactory.getJavaObjectAdapter().write(patch.apply());
+	Key valueIdentity = commitFactory.getObjectStoreAdapter().write(patch.apply());
 	return commitFactory.createCommit(selectedAnchor, valueIdentity, commitAnchorToMergeA.getDestinationAddress(),
 		addressB);
     }
 
-    private void setup(AddressableStorage store) {
-	this.store = store;
-	store.registerAdapter(new JsonAdapter<LabelsDao>(LabelsDao.class), LabelsDao.class);
-	store.registerAdapter(new JsonAdapter<CommitDao>(CommitDao.class), CommitDao.class);
-	jsonFactory = new JsonStoreAdapterFactory(store);
-	commitFactory = new CommitFactory(store);
-
-    }
 
     public enum MergeType {
 	OVERWRITE, IGNORE_CONFLICT, MERGE

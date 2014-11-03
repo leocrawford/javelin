@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import com.crypticbit.javelin.merkle.CorruptTreeException;
 import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -19,7 +20,7 @@ public class NamePanel extends JPanel {
     private JsonListModelAdapter dataModel;
 
     public NamePanel(MerkleTree jca, final JsonElementSelectionListener jsonElementSelectionListener)
-	    throws JsonSyntaxException, StoreException {
+	    throws JsonSyntaxException, StoreException, CorruptTreeException {
 	this.jca = jca;
 	this.setLayout(new BorderLayout());
 	JsonListModelAdapter dataModel = updateModel(jca);
@@ -46,7 +47,7 @@ public class NamePanel extends JPanel {
 	try {
 	    list.setModel(updateModel(jca));
 	}
-	catch (StoreException | JsonSyntaxException e) {
+	catch (StoreException | JsonSyntaxException | CorruptTreeException e) {
 	    // FIXME
 	    throw new Error(e);
 	}
@@ -56,7 +57,7 @@ public class NamePanel extends JPanel {
 	return dataModel;
     }
 
-    private JsonListModelAdapter updateModel(MerkleTree jca) throws StoreException, JsonSyntaxException {
+    private JsonListModelAdapter updateModel(MerkleTree jca) throws StoreException, JsonSyntaxException, CorruptTreeException {
 	dataModel = new JsonListModelAdapter(jca, "people", "name");
 	return dataModel;
     }

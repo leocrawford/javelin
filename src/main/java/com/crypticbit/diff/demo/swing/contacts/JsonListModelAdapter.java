@@ -3,6 +3,7 @@ package com.crypticbit.diff.demo.swing.contacts;
 import javax.swing.AbstractListModel;
 
 import com.crypticbit.javelin.convert.lazy.LazyArray;
+import com.crypticbit.javelin.merkle.CorruptTreeException;
 import com.crypticbit.javelin.merkle.MerkleTree;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -17,7 +18,7 @@ public class JsonListModelAdapter extends AbstractListModel<String> {
     private LazyArray backing;
     private JsonPath label;
 
-    JsonListModelAdapter(MerkleTree jca, String path, String label) throws JsonSyntaxException, StoreException {
+    JsonListModelAdapter(MerkleTree jca, String path, String label) throws JsonSyntaxException, StoreException, CorruptTreeException {
 	this.jca = jca;
 	this.path = path;
 	this.label = new JsonPath(label, new Filter[] {});
@@ -38,7 +39,7 @@ public class JsonListModelAdapter extends AbstractListModel<String> {
 	return backing.size();
     }
 
-    private LazyArray findBacking() throws JsonSyntaxException, StoreException {
+    private LazyArray findBacking() throws JsonSyntaxException, StoreException, CorruptTreeException {
 	return (LazyArray) jca.getCommit().navigate(path);
     }
 

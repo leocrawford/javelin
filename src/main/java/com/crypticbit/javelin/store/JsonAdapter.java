@@ -1,7 +1,10 @@
 package com.crypticbit.javelin.store;
 
+
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -45,7 +48,17 @@ public class JsonAdapter<S> implements Adapter<S> {
 
     @Override
     public Key getContentDigest(S element) {
-	return new Key(toByteArray(element));
+
+	MessageDigest messageDigest;
+	try {
+	    messageDigest = MessageDigest.getInstance("SHA-256");
+	}
+	catch (NoSuchAlgorithmException e) {
+	    throw new Error("SHA-256 not supported (though Java spec says it should be)",e);
+	}
+	messageDigest.update(toByteArray(element));
+
+	return new Key(messageDigest.digest());
     }
 
     @Override

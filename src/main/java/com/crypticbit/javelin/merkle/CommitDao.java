@@ -25,6 +25,7 @@ public class CommitDao {
     }
 
     public CommitDao(Key head, Date when, String user, Key[] parents) {
+	System.out.println("Creating DAO with "+head);
 	this.head = head;
 	this.when = when;
 	this.user = user;

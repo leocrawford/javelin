@@ -5,10 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.crypticbit.javelin.convert.JsonStoreAdapterFactory;
 import com.crypticbit.javelin.diff.ThreeWayDiff;
 import com.crypticbit.javelin.store.AddressableStorage;
 import com.crypticbit.javelin.store.JsonAdapter;
@@ -37,11 +35,6 @@ public class MerkleTree {
     /** The current head of the Json data structure */
     private ExtendedAnchor<CommitDao> selectedAnchor;
     private ExtendedAnchor<LabelsDao> labelsAnchor;
-    private JsonElement element;
-    /**
-     * The last known head of the actual data structure, set after a read or write operation
-     */
-    private Commit commit;
     /** The underlying data store */
     private AddressableStorage store;
     private CommitFactory commitFactory;
@@ -56,13 +49,16 @@ public class MerkleTree {
      */
     public MerkleTree(AddressableStorage store) throws StoreException {
 	setup(store);
+	createLabelsWithHead(store);
+
+    }
+
+    private void createLabelsWithHead(AddressableStorage store) throws StoreException {
 	labelsAnchor = new ExtendedAnchor<>(store, LabelsDao.class);
 	LabelsDao labels = new LabelsDao();
 	selectedAnchor = labels.addCommitAnchor("HEAD", store);
 	labelsAnchor.setDestinationValue(labels);
-
     }
-    
 
     private void setup(AddressableStorage store) {
 	this.store = store;
@@ -74,14 +70,15 @@ public class MerkleTree {
 
     /**
      * Create a new json data structure - by selecting a label from an existing ds by name
-     * @throws CorruptTreeException 
      * 
+     * @throws CorruptTreeException
      * @throws Error
      * @throws TreeMapperException
      * @throws StoreException
      * @throws JsonSyntaxException
      */
-    MerkleTree(AddressableStorage store, Key labelsAddress, String label) throws JsonSyntaxException, CorruptTreeException, StoreException  {
+    MerkleTree(AddressableStorage store, Key labelsAddress, String label) throws JsonSyntaxException,
+	    CorruptTreeException, StoreException {
 	setup(store);
 	this.labelsAnchor = new ExtendedAnchor<>(store, labelsAddress, LabelsDao.class);
 	if (labelsAnchor.getDestinationValue().hasCommitAnchor(label)) {
@@ -113,54 +110,8 @@ public class MerkleTree {
 	return new MerkleTree(this);
     }
 
-    public synchronized MerkleTree checkout() throws CorruptTreeException {
-	commit = commitFactory.getCommitFromAnchor(selectedAnchor);
-	element = commit.getAsElement();
-	if (LOG.isLoggable(Level.FINER)) {
-	    LOG.log(Level.FINER, "Reading commit: " + commit);
-	}
-	return this;
-    }
-
-    // FIXME - what about persisting shared labels? Would they be betetr stored
-    // as our own mergable data structure?
-    /*
-     * public DataStructure branch(String newLabel) throws StoreException { return new DataStructure(store, labels,
-     * newLabel); }
-     */
-
-    public synchronized MerkleTree commit() throws StoreException, CorruptTreeException {
-	Key write = commitFactory.getJsonElementStoreAdapter().write(element);
-	commit = commitFactory.createCommit(selectedAnchor, write, selectedAnchor.getDestinationAddress());
-	return checkout();
-    }
-
-    public void exportAll(OutputStream outputStream) throws JsonSyntaxException, StoreException, IOException {
-
-	/*
-	 * ObjectOutputStream oos = new ObjectOutputStream(outputStream); Set<Key> tempCas = new HashSet<>(); Set<Key>
-	 * tempKas = new HashSet<>(); Map<String, Key> labelToCommitMap = new HashMap<>(); LabelsDao labels =
-	 * labelsAnchor.readEndPoint(store); for (String label : labels.getLabels()) {
-	 * System.out.println("Processing label " + label); Key commitAddress = labels.getCommitAnchor(label,
-	 * jsonFactory).getAddress(); tempKas.add(commitAddress); CommitDao commitDao = labels.getCommitAnchor(label,
-	 * jsonFactory).readEndPoint(store); Key destination = labels.getCommitAnchor(label, jsonFactory).read(store);
-	 * System.out.println("dest=" + destination + "," + commitDao); labelToCommitMap.put(label, destination); Commit
-	 * c = new Commit(commitDao, destination, jsonFactory); DirectedGraph<Commit, DefaultEdge> x =
-	 * c.getAsGraphToRoot(); for (Commit v : x.vertexSet()) { tempCas.addAll(v.getAllIdentities());
-	 * System.out.println("Commit=" + v.getIdentity2() + "," + v.toString() + "," + store.getCas(v.getIdentity2()));
-	 * } } oos.writeObject(labelToCommitMap); tempKas.add(labelsAnchor.getAddress());
-	 * tempCas.add(labelsAnchor.getDestination()); System.out.println("cas: " + tempCas); System.out.println("kas: "
-	 * + tempKas); System.out.println("all: " + store.list()); Set<Key> missing = new HashSet(store.list());
-	 * missing.removeAll(tempCas); missing.removeAll(tempKas); for (Key i : missing) { System.out.println(i + "=" +
-	 * store.getCas(i)); } Map<Key, PersistableResource> casRresult = new HashMap<>(); for (Key i : tempCas) {
-	 * casRresult.put(i, store.getCas(i)); } oos.writeObject(casRresult); Map<Key, PersistableResource> kasResult =
-	 * new HashMap<>(); for (Key i : tempKas) { kasResult.put(i, store.getCas(i)); } oos.writeObject(kasResult);
-	 */
-
-    }
-
-    public Commit getCommit() {
-	return commit;
+    public Commit getCommit() throws CorruptTreeException {
+	return commitFactory.getCommitFromAnchor(selectedAnchor);
     }
 
     public Key getLabelsAddress() {
@@ -170,6 +121,79 @@ public class MerkleTree {
     /*
      * public Identity getCommitAnchor() { return selectedAnchor.getDigest(); }
      */
+
+    public Object getAsObject() throws CorruptTreeException {
+	return getCommit().getAsObject();
+    }
+
+    public synchronized MerkleTree merge(MerkleTree other) throws PatchFailedException, MergeException,
+	    CorruptTreeException, StoreException {
+	merge(selectedAnchor, commitFactory.getCommitFromAnchor(other.selectedAnchor), other.selectedAnchor
+		.getDestinationAddress());
+	return this;
+    }
+
+    public JsonElement read() throws CorruptTreeException {
+	return getCommit().getAsElement();
+
+    }
+
+    public void createLabel(String label) throws StoreException {
+	LabelsDao value = labelsAnchor.getDestinationValue();
+	value.addAnchor(label, this.selectedAnchor);
+	labelsAnchor.setDestinationValue(value);
+    }
+
+    public MerkleTree write(String string) throws CorruptTreeException, StoreException {
+	Key write = commitFactory.getJsonElementStoreAdapter().write(gson.fromJson(string, JsonElement.class));
+	System.out.println("Wrote "+string+" to "+write);
+	commitFactory.createCommit(selectedAnchor, write, selectedAnchor.getDestinationAddress());
+	return this;
+    }
+
+    public void write(String path, String json) throws StoreException, CorruptTreeException {
+	HackedJsonPath compiledPath = new HackedJsonPath(path, new Filter[] {});
+	// code copied from jsonpath
+	// FIXME reuse JSON
+	// FIXME should this be in JCA?
+	Object jsonObject = new Gson().fromJson(json, Object.class);
+	if (!(jsonObject instanceof Map) && !(jsonObject instanceof List)) {
+	    throw new IllegalArgumentException("Invalid container object");
+	}
+	JsonProvider jsonProvider = JsonProviderFactory.createProvider();
+	Object originalResult, result;
+	originalResult = result = getAsObject();
+
+	PathTokenizer tokenizer = compiledPath.getTokenizer();
+	PathToken lastToken = tokenizer.removeLastPathToken();
+	for (PathToken pathToken : tokenizer) {
+	    PathTokenFilter filter = pathToken.getFilter();
+	    result = filter.filter(result, jsonProvider);
+	}
+
+	if (lastToken.isArrayIndexToken()) {
+	    ((List) result).set(lastToken.getArrayIndex(), jsonObject);
+	}
+	else {
+	    ((Map) result).put(lastToken.getFragment(), jsonObject);
+	}
+
+	Key valueIdentity = commitFactory.getObjectStoreAdapter().write(originalResult);
+	// FIXME patterm of commit = create then checkout repeated several times
+	commitFactory.createCommit(selectedAnchor, valueIdentity, selectedAnchor.getDestinationAddress());
+    }
+
+    private Commit merge(ExtendedAnchor<CommitDao> commitAnchorToMergeA, Commit commitB, Key addressB)
+	    throws PatchFailedException, MergeException, CorruptTreeException, StoreException {
+	ThreeWayDiff patch = commitFactory.getCommitFromAnchor(commitAnchorToMergeA).createChangeSet(commitB);
+	Key valueIdentity = commitFactory.getObjectStoreAdapter().write(patch.apply());
+	return commitFactory.createCommit(selectedAnchor, valueIdentity, commitAnchorToMergeA.getDestinationAddress(),
+		addressB);
+    }
+
+    public enum MergeType {
+	OVERWRITE, IGNORE_CONFLICT, MERGE
+    }
 
     public void importAll(InputStream inputStream, MergeType mergeType) throws IOException, ClassNotFoundException,
 	    StoreException, JsonSyntaxException {
@@ -219,78 +243,28 @@ public class MerkleTree {
 
     }
 
-    public Object getAsObject() {
-	return commit.getAsObject();
-    }
+    public void exportAll(OutputStream outputStream) throws JsonSyntaxException, StoreException, IOException {
 
-    public synchronized MerkleTree merge(MerkleTree other) throws PatchFailedException, MergeException,
-	    CorruptTreeException, StoreException {
-	// FIXME factor out code for creating change set to Commit and make work
-	// for multiple labels
-	commit = merge(selectedAnchor, commitFactory.getCommitFromAnchor(other.selectedAnchor), other.selectedAnchor
-		.getDestinationAddress());
-	return checkout();
-    }
+	/*
+	 * ObjectOutputStream oos = new ObjectOutputStream(outputStream); Set<Key> tempCas = new HashSet<>(); Set<Key>
+	 * tempKas = new HashSet<>(); Map<String, Key> labelToCommitMap = new HashMap<>(); LabelsDao labels =
+	 * labelsAnchor.readEndPoint(store); for (String label : labels.getLabels()) {
+	 * System.out.println("Processing label " + label); Key commitAddress = labels.getCommitAnchor(label,
+	 * jsonFactory).getAddress(); tempKas.add(commitAddress); CommitDao commitDao = labels.getCommitAnchor(label,
+	 * jsonFactory).readEndPoint(store); Key destination = labels.getCommitAnchor(label, jsonFactory).read(store);
+	 * System.out.println("dest=" + destination + "," + commitDao); labelToCommitMap.put(label, destination); Commit
+	 * c = new Commit(commitDao, destination, jsonFactory); DirectedGraph<Commit, DefaultEdge> x =
+	 * c.getAsGraphToRoot(); for (Commit v : x.vertexSet()) { tempCas.addAll(v.getAllIdentities());
+	 * System.out.println("Commit=" + v.getIdentity2() + "," + v.toString() + "," + store.getCas(v.getIdentity2()));
+	 * } } oos.writeObject(labelToCommitMap); tempKas.add(labelsAnchor.getAddress());
+	 * tempCas.add(labelsAnchor.getDestination()); System.out.println("cas: " + tempCas); System.out.println("kas: "
+	 * + tempKas); System.out.println("all: " + store.list()); Set<Key> missing = new HashSet(store.list());
+	 * missing.removeAll(tempCas); missing.removeAll(tempKas); for (Key i : missing) { System.out.println(i + "=" +
+	 * store.getCas(i)); } Map<Key, PersistableResource> casRresult = new HashMap<>(); for (Key i : tempCas) {
+	 * casRresult.put(i, store.getCas(i)); } oos.writeObject(casRresult); Map<Key, PersistableResource> kasResult =
+	 * new HashMap<>(); for (Key i : tempKas) { kasResult.put(i, store.getCas(i)); } oos.writeObject(kasResult);
+	 */
 
-    public JsonElement read() {
-	return element;
-    }
-
-    public void createLabel(String label) throws StoreException {
-	LabelsDao value = labelsAnchor.getDestinationValue();
-	value.addAnchor(label, this.selectedAnchor);
-	labelsAnchor.setDestinationValue(value);
-    }
-
-    public MerkleTree write(String string) {
-	element = gson.fromJson(string, JsonElement.class);
-	return this;
-    }
-
-    public void write(String path, String json) throws StoreException, CorruptTreeException {
-	HackedJsonPath compiledPath = new HackedJsonPath(path, new Filter[] {});
-	// code copied from jsonpath
-	// FIXME reuse JSON
-	// FIXME should this be in JCA?
-	Object jsonObject = new Gson().fromJson(json, Object.class);
-	if (!(jsonObject instanceof Map) && !(jsonObject instanceof List)) {
-	    throw new IllegalArgumentException("Invalid container object");
-	}
-	JsonProvider jsonProvider = JsonProviderFactory.createProvider();
-	Object originalResult, result;
-	originalResult = result = getAsObject();
-
-	PathTokenizer tokenizer = compiledPath.getTokenizer();
-	PathToken lastToken = tokenizer.removeLastPathToken();
-	for (PathToken pathToken : tokenizer) {
-	    PathTokenFilter filter = pathToken.getFilter();
-	    result = filter.filter(result, jsonProvider);
-	}
-
-	if (lastToken.isArrayIndexToken()) {
-	    ((List) result).set(lastToken.getArrayIndex(), jsonObject);
-	}
-	else {
-	    ((Map) result).put(lastToken.getFragment(), jsonObject);
-	}
-
-	Key valueIdentity = commitFactory.getObjectStoreAdapter().write(originalResult);
-	// FIXME patterm of commit = create then checkout repeated several times
-	commit = commitFactory.createCommit(selectedAnchor, valueIdentity, selectedAnchor.getDestinationAddress());
-	checkout();
-    }
-
-    private Commit merge(ExtendedAnchor<CommitDao> commitAnchorToMergeA, Commit commitB, Key addressB)
-	    throws PatchFailedException, MergeException, CorruptTreeException, StoreException {
-	ThreeWayDiff patch = commitFactory.getCommitFromAnchor(commitAnchorToMergeA).createChangeSet(commitB);
-	Key valueIdentity = commitFactory.getObjectStoreAdapter().write(patch.apply());
-	return commitFactory.createCommit(selectedAnchor, valueIdentity, commitAnchorToMergeA.getDestinationAddress(),
-		addressB);
-    }
-
-
-    public enum MergeType {
-	OVERWRITE, IGNORE_CONFLICT, MERGE
     }
 
 }

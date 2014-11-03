@@ -141,6 +141,14 @@ public class Commit implements Comparable<Commit> {
     public String toString() {
 	return commitDao.toString();
     }
+    
+    public Commit getFirstParent() throws CorruptTreeException {
+	if(commitDao.getParents().length >= 1)
+	    return commitFactory.getCommit(commitDao.getParents()[0]);
+	else
+	    return null;
+		
+    }
 
     // FIXME - baffling method
     private void addCommitToTreeMap(Graph<Commit, DefaultEdge> x, ThreeWayDiff<Object> twd,

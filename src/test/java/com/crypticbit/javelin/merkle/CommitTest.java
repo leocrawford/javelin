@@ -28,14 +28,14 @@ public class CommitTest extends TestUtils {
 	String c7 = "[\"a\",\"b1\",\"c2\",\"d\",[\"f\"],\"g\"]";
 
 	jca1 = new MerkleTree(new StorageFactory().createMemoryCas());
-	jca1.write(c1).commit().write(c2).commit();
+	jca1.write(c1).write(c2);
 	jca2 = jca1.branch();
-	jca1.write(c3).commit();
-	jca2.write(c4).commit();
+	jca1.write(c3);
+	jca2.write(c4);
 	jca3 = jca2.branch();
-	jca3.write(c5).commit().write(c6);
+	jca3.write(c5).write(c6);
 	jca4 = jca2.branch();
-	jca4.write(c7).commit();
+	jca4.write(c7);
     }
 
     @Test
@@ -62,14 +62,14 @@ public class CommitTest extends TestUtils {
     public void testGetAsGraph() throws StoreException, IOException, JsonSyntaxException, CorruptTreeException {
 	assertEquals(3, jca1.getCommit().getAsGraphToRoot().vertexSet().size());
 	assertEquals(3, jca2.getCommit().getAsGraphToRoot().vertexSet().size());
-	assertEquals(4, jca3.getCommit().getAsGraphToRoot().vertexSet().size());
+	assertEquals(5, jca3.getCommit().getAsGraphToRoot().vertexSet().size());
 	assertEquals(4, jca4.getCommit().getAsGraphToRoot().vertexSet().size());
     }
 
     @Test
     public void testNavigate() throws JsonSyntaxException, StoreException, CorruptTreeException {
 	String c8 = "{\"a\":\"b\",\"c\":{\"d\":\"e\"},\"f\":[\"g\",1,2,3,{\"k\":true,\"l\":false}]}";
-	jca4.write(c8).commit();
+	jca4.write(c8);
 
 	assertEquals(false, jca4.getCommit().navigate("f[4].l"));
 	assertEquals("e", jca4.getCommit().navigate("c.d"));

@@ -34,7 +34,6 @@ public class Main extends JFrame {
 	    public void callback(InputStream is) {
 		try {
 		    jsonStore.importAll(is, MergeType.MERGE);
-		    jsonStore.checkout();
 		    commitChange();
 		    System.out.println(jsonStore.read());
 		}
@@ -84,7 +83,6 @@ public class Main extends JFrame {
 		    File f = chooser.getSelectedFile();
 
 		    jsonStore.importAll(new FileInputStream(f), MergeType.MERGE);
-		    jsonStore.checkout();
 		    commitChange();
 		    System.out.println(jsonStore.read());
 
@@ -139,7 +137,7 @@ public class Main extends JFrame {
 	content.add(navAndViewJSplit);
 
 	jsonStore = new MerkleTree(new StorageFactory().createMemoryCas());
-	jsonStore.write("{people:[{name:\"Leo\"},{name:\"John\"},{name:\"Caroline\"}]}").commit().commit();
+	jsonStore.write("{people:[{name:\"Leo\"},{name:\"John\"},{name:\"Caroline\"}]}");
 
 	final ContactEditPanel contactEditPanel = new ContactEditPanel();
 	namePanel = new NamePanel(jsonStore, new JsonElementSelectionListener() {
@@ -190,7 +188,7 @@ public class Main extends JFrame {
 	dispose();
     }
 
-    private void commitChange() throws JsonSyntaxException, UnsupportedEncodingException, StoreException {
+    private void commitChange() throws JsonSyntaxException, UnsupportedEncodingException, StoreException, CorruptTreeException {
 	namePanel.refresh();
 	commitGraphPanel.show(new Commit[] { jsonStore.getCommit() });
     }

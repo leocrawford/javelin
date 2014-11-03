@@ -63,14 +63,14 @@ public class CommitBuilder extends JFrame {
 	String c7 = "[\"a\",\"b1\",\"c2\",\"d\",[\"f\"],\"g\"]";
 
 	jca1 = new MerkleTree(new StorageFactory().createMemoryCas());
-	jca1.write(c1).commit().write(c2).commit();
+	jca1.write(c1).write(c2);
 	jca2 = jca1.branch();
-	jca1.write(c3).commit();
-	jca2.write(c4).commit();
+	jca1.write(c3);
+	jca2.write(c4);
 	jca3 = jca2.branch();
-	jca3.write(c5).commit().write(c6);
+	jca3.write(c5).write(c6);
 	jca4 = jca2.branch();
-	jca4.write(c7).commit();
+	jca4.write(c7);
     }
 
     private void demo() throws JsonSyntaxException, StoreException, PatchFailedException, IOException,
@@ -82,7 +82,7 @@ public class CommitBuilder extends JFrame {
 
 	Thread.sleep(2000);
 
-	jca4.write("hello").commit();
+	jca4.write("hello");
 
 	commitPanel.show(new Commit[] { jca4.getCommit() });
 	System.out.println("x");

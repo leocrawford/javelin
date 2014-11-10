@@ -85,10 +85,7 @@ public class MerkleTree {
 	    this.selectedAnchor = labelsAnchor.getDestinationValue().getCommitAnchor(label, store);
 	}
 	else {
-	    // FIXME exception handling, and thought about changing to unknown
-	    // branch
 	    throw new CorruptTreeException("Labels don't exist: " + labelsAnchor.getDestinationValue());
-	    // this.selectedAnchor = labels.addCommitAnchor(label);
 	}
     }
 
@@ -146,7 +143,7 @@ public class MerkleTree {
 
     public MerkleTree write(String string) throws CorruptTreeException, StoreException {
 	Key write = commitFactory.getJsonElementStoreAdapter().write(gson.fromJson(string, JsonElement.class));
-	System.out.println("Wrote "+string+" to "+write);
+	System.out.println("Wrote " + string + " to " + write);
 	commitFactory.createCommit(selectedAnchor, write, selectedAnchor.getDestinationAddress());
 	return this;
     }

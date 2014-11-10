@@ -124,6 +124,18 @@ public class ThreeWayDiffTest {
     }
 
     @Test
+    public void testMapAndListNull() {
+	Map<String, String> lca = GSON.fromJson("{A:a,B:null,C:[x,y,z]}", Map.class);
+	ThreeWayDiff<Map<String, String>> twd = new ThreeWayDiff<>(lca);
+	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:null,C:[x,y,z]}", Map.class), "Branch 1");
+	twd.addBranchSnapshot(GSON.fromJson("{A:a,B:b,C:[x,null,z]}", Map.class), "Branch 2");
+	Map<String, String> result = twd.apply();
+	Assert.assertEquals(GSON.fromJson("{A:a,B:b,C:[x,null,z]}", Map.class), result);
+    }
+    
+    
+    
+    @Test
     public void testRealExample() {
 	ThreeWayDiff<Map<String, ?>> twd = new ThreeWayDiff<Map<String, ?>>(GSON.fromJson(
 		"{name:\"Bill\",aliases:[Billy],phone:[{type:Mobile,code:01222,number:123456}],addresses:"

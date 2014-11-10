@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Performa three way diff for a range of inbuilt types, which can be extended by adding them to the DifferFactory
+ * Perform a three way diff for a range of inbuilt types, which can be extended by adding them to the DifferFactory
  */
 public class ThreeWayDiff<T> {
 

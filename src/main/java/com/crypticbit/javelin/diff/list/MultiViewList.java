@@ -6,6 +6,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 /**
  * A List which allows views onto it, whereby the views are independent of each other (they can not see each others
@@ -244,11 +245,11 @@ public class MultiViewList<T> implements List<T> {
     }
 
     /**
-     * Return a list with elements not applying to this mode removed, and only the value returned instead of teh full
+     * Return a list with elements not applying to this mode removed, and only the value returned instead of the full
      * AddRemoveRecord
      */
     private List<T> filterAndTransform() {
-	return ImmutableList.copyOf(transform(Iterables.filter(backingList, new ValidInModePredicate<T>(currentMode))));
+	return Lists.newArrayList(transform(Iterables.filter(backingList, new ValidInModePredicate<T>(currentMode))));
     }
 
     /** Return only the value from an Iterable of AddRemoveRecords. */

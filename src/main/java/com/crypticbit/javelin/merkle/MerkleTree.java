@@ -32,8 +32,8 @@ public class MerkleTree {
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.merkle");
 
     /** The current head of the Json data structure */
-    private ExtendedAnchor<CommitDao> selectedAnchor;
-    private ExtendedAnchor<LabelsDao> labelsAnchor;
+    private final ExtendedAnchor<CommitDao> selectedAnchor;
+    private final ExtendedAnchor<LabelsDao> labelsAnchor;
     /** The underlying data store */
     private AddressableStorage store;
     private CommitFactory commitFactory;
@@ -48,15 +48,14 @@ public class MerkleTree {
      */
     public MerkleTree(AddressableStorage store) throws StoreException {
 	setup(store);
-	createLabelsWithHead(store);
-    }
 
-    private void createLabelsWithHead(AddressableStorage store) throws StoreException {
 	labelsAnchor = new ExtendedAnchor<>(store, LabelsDao.class);
 	LabelsDao labels = new LabelsDao();
 	selectedAnchor = labels.addCommitAnchor(HEAD, store);
 	labelsAnchor.setDestinationValue(labels);
     }
+
+
 
     private void setup(AddressableStorage store) {
 	this.store = store;
@@ -209,8 +208,6 @@ public class MerkleTree {
 	Commit c = tempFactory.getCommitFromAnchor(remoteAnchor);
 	c.recusivelyLoad();
 	anchor.setDestinationAddress(remoteAnchor.getDestinationAddress());
-	selectedAnchor = anchor;
-	
     }
 
     public void importAll(InputStream inputStream, MergeType mergeType) throws IOException, ClassNotFoundException,

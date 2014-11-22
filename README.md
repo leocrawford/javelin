@@ -56,12 +56,15 @@ There are a number of interesting projects looking at a very similar problem. Th
 
 * http://camlistore.org/
 * https://github.com/dominictarr/cyphernet
+* http://www.waveprotocol.org/whitepapers/wave-protocol-verification
+* http://www.codecommit.com/blog/java/understanding-and-applying-operational-transformation
 * <need to look these up>
 
 In terms of technology, the things that shaped my thinking are:
 
 * git
 * darcs
+* Merkle Tree
 
 
 ##Resources

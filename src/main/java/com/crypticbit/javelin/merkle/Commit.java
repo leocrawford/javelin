@@ -141,13 +141,13 @@ public class Commit implements Comparable<Commit> {
     public String toString() {
 	return commitDao.toString();
     }
-    
+
     public Commit getFirstParent() throws CorruptTreeException {
-	if(commitDao.getParents().length >= 1)
+	if (commitDao.getParents().length >= 1)
 	    return commitFactory.getCommit(commitDao.getParents()[0]);
 	else
 	    return null;
-		
+
     }
 
     // FIXME - baffling method
@@ -229,6 +229,15 @@ public class Commit implements Comparable<Commit> {
 
     private static String indent(int indent) {
 	return new String(new char[indent]).replace("\0", " ");
+    }
+
+    // FIXME - very suboptimal in order to force two trees to be merged we simply laod the entire tree, this forcing a
+    // StoreAggregtaor to copy it locally. Should stop as soon as a known node is found. Also common parents shouldn't
+    // be repeated.
+    public void recusivelyLoad() throws CorruptTreeException {
+	System.out.print(this + ":" + getAsElement().toString());
+	for (Commit c : this.getParents())
+	    c.recusivelyLoad();
     }
 
 }

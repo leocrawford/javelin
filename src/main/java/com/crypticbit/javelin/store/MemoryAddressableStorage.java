@@ -7,13 +7,30 @@ import java.util.logging.Logger;
 /**
  * Provides a memory based AddressableStorage.
  */
-class MemoryAddressableStorage implements AddressableStorage {
+public class MemoryAddressableStorage implements AddressableStorage {
 
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.cas");
-    private final TreeMap<Key, byte[]> casMap = new TreeMap<>();
-    private final TreeMap<Key, byte[]> kasMap = new TreeMap<>();
-    private final Map<Class<?>, Adapter<?>> adapters = new HashMap<>();
+    private final TreeMap<Key, byte[]> casMap;
+    private final TreeMap<Key, byte[]> kasMap;
+    private final Map<Class<?>, Adapter<?>> adapters;
 
+    public MemoryAddressableStorage() {
+	casMap = new TreeMap<>();
+	kasMap = new TreeMap<>();
+	adapters = new HashMap<>();
+    }
+    
+    // FIXME do we really want this?
+    private MemoryAddressableStorage(TreeMap<Key, byte[]> casMap, TreeMap<Key, byte[]> kasMap, Map<Class<?>, Adapter<?>> adapters) {
+	this.casMap = (TreeMap<Key, byte[]>) casMap.clone();
+	this.kasMap = (TreeMap<Key, byte[]>) kasMap.clone();
+	this.adapters = new HashMap<Class<?>, Adapter<?>>(adapters);
+    }
+    
+    public MemoryAddressableStorage clone() {
+	return new MemoryAddressableStorage(casMap,kasMap,adapters);
+    }
+    
     @Override
     public boolean checkCas(Key key) {
 	return casMap.containsKey(key);

@@ -51,8 +51,8 @@ public class ExtendedAnchor<T> extends Anchor {
     @Override
     public String toString() {
 	try {
-	    return clazz.getSimpleName() + ":" + super.getSourceAddress() + "->" + super.getDestinationAddress() + "("
-		    + getDestinationValue() + ")";
+	    return super.getSourceAddress() + "->" + super.getDestinationAddress() + "("
+		    + clazz.getSimpleName() + ":" + getDestinationValue() + ")";
 	}
 	catch (Exception e) {
 	    return super.getSourceAddress() + "<error>";

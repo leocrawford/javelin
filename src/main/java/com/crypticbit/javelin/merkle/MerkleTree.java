@@ -8,10 +8,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.crypticbit.javelin.diff.ThreeWayDiff;
-import com.crypticbit.javelin.store.AddressableStorage;
-import com.crypticbit.javelin.store.JsonAdapter;
-import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.StoreException;
+import com.crypticbit.javelin.store.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
@@ -29,6 +26,8 @@ import difflib.PatchFailedException;
 // multiple anchors?
 // FIXME tidy up exceptions
 public class MerkleTree {
+
+    public static final String HEAD = "HEAD";
 
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.merkle");
 
@@ -50,13 +49,12 @@ public class MerkleTree {
     public MerkleTree(AddressableStorage store) throws StoreException {
 	setup(store);
 	createLabelsWithHead(store);
-
     }
 
     private void createLabelsWithHead(AddressableStorage store) throws StoreException {
 	labelsAnchor = new ExtendedAnchor<>(store, LabelsDao.class);
 	LabelsDao labels = new LabelsDao();
-	selectedAnchor = labels.addCommitAnchor("HEAD", store);
+	selectedAnchor = labels.addCommitAnchor(HEAD, store);
 	labelsAnchor.setDestinationValue(labels);
     }
 
@@ -192,6 +190,29 @@ public class MerkleTree {
 	OVERWRITE, IGNORE_CONFLICT, MERGE
     }
 
+    public void sync(AddressableStorage remote, String label, MergeType mergeType) throws CorruptTreeException,
+	    StoreException {
+
+	ExtendedAnchor<CommitDao> anchor = labelsAnchor.getDestinationValue().getCommitAnchor(label, store);
+	anchor.getDestinationValue();
+
+	// use a StoreAggregator which allows us to access both stores as if they were one. Everything we access which
+	// is only available in the remote store will be copied to teh local store.
+	StoreAggregator aggregateStore = new StoreAggregator(store, remote);
+	CommitFactory tempFactory = new CommitFactory(aggregateStore);
+
+	ExtendedAnchor<CommitDao> remoteAnchor = new ExtendedAnchor<CommitDao>(remote, anchor
+		.getSourceAddress(), CommitDao.class);
+
+	// FIXME force load
+	aggregateStore.getCas(remoteAnchor.getDestinationAddress(), CommitDao.class);
+	Commit c = tempFactory.getCommitFromAnchor(remoteAnchor);
+	c.recusivelyLoad();
+	anchor.setDestinationAddress(remoteAnchor.getDestinationAddress());
+	selectedAnchor = anchor;
+	
+    }
+
     public void importAll(InputStream inputStream, MergeType mergeType) throws IOException, ClassNotFoundException,
 	    StoreException, JsonSyntaxException {
 	/*
@@ -262,6 +283,10 @@ public class MerkleTree {
 	 * new HashMap<>(); for (Key i : tempKas) { kasResult.put(i, store.getCas(i)); } oos.writeObject(kasResult);
 	 */
 
+    }
+
+    AddressableStorage getStore() {
+	return store;
     }
 
 }

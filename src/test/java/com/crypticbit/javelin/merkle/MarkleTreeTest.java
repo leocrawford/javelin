@@ -2,8 +2,6 @@ package com.crypticbit.javelin.merkle;
 
 import static org.junit.Assert.fail;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
@@ -13,17 +11,14 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.crypticbit.javelin.merkle.MerkleTree.MergeType;
-import com.crypticbit.javelin.store.AddressableStorage;
-import com.crypticbit.javelin.store.Key;
-import com.crypticbit.javelin.store.StorageFactory;
-import com.crypticbit.javelin.store.StoreException;
+import com.crypticbit.javelin.store.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import difflib.PatchFailedException;
 
-public class DataStructureTest extends TestUtils {
+public class MarkleTreeTest extends TestUtils {
     // FIXME reinstate null
     /*
      * private static final String JSON_EXAMPLE = "[\"foo\",100,{\"a\":1000.21,\"b\":6},true,null,[1,2,3]]"; private
@@ -151,23 +146,30 @@ public class DataStructureTest extends TestUtils {
     @Test
     public void testImportExport() throws IOException, StoreException, JsonSyntaxException, ClassNotFoundException,
 	    PatchFailedException, InterruptedException, CorruptTreeException {
-	MerkleTree ds1 = new MerkleTree(new StorageFactory().createMemoryCas());
-	MerkleTree ds2 = new MerkleTree(new StorageFactory().createMemoryCas());
-
+	
+	MemoryAddressableStorage store1 = (MemoryAddressableStorage) new StorageFactory().createMemoryCas();
+	
+	MerkleTree ds1 = new MerkleTree(store1);
+	
 	ds1.write(JSON_EXAMPLE);
-	copy(ds1, ds2, MergeType.OVERWRITE);
+	
+	MerkleTree ds2 = new MerkleTree(store1.clone(),ds1.getLabelsAddress(),MerkleTree.HEAD);
+
+	ds1.write(JSON_EXAMPLE_2);
+	copy(ds2, ds1.getStore(), MerkleTree.HEAD, MergeType.OVERWRITE);
+	
 	Assert.assertEquals(ds1.read(), ds2.read());
 
 	ds1.write(JSON_EXAMPLE_2);
 
-	copy(ds1, ds2, MergeType.MERGE);
+	copy(ds2, ds1.getStore(),MerkleTree.HEAD, MergeType.MERGE);
 	Assert.assertEquals(ds1.read(), ds2.read());
 
 	ds2.write(JSON_EXAMPLE_3);
 
 	ds1.write(JSON_EXAMPLE_5);
 
-	copy(ds1, ds2, MergeType.MERGE);
+	copy(ds1, ds2.getStore(), MerkleTree.HEAD, MergeType.MERGE);
 
 	System.out.println(ds1.getCommit().getAsGraphToRoot());
 	System.out.println(ds2.getCommit().getAsGraphToRoot());
@@ -176,6 +178,7 @@ public class DataStructureTest extends TestUtils {
 	// Thread.sleep(1000*1000);
     }
 
+    
     @Test
     public void testMultiplBranches() throws StoreException, CorruptTreeException {
 	enableLog();
@@ -209,12 +212,13 @@ public class DataStructureTest extends TestUtils {
 	MerkleTree jca2 = new MerkleTree(store, new Key(labelsAddress), "HEAD");
 	Assert.assertEquals(jca.read().toString(), jca2.read().toString());
     }
+    
+    
+    
 
-    private void copy(MerkleTree ds1, MerkleTree ds2, MergeType mt) throws StoreException, IOException,
+    private void copy(MerkleTree to, AddressableStorage from, String label, MergeType mergeType) throws StoreException, IOException,
 	    ClassNotFoundException, CorruptTreeException {
-	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	ds1.exportAll(out);
-	ds2.importAll(new ByteArrayInputStream(out.toByteArray()), mt);
+	to.sync(from, label, mergeType);
     }
 
     private void dump(AddressableStorage cas) throws StoreException {

@@ -11,7 +11,6 @@ import javax.swing.*;
 import com.crypticbit.javelin.merkle.Commit;
 import com.crypticbit.javelin.merkle.CorruptTreeException;
 import com.crypticbit.javelin.merkle.MerkleTree;
-import com.crypticbit.javelin.merkle.MerkleTree.MergeType;
 import com.crypticbit.javelin.store.StorageFactory;
 import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
@@ -33,7 +32,7 @@ public class Main extends JFrame {
 	    @Override
 	    public void callback(InputStream is) {
 		try {
-		    jsonStore.importAll(is, MergeType.MERGE);
+//		    jsonStore.importAll(is, MergeType.MERGE);
 		    commitChange();
 		    System.out.println(jsonStore.read());
 		}
@@ -45,7 +44,7 @@ public class Main extends JFrame {
 	    @Override
 	    public void callback(OutputStream os) {
 		try {
-		    jsonStore.exportAll(os);
+//		    jsonStore.exportAll(os);
 		    System.out.println("Exported");
 		}
 		catch (Exception e) {
@@ -63,7 +62,7 @@ public class Main extends JFrame {
 		try {
 		    File f = File.createTempFile(jsonStore.getCommit().getUser(), "commit");
 
-		    jsonStore.exportAll(new FileOutputStream(f));
+//		    jsonStore.exportAll(new FileOutputStream(f));
 		    System.out.println("Exported to: " + f + ".");
 		}
 		catch (Exception e1) {
@@ -82,7 +81,7 @@ public class Main extends JFrame {
 		    chooser.showOpenDialog(Main.this);
 		    File f = chooser.getSelectedFile();
 
-		    jsonStore.importAll(new FileInputStream(f), MergeType.MERGE);
+//		    jsonStore.importAll(new FileInputStream(f), MergeType.MERGE);
 		    commitChange();
 		    System.out.println(jsonStore.read());
 

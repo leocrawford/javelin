@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.crypticbit.javelin.diff.ThreeWayDiff;
@@ -22,83 +23,84 @@ import com.jayway.jsonpath.spi.JsonProviderFactory;
 
 import difflib.PatchFailedException;
 
+/**
+ * Merkle tree is a tree in which every non-leaf node is labelled with the hash of the labels of its children nodes.
+ * Hash trees are useful because they allow efficient and secure verification of the contents of large data
+ * structures.(http://en.wikipedia.org/wiki/Merkle_tree).
+ * 
+ * @author leo
+ */
+
 // what is immutable? commit? element? anchors?
 // multiple anchors?
 // FIXME tidy up exceptions
 public class MerkleTree {
 
     public static final String HEAD = "HEAD";
-
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.merkle");
-
+    private static final Gson gson = new Gson();
     /** The current head of the Json data structure */
     private final ExtendedAnchor<CommitDao> selectedAnchor;
+    /** The set of all the labels, one of which is the current one */
     private final ExtendedAnchor<LabelsDao> labelsAnchor;
     /** The underlying data store */
-    private AddressableStorage store;
-    private CommitFactory commitFactory;
-
-    private Gson gson = new Gson();
+    private final AddressableStorage store;
+    private final CommitFactory commitFactory;
 
     /**
-     * Create a new json data structure with a random anchor, which can be retrieved using <code>getCommitAnchor</code>
+     * Create a new merkle tree with a random anchor, and new set of labels containing only HEAD (which initially points
+     * at nothing)
      * 
      * @throws TreeMapperException
      * @throws StoreException
      */
     public MerkleTree(AddressableStorage store) throws StoreException {
-	setup(store);
-
-	labelsAnchor = new ExtendedAnchor<>(store, LabelsDao.class);
-	LabelsDao labels = new LabelsDao();
-	selectedAnchor = labels.addCommitAnchor(HEAD, store);
-	labelsAnchor.setDestinationValue(labels);
-    }
-
-
-
-    private void setup(AddressableStorage store) {
-	this.store = store;
-	store.registerAdapter(new JsonAdapter<LabelsDao>(LabelsDao.class), LabelsDao.class);
-	store.registerAdapter(new JsonAdapter<CommitDao>(CommitDao.class), CommitDao.class);
-	commitFactory = new CommitFactory(store);
-
+	this(store, createLabels(touch(store)), HEAD);
     }
 
     /**
-     * Create a new json data structure - by selecting a label from an existing ds by name
-     * 
-     * @throws CorruptTreeException
-     * @throws Error
-     * @throws TreeMapperException
-     * @throws StoreException
-     * @throws JsonSyntaxException
+     * Create a merkle tree using a store with an existing set of labels, which are provided by labelsAddress and the
+     * current label identified by label
      */
-    MerkleTree(AddressableStorage store, Key labelsAddress, String label) throws JsonSyntaxException,
-	    CorruptTreeException, StoreException {
-	setup(store);
-	this.labelsAnchor = new ExtendedAnchor<>(store, labelsAddress, LabelsDao.class);
-	if (labelsAnchor.getDestinationValue().hasCommitAnchor(label)) {
-	    this.selectedAnchor = labelsAnchor.getDestinationValue().getCommitAnchor(label, store);
-	}
-	else {
-	    throw new CorruptTreeException("Labels don't exist: " + labelsAnchor.getDestinationValue());
-	}
+    public MerkleTree(AddressableStorage store, Key labelsAddress, String label) throws JsonSyntaxException,
+	    StoreException {
+	this(store, new ExtendedAnchor<>(touch(store), labelsAddress, LabelsDao.class), label);
+    }
+
+    private MerkleTree(AddressableStorage store, ExtendedAnchor<LabelsDao> labelsAnchor,
+	    ExtendedAnchor<CommitDao> selectedAnchor) {
+	this.store = touch(store);
+	this.commitFactory = new CommitFactory(store);
+	this.labelsAnchor = labelsAnchor;
+	this.selectedAnchor = selectedAnchor;
     }
 
     /**
-     * Create a new branch. Same DS
+     * Create a new branch.
      */
     private MerkleTree(MerkleTree parent) throws StoreException {
-	setup(parent.store);
-	this.labelsAnchor = parent.labelsAnchor;
-	this.selectedAnchor = new ExtendedAnchor<>(store, parent.selectedAnchor, CommitDao.class);
+	this(parent.store, parent.labelsAnchor, new ExtendedAnchor<>(parent.store, parent.selectedAnchor,
+		CommitDao.class));
     }
 
-    /*
-     * public DataStructure(CasKasStore store, Identity identity) { this(store); this.selectedAnchor = new
-     * Anchor(identity); }
-     */
+    private static ExtendedAnchor<LabelsDao> createLabels(AddressableStorage store) throws StoreException {
+	ExtendedAnchor<LabelsDao> labelsAnchor = new ExtendedAnchor<>(store, LabelsDao.class);
+	LabelsDao labels = new LabelsDao();
+	labels.addCommitAnchor(HEAD, store);
+	labelsAnchor.setDestinationValue(labels);
+	return labelsAnchor;
+    }
+
+    private MerkleTree(AddressableStorage store, ExtendedAnchor<LabelsDao> labelsAnchor, String label)
+	    throws JsonSyntaxException, StoreException {
+	this(store, labelsAnchor, labelsAnchor.getDestinationValue().getCommitAnchor(label, touch(store)));
+    }
+
+    private static AddressableStorage touch(AddressableStorage store) {
+	store.registerAdapter(new JsonAdapter<LabelsDao>(LabelsDao.class), LabelsDao.class);
+	store.registerAdapter(new JsonAdapter<CommitDao>(CommitDao.class), CommitDao.class);
+	return store;
+    }
 
     public MerkleTree branch() throws StoreException {
 	return new MerkleTree(this);
@@ -111,10 +113,6 @@ public class MerkleTree {
     public Key getLabelsAddress() {
 	return labelsAnchor.getSourceAddress();
     }
-
-    /*
-     * public Identity getCommitAnchor() { return selectedAnchor.getDigest(); }
-     */
 
     public Object getAsObject() throws CorruptTreeException {
 	return getCommit().getAsObject();
@@ -140,7 +138,6 @@ public class MerkleTree {
 
     public MerkleTree write(String string) throws CorruptTreeException, StoreException {
 	Key write = commitFactory.getJsonElementStoreAdapter().write(gson.fromJson(string, JsonElement.class));
-	System.out.println("Wrote " + string + " to " + write);
 	commitFactory.createCommit(selectedAnchor, write, selectedAnchor.getDestinationAddress());
 	return this;
     }
@@ -185,12 +182,12 @@ public class MerkleTree {
 		addressB);
     }
 
-    public enum MergeType {
-	OVERWRITE, IGNORE_CONFLICT, MERGE
-    }
+    // public enum MergeType {
+    // OVERWRITE, IGNORE_CONFLICT, MERGE
+    // }
 
-    public void sync(AddressableStorage remote, String label, MergeType mergeType) throws CorruptTreeException,
-	    StoreException {
+    public void sync(AddressableStorage remote, String label) throws CorruptTreeException, StoreException,
+	    PatchFailedException, MergeException {
 
 	ExtendedAnchor<CommitDao> anchor = labelsAnchor.getDestinationValue().getCommitAnchor(label, store);
 	anchor.getDestinationValue();
@@ -200,85 +197,26 @@ public class MerkleTree {
 	StoreAggregator aggregateStore = new StoreAggregator(store, remote);
 	CommitFactory tempFactory = new CommitFactory(aggregateStore);
 
-	ExtendedAnchor<CommitDao> remoteAnchor = new ExtendedAnchor<CommitDao>(remote, anchor
-		.getSourceAddress(), CommitDao.class);
+	ExtendedAnchor<CommitDao> remoteAnchor = new ExtendedAnchor<CommitDao>(remote, anchor.getSourceAddress(),
+		CommitDao.class);
 
 	// FIXME force load
 	aggregateStore.getCas(remoteAnchor.getDestinationAddress(), CommitDao.class);
 	Commit c = tempFactory.getCommitFromAnchor(remoteAnchor);
 	c.recusivelyLoad();
-	anchor.setDestinationAddress(remoteAnchor.getDestinationAddress());
-    }
 
-    public void importAll(InputStream inputStream, MergeType mergeType) throws IOException, ClassNotFoundException,
-	    StoreException, JsonSyntaxException {
-	/*
-	 * ObjectInputStream ois = new ObjectInputStream(inputStream); Map<String, Key> labelToCommitMap = (Map<String,
-	 * Key>) ois.readObject(); LabelsDao localLabels = labelsAnchor.readEndPoint(store); // copy all cas elements
-	 * Map<Key, PersistableResource> casResult = (Map<Key, PersistableResource>) ois.readObject(); for (Entry<Key,
-	 * PersistableResource> x : casResult.entrySet()) { Key idOfValueWrittenToStore = store.store(x.getValue()); if
-	 * (!idOfValueWrittenToStore.equals(x.getKey())) { throw new IllegalStateException("The entry " + x.getKey() +
-	 * " produced a new key on store to local (" + idOfValueWrittenToStore + ")"); } }
-	 */
-	/*
-	 * // copy all kas elements Map<Identity, PersistableResource> kasResult = (Map<Identity, PersistableResource>)
-	 * ois.readObject(); for (Entry<Identity, PersistableResource> x : kasResult.entrySet()) {
-	 * System.out.println("Wrote kas: " + x.getKey()); // FIXME - what should I check against? // FIXME
-	 * store.get(x.getKey()).getBytes()) very cumbersome if (store.check(x.getKey())) { if (mergeType ==
-	 * MergeType.OVERWRITE) { System.out.println("Over-writing:" + x.getKey()); store.store(x.getKey(), new
-	 * Digest(store.get(x.getKey()).getBytes()), new Digest(x.getValue() .getBytes())); } else { // throw new
-	 * StoreException("KAS Conflict in " + mergeType + " mode. Key = " + x.getKey()); // fFIXME probably wnat to
-	 * ignore some of these.. System.out.println("KAS Conflict in " + mergeType + " mode. Key = " + x.getKey() +
-	 * "goes to "+store.get(x.getKey())+" but incoming "+new Digest(x.getValue() .getBytes())); } } else
-	 * store.store(x.getKey(), null, new Digest(x.getValue().getBytes())); System.out.println("Got :" + new
-	 * Digest(store.get(x.getKey()).getBytes())); }
-	 */
-
-	// merge labels
-	/*
-	 * for (String importedLabel : labelToCommitMap.keySet()) { if (localLabels.hasCommitAnchor(importedLabel)) {
-	 * ExtendedAnchor<CommitDao> localCommitAnchor = localLabels.getCommitAnchor(importedLabel, jsonFactory); switch
-	 * (mergeType) { case OVERWRITE: System.out.println("overwrite label " + importedLabel + " from " +
-	 * localLabels); // FIXME does deleting read work? // localCommitAnchor.readEndPoint(store);
-	 * localCommitAnchor.write(store, labelToCommitMap.get(importedLabel)); break; case IGNORE_CONFLICT:
-	 * System.out.println("Doing nothing with label " + importedLabel + " from " + localLabels); break; case MERGE:
-	 * System.out.println("Merging label " + importedLabel + " from " + localLabels);
-	 * localCommitAnchor.readEndPoint(store); try { Commit ic = new
-	 * Commit(jsonFactory.getSimpleObjectAdapter(CommitDao.class).read( labelToCommitMap.get(importedLabel)),
-	 * labelToCommitMap.get(importedLabel), jsonFactory); System.out.println("import destination=" +
-	 * labelToCommitMap.get(importedLabel)); System.out.println("local address=" + localCommitAnchor.getAddress());
-	 * System.out.println("local destination=" + localCommitAnchor.getDestination()); System.out.println(new
-	 * Commit(localCommitAnchor.getEndPoint(), localCommitAnchor .getDestination(),
-	 * jsonFactory).getShortestHistory()); System.out.println(ic.getShortestHistory());
-	 * localCommitAnchor.writeEndPoint(store, merge(localCommitAnchor, ic,
-	 * labelToCommitMap.get(importedLabel)).getDao()); } catch (PatchFailedException e) { // FIXME betetr exception
-	 * handling throw new StoreException("Can't merge", e); } break; } } else
-	 * System.out.println("Not writing label"); // localLabels.addAnchor(importedLabel, importedCommitAnchor); }
-	 */
-
-    }
-
-    public void exportAll(OutputStream outputStream) throws JsonSyntaxException, StoreException, IOException {
-
-	/*
-	 * ObjectOutputStream oos = new ObjectOutputStream(outputStream); Set<Key> tempCas = new HashSet<>(); Set<Key>
-	 * tempKas = new HashSet<>(); Map<String, Key> labelToCommitMap = new HashMap<>(); LabelsDao labels =
-	 * labelsAnchor.readEndPoint(store); for (String label : labels.getLabels()) {
-	 * System.out.println("Processing label " + label); Key commitAddress = labels.getCommitAnchor(label,
-	 * jsonFactory).getAddress(); tempKas.add(commitAddress); CommitDao commitDao = labels.getCommitAnchor(label,
-	 * jsonFactory).readEndPoint(store); Key destination = labels.getCommitAnchor(label, jsonFactory).read(store);
-	 * System.out.println("dest=" + destination + "," + commitDao); labelToCommitMap.put(label, destination); Commit
-	 * c = new Commit(commitDao, destination, jsonFactory); DirectedGraph<Commit, DefaultEdge> x =
-	 * c.getAsGraphToRoot(); for (Commit v : x.vertexSet()) { tempCas.addAll(v.getAllIdentities());
-	 * System.out.println("Commit=" + v.getIdentity2() + "," + v.toString() + "," + store.getCas(v.getIdentity2()));
-	 * } } oos.writeObject(labelToCommitMap); tempKas.add(labelsAnchor.getAddress());
-	 * tempCas.add(labelsAnchor.getDestination()); System.out.println("cas: " + tempCas); System.out.println("kas: "
-	 * + tempKas); System.out.println("all: " + store.list()); Set<Key> missing = new HashSet(store.list());
-	 * missing.removeAll(tempCas); missing.removeAll(tempKas); for (Key i : missing) { System.out.println(i + "=" +
-	 * store.getCas(i)); } Map<Key, PersistableResource> casRresult = new HashMap<>(); for (Key i : tempCas) {
-	 * casRresult.put(i, store.getCas(i)); } oos.writeObject(casRresult); Map<Key, PersistableResource> kasResult =
-	 * new HashMap<>(); for (Key i : tempKas) { kasResult.put(i, store.getCas(i)); } oos.writeObject(kasResult);
-	 */
+	System.out.println("\n***\n" + c + "," + this.getCommit());
+	System.out.println("1)" + c.getAsGraphToRoot());
+	if (c.getAsGraphToRoot().containsVertex(this.getCommit())) {
+	    LOG.log(Level.INFO, "Updating " + label + " to newer version from remote");
+	    anchor.setDestinationAddress(remoteAnchor.getDestinationAddress());
+	}
+	else if (this.getCommit().getAsGraphToRoot().containsVertex(c))
+	    LOG.log(Level.INFO, "Ignoring incoming from remote " + label + " as already in stream");
+	else {
+	    LOG.log(Level.INFO, "Merging incoming from remote " + label);
+	    merge(selectedAnchor, c, remoteAnchor.getDestinationAddress());
+	}
 
     }
 

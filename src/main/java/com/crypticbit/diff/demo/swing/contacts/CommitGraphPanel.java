@@ -14,11 +14,15 @@ import com.crypticbit.javelin.store.StoreException;
 import com.google.gson.JsonSyntaxException;
 import com.mxgraph.layout.mxParallelEdgeLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxEventObject;
+import com.mxgraph.util.mxEventSource.mxIEventListener;
+import com.mxgraph.view.mxGraphSelectionModel;
 
 import difflib.PatchFailedException;
 
-public class CommitGraphPanel extends mxGraphComponent {
+public class CommitGraphPanel extends mxGraphComponent implements mxIEventListener {
 
     private MergeableDirectedGraph asGraphToRoots = new MergeableDirectedGraph(DefaultEdge.class);
 
@@ -26,6 +30,8 @@ public class CommitGraphPanel extends mxGraphComponent {
 
 	super(getAdapter(commits));
 
+	// this.getAdapter().addListener(null, this);
+	this.getGraph().getSelectionModel().addListener("change", this);
     }
 
     public CommitGraphPanel(MerkleTree jca) throws StoreException, IOException, JsonSyntaxException,
@@ -48,6 +54,10 @@ public class CommitGraphPanel extends mxGraphComponent {
     private static JGraphXAdapter getAdapter(Commit... commits) throws JsonSyntaxException, StoreException,
 	    CorruptTreeException {
 	JGraphXAdapter adapter = new JGraphXAdapter(Commit.getAsGraphToRoots(commits));
+	adapter.setCellsDisconnectable(false);
+	adapter.setCellsEditable(false);
+	adapter.setCellsLocked(true);
+
 	/*
 	 * xa.getSelectionModel().addListener(mxEvent.SELECT, new mxIEventListener() {
 	 * @Override public void invoke(Object arg0, mxEventObject e) { // tCommit c = (Commit) ((DefaultGraphCell)
@@ -80,6 +90,14 @@ public class CommitGraphPanel extends mxGraphComponent {
 	    }
 
 	}
+    }
+
+    @Override
+    public void invoke(Object sender, mxEventObject evt) {
+	mxGraphSelectionModel sm = (mxGraphSelectionModel) sender;
+	mxCell cell = (mxCell) sm.getCell();
+	if (cell.isVertex())
+	    System.out.println(((Commit) cell.getValue()).getAsElement());
     }
 
 }

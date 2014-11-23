@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.crypticbit.javelin.merkle.MerkleTree.MergeType;
 import com.crypticbit.javelin.store.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -145,7 +144,7 @@ public class MarkleTreeTest extends TestUtils {
 
     @Test
     public void testImportExport() throws IOException, StoreException, JsonSyntaxException, ClassNotFoundException,
-	    PatchFailedException, InterruptedException, CorruptTreeException {
+	    PatchFailedException, InterruptedException, CorruptTreeException, MergeException {
 	
 	MemoryAddressableStorage store1 = (MemoryAddressableStorage) new StorageFactory().createMemoryCas();
 	
@@ -156,21 +155,24 @@ public class MarkleTreeTest extends TestUtils {
 	MerkleTree ds2 = new MerkleTree(store1.clone(),ds1.getLabelsAddress(),MerkleTree.HEAD);
 
 	ds1.write(JSON_EXAMPLE_2);
-	copy(ds2, ds1.getStore(), MerkleTree.HEAD, MergeType.OVERWRITE);
 	
-	Assert.assertEquals(ds1.read(), ds2.read());
-
-	ds1.write(JSON_EXAMPLE_2);
-
-	copy(ds2, ds1.getStore(),MerkleTree.HEAD, MergeType.MERGE);
+	copy(ds2, ds1.getStore(), MerkleTree.HEAD);
 	Assert.assertEquals(ds1.read(), ds2.read());
 
 	ds2.write(JSON_EXAMPLE_3);
 
+	copy(ds2, ds1.getStore(),MerkleTree.HEAD);
+//	Assert.assertEquals(ds1.read(), ds2.read());
+
+	ds2.write(JSON_EXAMPLE_4);
+
 	ds1.write(JSON_EXAMPLE_5);
+	System.out.println("DS1="+ds1.getCommit());
+	copy(ds1, ds2.getStore(), MerkleTree.HEAD);
+	System.out.println("DS1="+ds1.getCommit().getAsElement());
 
-	copy(ds1, ds2.getStore(), MerkleTree.HEAD, MergeType.MERGE);
-
+//	new TestUtils().show(ds1.getCommit(),ds2.getCommit());
+	
 	System.out.println(ds1.getCommit().getAsGraphToRoot());
 	System.out.println(ds2.getCommit().getAsGraphToRoot());
 
@@ -216,9 +218,9 @@ public class MarkleTreeTest extends TestUtils {
     
     
 
-    private void copy(MerkleTree to, AddressableStorage from, String label, MergeType mergeType) throws StoreException, IOException,
-	    ClassNotFoundException, CorruptTreeException {
-	to.sync(from, label, mergeType);
+    private void copy(MerkleTree to, AddressableStorage from, String label) throws StoreException, IOException,
+	    ClassNotFoundException, CorruptTreeException, PatchFailedException, MergeException {
+	to.sync(from, label);
     }
 
     private void dump(AddressableStorage cas) throws StoreException {

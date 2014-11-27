@@ -205,8 +205,6 @@ public class MerkleTree {
 	Commit c = tempFactory.getCommitFromAnchor(remoteAnchor);
 	c.recusivelyLoad();
 
-	System.out.println("\n***\n" + c + "," + this.getCommit());
-	System.out.println("1)" + c.getAsGraphToRoot());
 	if (c.getAsGraphToRoot().containsVertex(this.getCommit())) {
 	    LOG.log(Level.INFO, "Updating " + label + " to newer version from remote");
 	    anchor.setDestinationAddress(remoteAnchor.getDestinationAddress());

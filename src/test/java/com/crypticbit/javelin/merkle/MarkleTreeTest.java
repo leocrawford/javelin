@@ -164,12 +164,17 @@ public class MarkleTreeTest extends TestUtils {
 				.createMemoryCas();
 
 		MerkleTree ds1 = new MerkleTree(store1);
+		MerkleTree ds2 = new MerkleTree(new StorageFactory().createMemoryCas());
 
+		
 		ds1.write(JSON_EXAMPLE);
 
-		MerkleTree ds2 = new MerkleTree(store1.clone(), ds1.getLabelsAddress(),
-				MerkleTree.HEAD);
+//		MerkleTree ds2 = new MerkleTree(store1.clone(), ds1.getLabelsAddress(),
+//				MerkleTree.HEAD);
 
+		ds2.sync(ds1.getStore(), MerkleTree.HEAD,MerkleTree.MergeType.OVERWRITE);
+
+		
 		ds1.write(JSON_EXAMPLE_2);
 
 		ds2.sync(ds1.getStore(), MerkleTree.HEAD);

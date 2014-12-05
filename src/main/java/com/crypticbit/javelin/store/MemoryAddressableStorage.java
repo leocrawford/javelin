@@ -1,8 +1,14 @@
 package com.crypticbit.javelin.store;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.crypticbit.javelin.store.CasKasStore.KeyValueStore;
 
 /**
  * Provides a memory based AddressableStorage.
@@ -10,35 +16,22 @@ import java.util.logging.Logger;
 public class MemoryAddressableStorage implements AddressableStorage {
 
     private static final Logger LOG = Logger.getLogger("com.crypticbit.javelin.cas");
-    private final TreeMap<Key, byte[]> casMap;
-    private final TreeMap<Key, byte[]> kasMap;
     private final Map<Class<?>, Adapter<?>> adapters;
+	private CasKasStore store;
 
     public MemoryAddressableStorage() {
-	casMap = new TreeMap<>();
-	kasMap = new TreeMap<>();
+	store = new MemoryAddressableStore();
 	adapters = new HashMap<>();
     }
-    
-    // FIXME do we really want this?
-    private MemoryAddressableStorage(TreeMap<Key, byte[]> casMap, TreeMap<Key, byte[]> kasMap, Map<Class<?>, Adapter<?>> adapters) {
-	this.casMap = (TreeMap<Key, byte[]>) casMap.clone();
-	this.kasMap = (TreeMap<Key, byte[]>) kasMap.clone();
-	this.adapters = new HashMap<Class<?>, Adapter<?>>(adapters);
-    }
-    
-    public MemoryAddressableStorage clone() {
-	return new MemoryAddressableStorage(casMap,kasMap,adapters);
-    }
-    
+   
     @Override
     public boolean checkCas(Key key) {
-	return casMap.containsKey(key);
+	return store.getCas().containsKey(key);
     }
 
     @Override
     public boolean checkKas(Key key) {
-	return kasMap.containsKey(key);
+	return store.getKas().containsKey(key);
     }
 
     @Override
@@ -48,7 +41,7 @@ public class MemoryAddressableStorage implements AddressableStorage {
 	    throw new StoreException("The key " + key + " does not exist");
 	}
 
-	S result = adapter.fromByteArray(casMap.get(key));
+	S result = adapter.fromByteArray(store.getCas().get(key));
 
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Read " + result + " bytes from cas " + key);
@@ -63,7 +56,7 @@ public class MemoryAddressableStorage implements AddressableStorage {
 	    throw new StoreException("The key " + key + " does not exist");
 	}
 
-	S result = adapter.fromByteArray(kasMap.get(key));
+	S result = adapter.fromByteArray(store.getKas().get(key));
 
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Read " + result + " bytes from kas " + key);
@@ -76,7 +69,7 @@ public class MemoryAddressableStorage implements AddressableStorage {
     //
     // StringBuffer result = new StringBuffer();
     //
-    // for (Map.Entry<Key, byte[]> entry : casMap.entrySet()) {
+    // for (Map.Entry<Key, byte[]> entry : store.getCas().entrySet()) {
     // result.append(entry.getKey() + "," + adapter.fromByteArray(entry.getValue()) + "\n");
     // }
     // return result.toString();
@@ -89,13 +82,13 @@ public class MemoryAddressableStorage implements AddressableStorage {
 
     @Override
     public List<Key> listCas() {
-	return new LinkedList<Key>(casMap.keySet());
+	return new LinkedList<Key>(store.getCas().keySet());
     }
 
-    @Override
-    public List<Key> listCas(Key start) {
-	return new LinkedList<Key>(casMap.tailMap(start).keySet());
-    }
+//    @Override
+//    public List<Key> listCas(Key start) {
+//	return new LinkedList<Key>(store.getCas().tailMap(start).keySet());
+//    }
 
     @Override
     public <T> void registerAdapter(Adapter<T> adapter, Class<T> clazz) {
@@ -106,7 +99,7 @@ public class MemoryAddressableStorage implements AddressableStorage {
     @Override
     public <S> void store(Key key, S oldValue, S newValue, Class<S> clazz) throws StoreException {
 	if (!checkKas(key) || getKas(key, clazz).equals(oldValue)) {
-	    kasMap.put(key, ((Adapter<S>) adapters.get(clazz)).toByteArray(newValue));
+	    store.getKas().put(key, ((Adapter<S>) adapters.get(clazz)).toByteArray(newValue));
 	}
 	else {
 	    throw new StoreException("Concurrent modification. Expected " + oldValue + " but got "
@@ -122,13 +115,13 @@ public class MemoryAddressableStorage implements AddressableStorage {
 	if (LOG.isLoggable(Level.FINEST)) {
 	    LOG.log(Level.FINEST, "Adding " + key + " = " + value);
 	}
-	casMap.put(key, adapter.toByteArray(value));
+	store.getCas().put(key, adapter.toByteArray(value));
 	return key;
     }
 
     @Override
     public String toString() {
-	return casMap.toString();
+	return store.getCas().toString();
     }
 
     private <S> Adapter<S> getAdapter(Class<S> clazz) {

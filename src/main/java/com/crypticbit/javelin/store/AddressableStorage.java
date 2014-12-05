@@ -30,7 +30,7 @@ public interface AddressableStorage {
     public List<Key> listCas();;
 
     /** list every item with a key >= start */
-    public List<Key> listCas(Key key);
+//    public List<Key> listCas(Key key);
 
     /**
      * Register a new adapter to wrap the convert the stored byte array to a usable class

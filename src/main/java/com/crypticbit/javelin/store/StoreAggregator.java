@@ -44,17 +44,7 @@ public class StoreAggregator implements AddressableStorage {
 				+ secondary.getName();
 	}
 
-	@Override
-	public List<Key> listCas() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	@Override
-	public List<Key> listCas(Key key) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public <T> void registerAdapter(Adapter<T> adapter, Class<T> clazz) {
@@ -72,6 +62,12 @@ public class StoreAggregator implements AddressableStorage {
 	@Override
 	public <S> Key store(S po, Class<S> clazz) {
 		return primary.store(po, clazz);
+	}
+
+	@Override
+	public List<Key> listCas() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

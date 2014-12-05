@@ -49,25 +49,7 @@ public class MemoryAddressableStorageTest {
 	}
     }
 
-    @Test
-    public void testListAfterStart() throws UnsupportedEncodingException, StoreException, IOException {
-	AddressableStorage cas = cf.createMemoryCas();
-	List<Key> createList = new LinkedList<>();
-	for (int loop = 0; loop < 10; loop++) {
-	    createList.add(cas.store(prFromString("message" + loop), JsonElement.class));
-	}
-	Collections.sort(createList);
-	List<Key> list = cas.listCas(createList.get(5));
-	assertEquals(5, list.size());
-	// check they're in ascending order - and they exist
-	for (int loop = 0; loop < 5; loop++) {
-	    if (loop >= 1) {
-		assertTrue(list.get(loop - 1).compareTo(list.get(loop)) < 0);
-	    }
-	    assertTrue(cas.checkCas(list.get(loop)));
-	}
-    }
-
+  
     @Test
     public void testTypes() throws StoreException, IOException, JsonSyntaxException {
 	// enableLog("com.crypticbit.javelin.js", Level.FINEST);
